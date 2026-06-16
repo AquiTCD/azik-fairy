@@ -6,7 +6,9 @@ import {
   filterDictionaryByLevel,
   canWordAppearAtLevel,
   findMinimumLevel,
+  filterStageWords,
 } from "./wordValidator";
+import type { StageData } from "../azikRules";
 import { AZIK_DICTIONARY } from "../azikRules";
 
 describe("wordValidator", () => {
@@ -270,6 +272,72 @@ describe("wordValidator", () => {
       expect(findMinimumLevel("こと")).toBe(AzikLevel.Lev4);
       expect(findMinimumLevel("もの")).toBe(AzikLevel.Lev4);
       expect(findMinimumLevel("する")).toBe(AzikLevel.Lev4);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // filterStageWords
+  // ---------------------------------------------------------------
+  describe("filterStageWords", () => {
+    const makeStage = (
+      category: StageData["category"],
+      words: { kana: string; kanji: string }[]
+    ): StageData => ({ id: "test", category, name: "test", description: "", words });
+
+    it("removes words containing obsolete kana from any category", () => {
+      const stage = makeStage("Lev1", [
+        { kana: "いぬ", kanji: "犬" },
+        { kana: "ゐとう", kanji: "ゐとう" },
+        { kana: "ゑ", kanji: "ゑ" },
+        { kana: "ねこ", kanji: "猫" },
+      ]);
+      const result = filterStageWords(stage);
+      expect(result.words.map(w => w.kana)).toEqual(["いぬ", "ねこ"]);
+    });
+
+    it("also removes obsolete kana in Practice category", () => {
+      const stage = makeStage("Practice", [
+        { kana: "やった", kanji: "やった" },
+        { kana: "ヰヱ", kanji: "ヰヱ" },
+      ]);
+      const result = filterStageWords(stage);
+      expect(result.words.map(w => w.kana)).toEqual(["やった"]);
+    });
+
+    it("removes Lev0 words from Practice category", () => {
+      const stage = makeStage("Practice", [
+        { kana: "いぬ", kanji: "犬" },
+        { kana: "やった", kanji: "やった" },
+        { kana: "さくら", kanji: "桜" },
+      ]);
+      const result = filterStageWords(stage);
+      expect(result.words.map(w => w.kana)).not.toContain("いぬ");
+      expect(result.words.map(w => w.kana)).not.toContain("さくら");
+      expect(result.words.map(w => w.kana)).toContain("やった");
+    });
+
+    it("keeps Lev0 words in non-Practice categories", () => {
+      const stage = makeStage("Lev1", [
+        { kana: "いぬ", kanji: "犬" },
+        { kana: "やった", kanji: "やった" },
+      ]);
+      const result = filterStageWords(stage);
+      expect(result.words).toHaveLength(2);
+    });
+
+    it("does not mutate the original stage object", () => {
+      const words = [{ kana: "ゐとう", kanji: "ゐとう" }];
+      const stage = makeStage("Lev1", words);
+      filterStageWords(stage);
+      expect(stage.words).toHaveLength(1);
+    });
+
+    it("returns a new object with same metadata", () => {
+      const stage = makeStage("Lev2a", [{ kana: "かんたん", kanji: "簡単" }]);
+      const result = filterStageWords(stage);
+      expect(result.id).toBe(stage.id);
+      expect(result.category).toBe(stage.category);
+      expect(result.words).not.toBe(stage.words);
     });
   });
 });

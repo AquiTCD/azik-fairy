@@ -339,7 +339,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* AZIKフィーチャー + N代替設定 */}
           <div className="flex flex-col gap-3 p-3 bg-zinc-800 border border-zinc-700 rounded">
-            <span className="text-[10px] font-bold text-zinc-400 tracking-wider">AZIK FEATURES:</span>
+            <span className="text-sm font-extrabold font-sans text-zinc-300 tracking-wider">AZIK FEATURES:</span>
 
             {/* ON/OFFトグル */}
             <div className="flex flex-col gap-2">
@@ -349,8 +349,8 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
               ] as const).map(({ key, label, desc }) => (
                 <div key={key} className="flex items-center justify-between gap-3">
                   <div>
-                    <span className="text-xs font-bold text-green-300">{label}</span>
-                    <span className="text-[10px] text-zinc-500 ml-2 font-sans">{desc}</span>
+                    <span className="text-sm font-extrabold font-sans text-green-300">{label}</span>
+                    <span className="text-xs text-zinc-300 ml-2 font-sans">{desc}</span>
                   </div>
                   <button
                     onClick={() => onUpdateSettings({ ...settings, [key]: !settings[key] })}
@@ -370,14 +370,14 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
             <div className="border-t border-zinc-700 pt-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <span className="text-xs font-bold text-green-300">N代替 (撥音)</span>
-                  <span className="text-[10px] text-zinc-500 ml-2 font-sans">sz→sn / kz→kn など</span>
+                  <span className="text-sm font-extrabold font-sans text-green-300">N代替 (撥音)</span>
+                  <span className="text-xs text-zinc-300 ml-2 font-sans">sz→sn / kz→kn など</span>
                 </div>
                 <div className="flex gap-1.5 flex-shrink-0">
                   {([
                     { val: "off",  label: "OFF",  title: "Zのみ (源流AZIK)" },
-                    { val: "left", label: "LEFT", title: "左手子音のみ g/s/t/d/b/r/w/f/c/z/x (AzikT標準)" },
-                    { val: "all",  label: "ALL",  title: "全子音 k/j/h含む (AquaSKK互換)" },
+                    { val: "left", label: "LEFT", title: "左手子音のみ g/s/t/d/b/r/w/f/c/z/x" },
+                    { val: "all",  label: "ALL",  title: "全子音 k/j/h 含む" },
                   ] as const).map(({ val, label, title }) => (
                     <button
                       key={val}
@@ -394,12 +394,12 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                   ))}
                 </div>
               </div>
-              <p className="text-[10px] text-zinc-600 font-sans leading-relaxed mt-1.5">
-                撥音ZショートカットへのNの追加。LEFT=左手子音のみ(AzikT標準)、ALL=k/j/h含む全子音(AquaSKK互換)。
+              <p className="text-xs text-zinc-400 font-sans leading-relaxed mt-1.5">
+                撥音ZショートカットへのNの追加。LEFT=左手子音のみ、ALL=k/j/h含む全子音。
               </p>
             </div>
 
-            <p className="text-[10px] text-zinc-500 font-sans leading-relaxed">
+            <p className="text-xs text-zinc-400 font-sans leading-relaxed">
               OFFにした機能は該当ショートカットが無効になり、対応練習ステージも非表示になります。
             </p>
           </div>

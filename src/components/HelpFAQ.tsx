@@ -9,7 +9,31 @@ interface HelpFAQProps {
   onBackToTitle: () => void;
 }
 
-type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ";
+type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG";
+
+const CHANGELOG = [
+  {
+    version: "v1.1.0",
+    date: "2026-06-16",
+    items: [
+      "入力不可能な問題の修正",
+      "「外来語拡張 [TGI/DCI/TGU]」レッスンを追加",
+      "ゲーム画面に音声 ON/OFF ボタンを追加",
+      "いくつかの画面でキーボード操作に対応",
+      "実践レッスンから AZIK ショートカット不要の単語を除外",
+      "その他軽微なUIの修正",
+    ],
+  },
+  {
+    version: "v1.0.0",
+    date: "2026-06-14",
+    items: [
+      "初回リリース",
+      "AZIK 辞書エンジン、各種レッスン",
+      "カスタムキー設定、厳格モード、音声フィードバック",
+    ],
+  },
+];
 
 export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
   const [activeTab, setActiveTab] = useState<TabType>("ABOUT_AZIK");
@@ -24,6 +48,8 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
         return "自分のこだわり配列があるなら、OPTION画面から自由にカスタマイズしてオッケー！💖";
       case "FAQ":
         return "何か気になることがあるなら、ここで確認してみてね！👀";
+      case "CHANGELOG":
+        return "アップデートで何が変わったか気になる？ここでチェックしてね！📋";
       default:
         return "アタシと一緒にAZIKを完全マスターしちゃお！💎✨";
     }
@@ -44,6 +70,7 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
             { id: "GAME_RULES", label: "PLAY RULES" },
             { id: "CUSTOM_RULES", label: "CUSTOM MAP" },
             { id: "FAQ", label: "FAQ" },
+            { id: "CHANGELOG", label: "CHANGELOG" },
           ] as const
         ).map(tab => (
           <button
@@ -67,7 +94,7 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
           <div className="flex flex-col gap-4">
             <h3 className="text-lg font-bold text-green-400">■ AZIK（エイジック）ってなに？</h3>
             <p>
-              AZIKは、田中哲氏が考案したQWERTY配列ベースの拡張ローマ字入力方式です。<strong>「日本語のよく使う打鍵パターンを極限まで短縮した」</strong>設計で、通常のローマ字比で打鍵数を約30%削減できます。
+              AZIKは、木村清氏が考案したQWERTY配列ベースの拡張ローマ字入力方式です。<strong>「日本語のよく使う打鍵パターンを極限まで短縮した」</strong>設計で、通常のローマ字比で打鍵数を約30%削減できます。
             </p>
             <p>
               普段のローマ字入力のスキルをそのまま活かしながら、一部のキーを置き換えるだけで、タイピング速度が爆速になります！
@@ -103,7 +130,7 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
             </div>
 
             <p className="text-[10px] text-zinc-500 mt-1">
-              参考: <a href="https://web.archive.org/web/20241217165614/http://hp.vector.co.jp/authors/VA002116/azik/azikinfo.htm" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">オリジナルAZIK解説（アーカイブ）</a>
+              参考: <a href="https://note.com/actbemu/n/n74f1c04c9a2e" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">AZIK解説 by 木村清氏（note）</a>
             </p>
           </div>
         )}
@@ -196,6 +223,27 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
                 🔗 <a href="https://github.com/AquiTCD/azik-fairy" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">GitHub - AquiTCD/azik-fairy</a>
               </p>
             </div>
+          </div>
+        )}
+
+        {activeTab === "CHANGELOG" && (
+          <div className="flex flex-col gap-6 text-xs">
+            {CHANGELOG.map(release => (
+              <div key={release.version}>
+                <div className="flex items-baseline gap-3 mb-2">
+                  <span className="font-pixel font-bold text-green-400 text-sm">{release.version}</span>
+                  <span className="text-zinc-500 font-sans">{release.date}</span>
+                </div>
+                <ul className="pl-3 flex flex-col gap-1">
+                  {release.items.map((item, i) => (
+                    <li key={i} className="flex gap-2 opacity-90 font-sans">
+                      <span className="text-green-600 flex-shrink-0">▸</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         )}
 

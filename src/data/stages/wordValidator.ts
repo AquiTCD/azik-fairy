@@ -1,4 +1,4 @@
-import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping } from "../azikRules";
+import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping, StageData } from "../azikRules";
 
 // -------------------------------------------------------------
 // AZIKレベル定義
@@ -204,6 +204,23 @@ export function findMinimumLevel(
   return result;
 }
 
+const OBSOLETE_KANA = /[ゐゑヰヱ]/;
+
+/**
+ * ステージ語彙から不適切な語を除去して新しい StageData を返す純粋関数。
+ * - 全カテゴリ: 廃字（ゐゑヰヱ）を含む語を除外
+ * - Practice カテゴリ: Lev0（AZIK ショートカット不要）の語を追加除外
+ */
+export function filterStageWords(stage: StageData): StageData {
+  const words = stage.words.filter(w => !OBSOLETE_KANA.test(w.kana));
+  return {
+    ...stage,
+    words: stage.category === "Practice"
+      ? words.filter(w => findMinimumLevel(w.kana) !== AzikLevel.Lev0)
+      : words,
+  };
+}
+
 /**
  * ステージIDに対応するAzikLevelを返すヘルパー
  * ステージJSONの azikLevel フィールドと対応
@@ -228,6 +245,7 @@ export const STAGE_MAX_LEVELS: Record<string, AzikLevel> = {
   "lev3a-chouon-colon":    AzikLevel.Lev3a,
   "lev3a-g-youon":         AzikLevel.Lev3a,
   "lev3a-summary":         AzikLevel.Lev3a,
+  "lev3b-foreign-kana":    AzikLevel.Lev3b,
   "lev3b-zc-zf-za-ze":    AzikLevel.Lev3b,
   "lev3b-zv-zx-zai-zei":  AzikLevel.Lev3b,
   "lev3b-sf-ss-sai-sei":  AzikLevel.Lev3b,

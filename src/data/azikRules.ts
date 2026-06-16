@@ -41,6 +41,13 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "っ": { normal: ["ltu", "ltsu"], azik: [";"] },
   "ー": { normal: ["-"], azik: ["-", ":"] },
 
+  // --- 小書き仮名 (外来語表記用フォールバック) ---
+  "ぁ": { normal: ["xa", "la"], azik: ["xa", "la"] },
+  "ぃ": { normal: ["xi", "li"], azik: ["xi", "li"] },
+  "ぅ": { normal: ["xu", "lu"], azik: ["xu", "lu"] },
+  "ぇ": { normal: ["xe", "le"], azik: ["xe", "le"] },
+  "ぉ": { normal: ["xo", "lo"], azik: ["xo", "lo"] },
+
   // --- 五十音（清音） ---
   "か": { normal: ["ka"], azik: ["ka"] },
   "き": { normal: ["ki"], azik: ["ki", "kf"] },
@@ -356,6 +363,7 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "じょん": { normal: ["zyon", "jon"], azik: ["jl"] },
   "じゅう": { normal: ["zyuu", "juu"], azik: ["jh"] },
   "じょう": { normal: ["zyou", "jou"], azik: ["jp"] },
+  "じぇ":   { normal: ["je"], azik: ["je"] },
 
   // --- ファ行 ---
   "ふぁ": { normal: ["fa"], azik: ["fa", "fz"] },
@@ -364,6 +372,10 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ふぉ": { normal: ["fo"], azik: ["fo", "fl"] },
 
   // --- 外来語拗音 (AzikT x0108eng.txt) ---
+  "うぁ": { normal: ["wha"], azik: ["wha"] },
+  "うぃ": { normal: ["whi", "wi"], azik: ["whi", "wi"] },
+  "うぇ": { normal: ["whe", "we"], azik: ["whe", "we"] },
+  "うぉ": { normal: ["who"], azik: ["who"] },
   "てぃ": { normal: ["thi", "texi"], azik: ["tgi"] },
   "でぃ": { normal: ["dhi", "dexi"], azik: ["dci"] },
   "とぅ": { normal: ["twu", "toxu"], azik: ["tgu"] },

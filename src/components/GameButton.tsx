@@ -11,10 +11,10 @@ interface GameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 }
 
 const VARIANT: Record<ButtonVariant, string> = {
-  primary:   "bg-green-500 text-black border-2 border-green-500 hover:bg-black hover:text-green-500",
-  secondary: "bg-zinc-800 text-green-400 border-2 border-green-500 hover:bg-green-500 hover:text-black",
-  danger:    "bg-transparent text-red-500 border-2 border-red-500 hover:bg-red-500 hover:text-white",
-  ghost:     "bg-zinc-900 text-green-400 border border-green-700 hover:bg-green-500 hover:text-black",
+  primary:   "bg-green-500 text-black border-2 border-green-500 hover:bg-black hover:text-green-500 focus:ring-green-400",
+  secondary: "bg-zinc-800 text-green-400 border-2 border-green-500 hover:bg-green-500 hover:text-black focus:ring-green-400",
+  danger:    "bg-transparent text-red-500 border-2 border-red-500 hover:bg-red-500 hover:text-white focus:ring-red-400",
+  ghost:     "bg-zinc-900 text-green-400 border border-green-700 hover:bg-green-500 hover:text-black focus:ring-green-400",
 };
 
 const SIZE: Record<ButtonSize, string> = {
@@ -32,7 +32,7 @@ export default function GameButton({
 }: GameButtonProps) {
   return (
     <button
-      className={`font-pixel font-bold tracking-wider rounded cursor-pointer transition-all duration-150 ${VARIANT[variant]} ${SIZE[size]} ${className}`}
+      className={`font-pixel font-bold tracking-wider rounded cursor-pointer transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-zinc-950 ${VARIANT[variant]} ${SIZE[size]} ${className}`}
       {...props}
     >
       {children}
