@@ -8,6 +8,8 @@
  * Env vars: OGIG_URL
  */
 
+import resultComments from "../public/data/result_comments.json";
+
 interface Env {
   OGIG_URL?: string;
 }
@@ -62,9 +64,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     ? `${safeTitle} クリア！ | AZIK FAIRY`
     : 'AZIK FAIRY';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resolvedComment = (resultComments as any)[comment] || "";
+
   const description = isTraining
     ? 'AZIKタイピング特訓中！'
     : [
+        resolvedComment && `「${escapeHtml(resolvedComment)}」`,
         wpm  && `WPM: ${escapeHtml(wpm)}`,
         acc  && `Accuracy: ${escapeHtml(acc)}%`,
         azik && `AZIK: ${escapeHtml(azik)}%`,

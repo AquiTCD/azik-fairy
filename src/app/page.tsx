@@ -13,6 +13,7 @@ import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AdBanner from "@/components/AdBanner";
 import KeyNavGroup from "@/components/KeyNavGroup";
 import { GameStats } from "@/types/game";
+import resultComments from "../../public/data/result_comments.json";
 
 export interface GameSettings {
   isStrict: boolean;
@@ -319,7 +320,8 @@ export default function Home() {
       {/* リザルト画面 - 横長レイアウト */}
       {gameState === "RESULT" && stats && (
         <FairyScreenLayout
-          fairy={{ message: stats.comment, emotion: stats.rank === "PERFECT" ? "perfect" : stats.rank === "A" ? "proud" : "happy" }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          fairy={{ message: (resultComments as any)[stats.comment] || stats.comment, emotion: stats.rank === "PERFECT" ? "perfect" : stats.rank === "A" ? "proud" : "happy" }}
           fairyColClassName="animate-in fade-in zoom-in-95 duration-500 flex flex-col gap-4"
           fairySlot={<AdBanner ads={resultAds} layout="vertical" />}
         >

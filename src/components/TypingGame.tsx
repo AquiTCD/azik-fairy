@@ -12,6 +12,7 @@ import KeyboardDiagram from "./KeyboardDiagram";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
 import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
+import resultComments from "../../public/data/result_comments.json";
 
 interface TypingGameProps {
   stageId: string;
@@ -257,33 +258,18 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
                 : 100;
 
               const rank = getRank(accuracy, wpm, azikRatio);
-              const completeQuotes = rank === "PERFECT" ? [
-                "ミスゼロ！速い！AZIK率まで高い！？トリプルエースすぎてアタシが泣いてる！👑💎",
-                "完璧すぎてびっくりしてんだけど！！PERFECTランクって本当に存在するんだ！✨💖",
-                "100%全部取りとかもはや次元が違う！神指タイパーの誕生をアタシは目撃した！💎🏆",
-                "えっこれPERFECTじゃん！？ガチの天才系じゃん！アタシ誇りに思ってるよ！🌟👑",
-              ] : rank === "A" ? [
-                "めちゃくちゃいい走りだった！正確さもAZIK率もバチ高くてガチで尊敬する！🌟💗",
-                "Aランク！その数字マジでえぐくない！？指の動きがもう上級者系じゃん！💅🎊",
-                "すごすぎる精度！次は全部取りにいけると思う！あとちょっとでPERFECTだよ！⭐👑",
-                "AZIKの感覚めちゃ馴染んできてるじゃん！この調子で行ったらモンスタータイパー確定！💪🔥",
-              ] : rank === "B" ? [
-                "いい感じじゃん！指がAZIKに馴染んできてるの感じる！このまま続けてこ！💪🎯",
-                "Bランク達成！まだまだ伸びしろあるし、一緒にAレベル目指そ！😼💫",
-                "AZIKの使いこなし具合、えぐくなってきてるじゃん！継続は力なり系！💖🌟",
-                "ワンチャン中級者系に片足入ってきてる！？この調子で上を目指そ！⭐🔥",
-              ] : [
-                "完走お疲れ！ミスっても全然OK！練習量が全てだよ！💪🌸",
-                "とりま完走おつ！まだまだ伸びしろエグいから楽しみにしてて！🙄💗",
-                "ゴールまで走り切れたじゃん！それだけで十分すごいよ！続けてこ！✨🎮",
-                "お疲れ！AZIKマスターへの道を爆走中だよ！焦らず行こ！🔥⚡",
-                "完走できたことがまず偉い！次にもっとAZIK使えるようになったらアタシも嬉しい！💖",
-              ];
-              const comment = completeQuotes[Math.floor(Math.random() * completeQuotes.length)];
-              setFairyMessage(comment);
+              const commentIds = rank === "PERFECT" ? ["P1", "P2", "P3", "P4"]
+                : rank === "A" ? ["A1", "A2", "A3", "A4"]
+                : rank === "B" ? ["B1", "B2", "B3", "B4"]
+                : ["C1", "C2", "C3", "C4", "C5"];
+              const commentId = commentIds[Math.floor(Math.random() * commentIds.length)];
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const commentText = (resultComments as any)[commentId] || "";
+
+              setFairyMessage(commentText);
               const rankEmotion: FairyEmotion = rank === "PERFECT" ? "perfect" : rank === "A" ? "proud" : "happy";
               setFairyEmotion(rankEmotion);
-              setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment });
+              setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId });
             } else {
               setFairyMessage(getRandomQuote("correctWord"));
               setFairyEmotion("happy"); // 1単語クリア → 喜び
