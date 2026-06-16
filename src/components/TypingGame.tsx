@@ -141,6 +141,48 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     return quotes[Math.floor(Math.random() * quotes.length)];
   };
 
+  const getRealtimeSavedKeys = () => {
+    let optimalNormal = 0;
+    for (let i = 0; i < wordIndex; i++) {
+      const w = words[i];
+      w.segments.forEach(seg => {
+        optimalNormal += Math.min(...seg.normal.map(p => p.length));
+      });
+    }
+    if (wordIndex < words.length) {
+      const currentWord = words[wordIndex];
+      for (let j = 0; j < segmentIndex; j++) {
+        const seg = currentWord.segments[j];
+        optimalNormal += Math.min(...seg.normal.map(p => p.length));
+      }
+    }
+    const confirmedCorrectKeys = totalCorrectKeys - inputBuffer.length;
+    return Math.max(0, optimalNormal - confirmedCorrectKeys);
+  };
+
+  const getRealtimeAzikRatio = () => {
+    let optimalNormal = 0;
+    let optimalAzik = 0;
+    for (let i = 0; i < wordIndex; i++) {
+      const w = words[i];
+      w.segments.forEach(seg => {
+        optimalNormal += Math.min(...seg.normal.map(p => p.length));
+        optimalAzik += Math.min(...seg.azik.map(p => p.length));
+      });
+    }
+    if (wordIndex < words.length) {
+      const currentWord = words[wordIndex];
+      for (let j = 0; j < segmentIndex; j++) {
+        const seg = currentWord.segments[j];
+        optimalNormal += Math.min(...seg.normal.map(p => p.length));
+        optimalAzik += Math.min(...seg.azik.map(p => p.length));
+      }
+    }
+    if (optimalNormal <= optimalAzik) return 100;
+    const confirmedCorrectKeys = totalCorrectKeys - inputBuffer.length;
+    return Math.max(0, Math.min(100, Math.round(((optimalNormal - confirmedCorrectKeys) / (optimalNormal - optimalAzik)) * 100)));
+  };
+
   // STAGE COMPLETE: PRESS ANY KEY でリザルトへ
   useEffect(() => {
     if (!pendingStats) return;
@@ -392,14 +434,19 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         </div>
       ) : undefined}
       fairySlot={
-        <div className="hidden lg:flex flex-col gap-2 text-xs font-pixel border-t border-green-900 pt-3 text-green-300">
+        <div className="hidden lg:flex flex-col gap-1.5 text-xs font-pixel border-t border-green-900 pt-3 text-green-300">
           <div>TIME <span className="font-bold text-green-200">{elapsedTime}s</span></div>
-          <div>ACC <span className="font-bold text-yellow-300">
+          <div>KEYS <span className="font-bold text-zinc-100">{totalCorrectKeys}</span></div>
+          <div>WPM <span className="font-bold text-yellow-300">{elapsedTime > 0 ? Math.round((totalCorrectKeys / elapsedTime) * 60) : 0}</span></div>
+          <div>ACC <span className="font-bold text-green-300">
             {totalCorrectKeys + totalMissKeys > 0
               ? Math.round((totalCorrectKeys / (totalCorrectKeys + totalMissKeys)) * 100)
               : 100}%
           </span></div>
           <div>MISS <span className="font-bold text-red-400">{totalMissKeys}</span></div>
+          <div className="border-t border-green-950/50 my-1"></div>
+          <div>AZIK <span className="font-bold text-yellow-400">{getRealtimeAzikRatio()}%</span></div>
+          <div>SAVED <span className="font-bold text-cyan-300">{getRealtimeSavedKeys()}</span></div>
         </div>
       }
     >
@@ -476,14 +523,14 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         </div>
 
         {/* モバイル用メトリクス (lg未満で表示) */}
-        <div className="flex lg:hidden justify-between w-full text-sm border-t border-green-900 pt-3 px-1 font-pixel">
-          <div>TIME: <span className="font-bold text-green-300">{elapsedTime}s</span></div>
-          <div>ACC: <span className="font-bold text-green-300">
-            {totalCorrectKeys + totalMissKeys > 0
-              ? Math.round((totalCorrectKeys / (totalCorrectKeys + totalMissKeys)) * 100)
-              : 100}%
-          </span></div>
+        <div className="grid grid-cols-4 lg:hidden gap-x-2 gap-y-1 w-full text-xs border-t border-green-900 pt-3 px-1 font-pixel text-green-300">
+          <div>TIME: <span className="font-bold text-green-200">{elapsedTime}s</span></div>
+          <div>KEYS: <span className="font-bold text-zinc-100">{totalCorrectKeys}</span></div>
+          <div>WPM: <span className="font-bold text-yellow-300">{elapsedTime > 0 ? Math.round((totalCorrectKeys / elapsedTime) * 60) : 0}</span></div>
+          <div>ACC: <span className="font-bold text-green-300">{totalCorrectKeys + totalMissKeys > 0 ? Math.round((totalCorrectKeys / (totalCorrectKeys + totalMissKeys)) * 100) : 100}%</span></div>
           <div>MISS: <span className="font-bold text-red-400">{totalMissKeys}</span></div>
+          <div>AZIK: <span className="font-bold text-yellow-400">{getRealtimeAzikRatio()}%</span></div>
+          <div>SAVED: <span className="font-bold text-cyan-300">{getRealtimeSavedKeys()}</span></div>
         </div>
 
         {/* AZIKヒント表 */}
