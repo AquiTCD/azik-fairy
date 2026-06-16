@@ -200,7 +200,9 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
               {settings.isStrict
                 ? "強制スルーモード。非AZIKキーの入力を完全に無視します（入力バッファはリセットされず、ミスはカウントされます）。"
                 : "ノーマルモード。通常ローマ字入力も許容しますが、ミスは打鍵ミスとしてカウントされます。"}
-              <span className="block mt-1 text-yellow-400 font-bold">※基礎・応用・発展・特殊の練習ステージのみ有効（実戦・お題モードでは強制的に通常ローマ字入力が許可されます）。</span>
+              {settings.isStrict && (
+                <span className="block mt-1 text-yellow-400 font-bold">※基礎・応用・発展・特殊の練習ステージのみ有効</span>
+              )}
             </p>
           </div>
 
