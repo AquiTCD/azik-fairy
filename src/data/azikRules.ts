@@ -529,11 +529,10 @@ export function splitIntoAzikSegments(
 
   while (i < kana.length) {
     if (kana[i] === "っ" && i + 1 < kana.length) {
-      // 拗音(しょ/ちゃ等)は2文字で1音節なのでっと合わせる。
-      // AZIKの撥音複合(かん→kz等)まで取り込まないよう音節のみを渡す。
-      const SMALL_KANA = "ゃゅょぁぃぅぇぉ";
-      const syllableLen = (i + 2 < kana.length && SMALL_KANA.includes(kana[i + 2])) ? 2 : 1;
-      const nextSegs = splitIntoAzikSegments(kana.substring(i + 1, i + 1 + syllableLen), dictionary);
+      // 「っ」の後に続く文字列を再帰的にパースし、その最初のセグメントを結合対象とする。
+      // これにより、「とう」や「かん」のように二重母音・撥音拡張を含むセグメントを破壊せずに
+      // 「っとう」「っかん」として正しく結合でき、AZIKショートカット（;tp や ;kz）が有効になります。
+      const nextSegs = splitIntoAzikSegments(kana.substring(i + 1), dictionary);
       if (nextSegs.length > 0) {
         const nextSeg = nextSegs[0];
         const isConsonant = (c: string) => c && !["a", "i", "u", "e", "o", "q"].includes(c);

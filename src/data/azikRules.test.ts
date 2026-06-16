@@ -192,11 +192,23 @@ describe("AZIK Rules Engine Tests", () => {
 
     it("should correctly parse: きゃっかんてき", () => {
       const segs = splitIntoAzikSegments("きゃっかんてき");
-      // きゃ, っか, んて き → きゃ / っか / ん / て / き の分割を確認
-      // っか: 子音k+促音 → "kka" or ";ka"
-      const kakSegment = segs.find(s => s.kana === "っか");
-      expect(kakSegment).toBeDefined();
-      expect(kakSegment?.azik.some(p => p.includes("k"))).toBe(true);
+      // きゃ / っかん / て / き の分割を確認 (促音とそれに続く「かん」が結合される)
+      // っかん: 子音k+促音+撥音拡張 → "kkan" or ";kz"
+      const kkanSegment = segs.find(s => s.kana === "っかん");
+      expect(kkanSegment).toBeDefined();
+      expect(kkanSegment?.azik).toContain(";kz");
+      expect(kkanSegment?.normal).toContain("kkan");
+    });
+
+    it("should correctly parse: あっとう", () => {
+      const segs = splitIntoAzikSegments("あっとう");
+      // あ / っとう の分割を確認 (促音とそれに続く二重母音「とう」が結合される)
+      // っとう: 子音t+促音+二重母音拡張 → "ttou" or ";tp"
+      expect(segs).toHaveLength(2);
+      expect(segs[0].kana).toBe("あ");
+      expect(segs[1].kana).toBe("っとう");
+      expect(segs[1].azik).toContain(";tp");
+      expect(segs[1].normal).toContain("ttou");
     });
   });
 
