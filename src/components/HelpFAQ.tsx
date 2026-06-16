@@ -13,6 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.1.1",
+    date: "2026-06-16",
+    items: [
+      "「でゅ」「てゅ」「ふゅ」など外来語拗音の入力が正しく動作しない問題を修正",
+    ],
+  },
+  {
     version: "v1.1.0",
     date: "2026-06-16",
     items: [
