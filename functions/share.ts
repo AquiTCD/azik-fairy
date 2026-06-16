@@ -82,6 +82,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   <meta charset="UTF-8">
   <title>${pageTitle}</title>
   <meta name="description" content="${description}">
+  <link rel="canonical" href="https://azik-fairy.solunita.net/">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:title" content="${pageTitle}">
   <meta property="og:description" content="${description}">
@@ -89,6 +90,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AZIK-Fairy">
+  <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${pageTitle}">
   <meta name="twitter:description" content="${description}">
