@@ -38,7 +38,7 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "え": { normal: ["e"], azik: ["e"] },
   "お": { normal: ["o"], azik: ["o"] },
   "ん": { normal: ["nn", "xn"], azik: ["q"] },
-  "っ": { normal: ["ltu", "ltsu"], azik: [";"] },
+  "っ": { normal: ["ltu", "ltsu", "xtu"], azik: [";"] },
   "ー": { normal: ["-"], azik: ["-", ":"] },
 
   // --- 小書き仮名 (外来語表記用フォールバック) ---
@@ -193,7 +193,7 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ごん": { normal: ["gon"], azik: ["gl"] },
 
   "ざん": { normal: ["zan"], azik: ["zz"] },
-  "じん": { normal: ["zin", "jin"], azik: ["zk"] },
+  "じん": { normal: ["zin", "jin"], azik: ["zk", "jk"] },
   "ずん": { normal: ["zun"], azik: ["zj"] },
   "ぜん": { normal: ["zen"], azik: ["zd"] },
   "ぞん": { normal: ["zon"], azik: ["zl"] },
@@ -287,11 +287,11 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "きゃ": { normal: ["kya"], azik: ["kga", "kya"] },
   "きゅ": { normal: ["kyu"], azik: ["kgu", "kyu"] },
   "きょ": { normal: ["kyo"], azik: ["kgo", "kyo"] },
-  "きゅう": { normal: ["kyuu"], azik: ["kgh"] },
-  "きょう": { normal: ["kyou"], azik: ["kgp"] },
-  "きゃん": { normal: ["kyan"], azik: ["kgz"] },
-  "きゅん": { normal: ["kyun"], azik: ["kgj"] },
-  "きょん": { normal: ["kyon"], azik: ["kgl"] },
+  "きゅう": { normal: ["kyuu"], azik: ["kgh", "kyh"] },
+  "きょう": { normal: ["kyou"], azik: ["kgp", "kyp"] },
+  "きゃん": { normal: ["kyan"], azik: ["kgz", "kyz", "kgn", "kyn"] },
+  "きゅん": { normal: ["kyun"], azik: ["kgj", "kyj"] },
+  "きょん": { normal: ["kyon"], azik: ["kgl", "kyl"] },
 
   "ぎゃ": { normal: ["gya"], azik: ["gya"] },
   "ぎゅ": { normal: ["gyu"], azik: ["gyu"] },
@@ -302,20 +302,20 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "にゃ": { normal: ["nya"], azik: ["nga", "nya"] },
   "にゅ": { normal: ["nyu"], azik: ["ngu", "nyu"] },
   "にょ": { normal: ["nyo"], azik: ["ngo", "nyo"] },
-  "にゅう": { normal: ["nyuu"], azik: ["ngh"] },
-  "にょう": { normal: ["nyou"], azik: ["ngp"] },
+  "にゅう": { normal: ["nyuu"], azik: ["ngh", "nyh"] },
+  "にょう": { normal: ["nyou"], azik: ["ngp", "nyp"] },
 
   "ひゃ": { normal: ["hya"], azik: ["hga", "hya"] },
   "ひゅ": { normal: ["hyu"], azik: ["hgu", "hyu"] },
   "ひょ": { normal: ["hyo"], azik: ["hgo", "hyo"] },
-  "ひゅう": { normal: ["hyuu"], azik: ["hgh"] },
-  "ひょう": { normal: ["hyou"], azik: ["hgp"] },
+  "ひゅう": { normal: ["hyuu"], azik: ["hgh", "hyh"] },
+  "ひょう": { normal: ["hyou"], azik: ["hgp", "hyp"] },
 
   "みゃ": { normal: ["mya"], azik: ["mga", "mya"] },
   "みゅ": { normal: ["myu"], azik: ["mgu", "myu"] },
   "みょ": { normal: ["myo"], azik: ["mgo", "myo"] },
-  "みゅう": { normal: ["myuu"], azik: ["mgh"] },
-  "みょう": { normal: ["myou"], azik: ["mgp"] },
+  "みゅう": { normal: ["myuu"], azik: ["mgh", "myh"] },
+  "みょう": { normal: ["myou"], azik: ["mgp", "myp"] },
 
   "りゃ": { normal: ["rya"], azik: ["rya"] },
   "りゅ": { normal: ["ryu"], azik: ["ryu"] },
@@ -326,8 +326,8 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ぴゃ": { normal: ["pya"], azik: ["pga", "pya"] },
   "ぴゅ": { normal: ["pyu"], azik: ["pgu", "pyu"] },
   "ぴょ": { normal: ["pyo"], azik: ["pgo", "pyo"] },
-  "ぴゅう": { normal: ["pyuu"], azik: ["pgh"] },
-  "ぴょう": { normal: ["pyou"], azik: ["pgp"] },
+  "ぴゅう": { normal: ["pyuu"], azik: ["pgh", "pyh"] },
+  "ぴょう": { normal: ["pyou"], azik: ["pgp", "pyp"] },
 
   "びゃ": { normal: ["bya"], azik: ["bya"] },
   "びゅ": { normal: ["byu"], azik: ["byu"] },
@@ -347,26 +347,26 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "しゅう": { normal: ["syuu", "shuu"], azik: ["xh"] },
   "しょう": { normal: ["syou", "shou"], azik: ["xp"] },
 
-  "ちゃ": { normal: ["tya", "cha"], azik: ["ca"] },
+  "ちゃ": { normal: ["tya", "cha", "cya"], azik: ["ca"] },
   "ちぃ": { normal: ["tyi"], azik: ["ci"] },
-  "ちゅ": { normal: ["tyu", "chu"], azik: ["cu"] },
+  "ちゅ": { normal: ["tyu", "chu", "cyu"], azik: ["cu"] },
   "ちぇ": { normal: ["tye", "che"], azik: ["ce", "cf"] },
-  "ちょ": { normal: ["tyo", "cho"], azik: ["co"] },
+  "ちょ": { normal: ["tyo", "cho", "cyo"], azik: ["co"] },
   "ちゃん": { normal: ["tyan", "chan"], azik: ["cz"] },
   "ちゅん": { normal: ["tyun", "chun"], azik: ["cj"] },
   "ちょん": { normal: ["tyon", "chon"], azik: ["cl"] },
   "ちゅう": { normal: ["tyuu", "chuu"], azik: ["ch"] },
   "ちょう": { normal: ["tyou", "chou"], azik: ["cp"] },
 
-  "じゃ": { normal: ["zya", "ja"], azik: ["ja"] },
-  "じゅ": { normal: ["zyu", "ju"], azik: ["ju", "jf"] },
-  "じょ": { normal: ["zyo", "jo"], azik: ["jo"] },
+  "じゃ": { normal: ["zya", "ja", "jya"], azik: ["ja"] },
+  "じゅ": { normal: ["zyu", "ju", "jyu"], azik: ["ju", "jf"] },
+  "じょ": { normal: ["zyo", "jo", "jyo"], azik: ["jo"] },
   "じゃん": { normal: ["zyan", "jan"], azik: ["jz"] },
   "じゅん": { normal: ["zyun", "jun"], azik: ["jj"] },
   "じょん": { normal: ["zyon", "jon"], azik: ["jl"] },
   "じゅう": { normal: ["zyuu", "juu"], azik: ["jh"] },
   "じょう": { normal: ["zyou", "jou"], azik: ["jp"] },
-  "じぇ":   { normal: ["je"], azik: ["je"] },
+  "じぇ":   { normal: ["je", "zye"], azik: ["je"] },
 
   // --- ファ行 ---
   "ふぁ": { normal: ["fa"], azik: ["fa", "fz"] },
@@ -378,13 +378,13 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "うぁ": { normal: ["wha"], azik: ["wha"] },
   "うぃ": { normal: ["whi", "wi"], azik: ["whi", "wi"] },
   "うぇ": { normal: ["whe", "we"], azik: ["whe", "we"] },
-  "うぉ": { normal: ["who"], azik: ["who"] },
+  "うぉ": { normal: ["who", "wso"], azik: ["who"] },
   "てぃ": { normal: ["thi", "texi"], azik: ["tgi"] },
   "でぃ": { normal: ["dhi", "dexi"], azik: ["dci"] },
   "とぅ": { normal: ["twu", "toxu"], azik: ["tgu"] },
   "どぅ": { normal: ["dwu", "doxu"], azik: ["dcu"] },
   "てゅ": { normal: ["tyu", "teyu"], azik: ["tyu"] },
-  "でゅ": { normal: ["dyu", "deyu"], azik: ["dyu"] },
+  "でゅ": { normal: ["dhu"], azik: ["dhu"] },
   "ふゅ": { normal: ["fyu"],         azik: ["fyu"] },
   "ふょ": { normal: ["fyo"],         azik: ["fyo"] },
 
@@ -418,6 +418,133 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "わた": { normal: ["wata"],          azik: ["wt"] },
   "われ": { normal: ["ware"],          azik: ["wr"] },
   "という": { normal: ["toiu"],        azik: ["tb"] },
+
+  // --- 歴史的仮名 ---
+  "ゐ": { normal: ["wyi"], azik: ["wyi", "yi"] },
+  "ゑ": { normal: ["wye"], azik: ["wye"] },
+
+  // --- 小書き特殊 ---
+  "ゎ": { normal: ["xwa"], azik: ["xwa"] },
+  "ヵ": { normal: ["xka"], azik: ["xka"] },
+  "ヶ": { normal: ["xke"], azik: ["xke"] },
+
+  // --- いぇ ---
+  "いぇ": { normal: ["ye"], azik: ["ye"] },
+
+  // --- ぢ拗音 ---
+  "ぢゃ": { normal: ["dya"], azik: ["dya"] },
+  "ぢゅ": { normal: ["dyu"], azik: ["dyu"] },
+  "ぢょ": { normal: ["dyo"], azik: ["dyo"] },
+  "ぢぇ": { normal: ["dye"], azik: ["dye"] },
+
+  // --- つ系外来語 ---
+  "つぁ": { normal: ["tsa"], azik: ["tsa"] },
+  "つぇ": { normal: ["tse"], azik: ["tse"] },
+  "つぃ": { normal: ["tsi"], azik: ["tsi"] },
+  "つぉ": { normal: ["tso"], azik: ["tso"] },
+
+  // --- ゔ系（hiragana） ---
+  "ゔ":   { normal: ["vu"],        azik: ["vu"] },
+  "ゔぁ": { normal: ["va"],        azik: ["va"] },
+  "ゔぃ": { normal: ["vi"],        azik: ["vi"] },
+  "ゔぇ": { normal: ["ve", "vye"], azik: ["ve"] },
+  "ゔぉ": { normal: ["vo"],        azik: ["vo"] },
+  "ゔゃ": { normal: ["vya"],       azik: ["vya"] },
+  "ゔゅ": { normal: ["vyu"],       azik: ["vyu"] },
+  "ゔょ": { normal: ["vyo"],       azik: ["vyo"] },
+  "ゔぁん": { normal: ["van"], azik: ["vn", "vz"] },
+  "ゔぁい": { normal: ["vai"], azik: ["vq"] },
+  "ゔぇん": { normal: ["ven"], azik: ["vd"] },
+  "ゔぃん": { normal: ["vin"], azik: ["vk"] },
+  "ゔぉん": { normal: ["von"], azik: ["vl"] },
+  "ゔぉう": { normal: ["vou"], azik: ["vp"] },
+  "ゔぇい": { normal: ["vei"], azik: ["vw"] },
+
+  // --- ぇ拗音（正典 table_14 準拠） ---
+  "きぇ": { normal: ["kye"], azik: ["kge", "kye"] },
+  "にぇ": { normal: ["nye"], azik: ["nge", "nye"] },
+  "ひぇ": { normal: ["hye"], azik: ["hge", "hye"] },
+  "みぇ": { normal: ["mye"], azik: ["mge", "mye"] },
+  "りぇ": { normal: ["rye"], azik: ["rye"] },
+  "ぎぇ": { normal: ["gye"], azik: ["gye"] },
+  "ぴぇ": { normal: ["pye"], azik: ["pge", "pye"] },
+  "びぇ": { normal: ["bye"], azik: ["bye"] },
+
+  // --- き系欠落拡張（正典 table_15/16 準拠） ---
+  "きゃい": { normal: ["kyai"], azik: ["kgq", "kyq"] },
+  "きぇん": { normal: ["kyen"], azik: ["kgd", "kyd"] },
+  "きぇい": { normal: ["kyei"], azik: ["kgw", "kyw"] },
+
+  // --- し系欠落拡張 ---
+  "しゃい": { normal: ["syai", "shai"], azik: ["xq", "syq"] },
+  "しぇん": { normal: ["syen", "shen"], azik: ["xd", "syd"] },
+  "しぇい": { normal: ["syei", "shei"], azik: ["xw", "syw"] },
+
+  // --- ち系欠落拡張 ---
+  "ちゃい": { normal: ["tyai", "chai"], azik: ["cq", "tyq"] },
+  "ちぇん": { normal: ["tyen", "chen"], azik: ["cd", "tyd"] },
+  "ちぇい": { normal: ["tyei", "chei"], azik: ["cw", "tyw"] },
+
+  // --- じ系欠落拡張 ---
+  "じゃい": { normal: ["zyai", "jai"], azik: ["jq"] },
+  "じぇん": { normal: ["zyen", "jen"], azik: ["jd"] },
+  "じぇい": { normal: ["zyei", "jei"], azik: ["jw"] },
+
+  // --- に系欠落拡張（正典 table_15/16 準拠） ---
+  "にゃん": { normal: ["nyan"], azik: ["ngz", "nyz", "ngn", "nyn"] },
+  "にゅん": { normal: ["nyun"], azik: ["ngj", "nyj"] },
+  "によん": { normal: ["nyon"], azik: ["ngl", "nyl"] },
+  "にゃい": { normal: ["nyai"], azik: ["ngq", "nyq"] },
+  "にぇん": { normal: ["nyen"], azik: ["ngd", "nyd"] },
+  "にぇい": { normal: ["nyei"], azik: ["ngw", "nyw"] },
+
+  // --- ひ系欠落拡張 ---
+  "ひゃん": { normal: ["hyan"], azik: ["hgz", "hyz", "hgn", "hyn"] },
+  "ひゅん": { normal: ["hyun"], azik: ["hgj", "hyj"] },
+  "ひょん": { normal: ["hyon"], azik: ["hgl", "hyl"] },
+  "ひゃい": { normal: ["hyai"], azik: ["hgq", "hyq"] },
+  "ひぇん": { normal: ["hyen"], azik: ["hgd", "hyd"] },
+  "ひぇい": { normal: ["hyei"], azik: ["hgw", "hyw"] },
+
+  // --- み系欠落拡張 ---
+  "みゃん": { normal: ["myan"], azik: ["mgz", "myz", "mgn", "myn"] },
+  "みゅん": { normal: ["myun"], azik: ["mgj", "myj"] },
+  "みょん": { normal: ["myon"], azik: ["mgl", "myl"] },
+  "みゃい": { normal: ["myai"], azik: ["mgq", "myq"] },
+  "みぇん": { normal: ["myen"], azik: ["mgd", "myd"] },
+  "みぇい": { normal: ["myei"], azik: ["mgw", "myw"] },
+
+  // --- り系欠落拡張 ---
+  "りゃん": { normal: ["ryan"], azik: ["ryz", "ryn"] },
+  "りゅん": { normal: ["ryun"], azik: ["ryj"] },
+  "りょん": { normal: ["ryon"], azik: ["ryl"] },
+  "りゃい": { normal: ["ryai"], azik: ["ryq"] },
+  "りぇん": { normal: ["ryen"], azik: ["ryd"] },
+  "りぇい": { normal: ["ryei"], azik: ["ryw"] },
+
+  // --- ぎ系欠落拡張（正典 table_17/18 準拠） ---
+  "ぎゃん": { normal: ["gyan"], azik: ["gyz", "gyn"] },
+  "ぎゅん": { normal: ["gyun"], azik: ["gyj"] },
+  "ぎょん": { normal: ["gyon"], azik: ["gyl"] },
+  "ぎゃい": { normal: ["gyai"], azik: ["gyq"] },
+  "ぎぇん": { normal: ["gyen"], azik: ["gyd"] },
+  "ぎぇい": { normal: ["gyei"], azik: ["gyw"] },
+
+  // --- び系欠落拡張 ---
+  "びゃん": { normal: ["byan"], azik: ["byz", "byn"] },
+  "びゅん": { normal: ["byun"], azik: ["byj"] },
+  "びょん": { normal: ["byon"], azik: ["byl"] },
+  "びゃい": { normal: ["byai"], azik: ["byq"] },
+  "びぇん": { normal: ["byen"], azik: ["byd"] },
+  "びぇい": { normal: ["byei"], azik: ["byw"] },
+
+  // --- ぴ系欠落拡張 ---
+  "ぴゃん": { normal: ["pyan"], azik: ["pgz", "pyz", "pgn", "pyn"] },
+  "ぴゅん": { normal: ["pyun"], azik: ["pgj", "pyj"] },
+  "ぴょん": { normal: ["pyon"], azik: ["pgl", "pyl"] },
+  "ぴゃい": { normal: ["pyai"], azik: ["pgq", "pyq"] },
+  "ぴぇん": { normal: ["pyen"], azik: ["pgd", "pyd"] },
+  "ぴぇい": { normal: ["pyei"], azik: ["pgw", "pyw"] },
 };
 
 // -------------------------------------------------------------
@@ -529,11 +656,10 @@ export function splitIntoAzikSegments(
 
   while (i < kana.length) {
     if (kana[i] === "っ" && i + 1 < kana.length) {
-      // 拗音(しょ/ちゃ等)は2文字で1音節なのでっと合わせる。
-      // AZIKの撥音複合(かん→kz等)まで取り込まないよう音節のみを渡す。
-      const SMALL_KANA = "ゃゅょぁぃぅぇぉ";
-      const syllableLen = (i + 2 < kana.length && SMALL_KANA.includes(kana[i + 2])) ? 2 : 1;
-      const nextSegs = splitIntoAzikSegments(kana.substring(i + 1, i + 1 + syllableLen), dictionary);
+      // 「っ」の後に続く文字列を再帰的にパースし、その最初のセグメントを結合対象とする。
+      // これにより、「とう」や「かん」のように二重母音・撥音拡張を含むセグメントを破壊せずに
+      // 「っとう」「っかん」として正しく結合でき、AZIKショートカット（;tp や ;kz）が有効になります。
+      const nextSegs = splitIntoAzikSegments(kana.substring(i + 1), dictionary);
       if (nextSegs.length > 0) {
         const nextSeg = nextSegs[0];
         const isConsonant = (c: string) => c && !["a", "i", "u", "e", "o", "q"].includes(c);

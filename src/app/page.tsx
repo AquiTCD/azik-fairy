@@ -275,7 +275,7 @@ export default function Home() {
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.2.0</p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.3.0</p>
             </div>
           </div>
         </FairyScreenLayout>
@@ -384,7 +384,7 @@ export default function Home() {
                      theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
                      azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
                    });
-                   const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でスコアアタック！\n【 ${rankLabel} 】\nスピード: ${stats.wpm} WPM | 正確率: ${stats.accuracy}% | AZIK率: ${stats.azikRatio}%`;
+                    const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でスコアアタック！\nステージ: 「${stageTitle}」\n【 ${rankLabel} 】\nスピード: ${stats.wpm} WPM | 正確率: ${stats.accuracy}% | AZIK率: ${stats.azikRatio}%`;
                   return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
                 }
                 const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy で効率的なタイピングを練習中！`;

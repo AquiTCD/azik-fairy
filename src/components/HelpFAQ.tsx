@@ -13,6 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.3.0",
+    date: "2026-06-17",
+    items: [
+      "入力と変換規則の改善",
+    ],
+  },
+  {
     version: "v1.2.0",
     date: "2026-06-16",
     items: [

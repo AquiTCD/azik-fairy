@@ -62,6 +62,15 @@ describe("AZIK Rules Engine Tests", () => {
       expect(segs[1].kana).toBe("っちゃ");
       expect(segs[1].azik).toContain(";ca");
     });
+
+    it("should parse じん correctly with both zk and jk", () => {
+      const segs = splitIntoAzikSegments("じんぞく");
+      expect(segs[0].kana).toBe("じん");
+      expect(segs[0].azik).toContain("zk");
+      expect(segs[0].azik).toContain("jk");
+      expect(segs[0].normal).toContain("zin");
+      expect(segs[0].normal).toContain("jin");
+    });
   });
 
   // 2. SKK互換: 母音始まりの撥音・二重母音は別セグメントに分解される
@@ -183,11 +192,23 @@ describe("AZIK Rules Engine Tests", () => {
 
     it("should correctly parse: きゃっかんてき", () => {
       const segs = splitIntoAzikSegments("きゃっかんてき");
-      // きゃ, っか, んて き → きゃ / っか / ん / て / き の分割を確認
-      // っか: 子音k+促音 → "kka" or ";ka"
-      const kakSegment = segs.find(s => s.kana === "っか");
-      expect(kakSegment).toBeDefined();
-      expect(kakSegment?.azik.some(p => p.includes("k"))).toBe(true);
+      // きゃ / っかん / て / き の分割を確認 (促音とそれに続く「かん」が結合される)
+      // っかん: 子音k+促音+撥音拡張 → "kkan" or ";kz"
+      const kkanSegment = segs.find(s => s.kana === "っかん");
+      expect(kkanSegment).toBeDefined();
+      expect(kkanSegment?.azik).toContain(";kz");
+      expect(kkanSegment?.normal).toContain("kkan");
+    });
+
+    it("should correctly parse: あっとう", () => {
+      const segs = splitIntoAzikSegments("あっとう");
+      // あ / っとう の分割を確認 (促音とそれに続く二重母音「とう」が結合される)
+      // っとう: 子音t+促音+二重母音拡張 → "ttou" or ";tp"
+      expect(segs).toHaveLength(2);
+      expect(segs[0].kana).toBe("あ");
+      expect(segs[1].kana).toBe("っとう");
+      expect(segs[1].azik).toContain(";tp");
+      expect(segs[1].normal).toContain("ttou");
     });
   });
 
@@ -384,11 +405,11 @@ x,あん
       expect(AZIK_DICTIONARY["ょ"].normal).toContain("xyo");
     });
 
-    it("でゅ is parsed as single segment [dyu] with foreign enabled", () => {
+    it("でゅ is parsed as single segment [dhu] with foreign enabled", () => {
       const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: true, nAlternative: "left" });
       const segs = splitIntoAzikSegments("でゅおたろう", dict);
       expect(segs[0].kana).toBe("でゅ");
-      expect(segs[0].normal).toContain("dyu");
+      expect(segs[0].normal).toContain("dhu");
     });
 
     it("てゅ is parsed as single segment [tyu] with foreign enabled", () => {
@@ -409,9 +430,9 @@ x,あん
       const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: false, nAlternative: "left" });
       const segs = splitIntoAzikSegments("でゅ", dict);
       expect(segs[0].kana).toBe("でゅ");
-      expect(segs[0].normal).toContain("dyu");
-      // azik shortcut reverts to normal (same as dyu) when foreign disabled
-      expect(segs[0].azik).toContain("dyu");
+      expect(segs[0].normal).toContain("dhu");
+      // azik shortcut reverts to normal (same as dhu) when foreign disabled
+      expect(segs[0].azik).toContain("dhu");
     });
   });
 });
