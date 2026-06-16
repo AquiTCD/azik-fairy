@@ -384,7 +384,7 @@ export default function Home() {
                      theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
                      azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
                    });
-                   const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でスコアアタック！\n【 ${rankLabel} 】\nスピード: ${stats.wpm} WPM | 正確率: ${stats.accuracy}% | AZIK率: ${stats.azikRatio}%`;
+                    const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でスコアアタック！\nステージ: 「${stageTitle}」\n【 ${rankLabel} 】\nスピード: ${stats.wpm} WPM | 正確率: ${stats.accuracy}% | AZIK率: ${stats.azikRatio}%`;
                   return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
                 }
                 const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy で効率的なタイピングを練習中！`;
