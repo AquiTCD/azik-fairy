@@ -363,4 +363,55 @@ x,あん
       expect(parsed["いん"]).toEqual(["k"]);
     });
   });
+
+  // ---------------------------------------------------------------
+  // 小書きゃゅょ と 外来語複合拗音
+  // ---------------------------------------------------------------
+  describe("Small youon kana (ゃゅょ) and foreign compounds", () => {
+    it("ゅ is typeable standalone as xyu or lyu", () => {
+      expect(AZIK_DICTIONARY["ゅ"]).toBeDefined();
+      expect(AZIK_DICTIONARY["ゅ"].normal).toContain("xyu");
+      expect(AZIK_DICTIONARY["ゅ"].normal).toContain("lyu");
+    });
+
+    it("ゃ is typeable standalone as xya or lya", () => {
+      expect(AZIK_DICTIONARY["ゃ"]).toBeDefined();
+      expect(AZIK_DICTIONARY["ゃ"].normal).toContain("xya");
+    });
+
+    it("ょ is typeable standalone as xyo or lyo", () => {
+      expect(AZIK_DICTIONARY["ょ"]).toBeDefined();
+      expect(AZIK_DICTIONARY["ょ"].normal).toContain("xyo");
+    });
+
+    it("でゅ is parsed as single segment [dyu] with foreign enabled", () => {
+      const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: true, nAlternative: "left" });
+      const segs = splitIntoAzikSegments("でゅおたろう", dict);
+      expect(segs[0].kana).toBe("でゅ");
+      expect(segs[0].normal).toContain("dyu");
+    });
+
+    it("てゅ is parsed as single segment [tyu] with foreign enabled", () => {
+      const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: true, nAlternative: "left" });
+      const segs = splitIntoAzikSegments("てゅーりんがー", dict);
+      expect(segs[0].kana).toBe("てゅ");
+      expect(segs[0].normal).toContain("tyu");
+    });
+
+    it("ふゅ is parsed as single segment [fyu] with foreign enabled", () => {
+      const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: true, nAlternative: "left" });
+      const segs = splitIntoAzikSegments("ふゅーじょん", dict);
+      expect(segs[0].kana).toBe("ふゅ");
+      expect(segs[0].normal).toContain("fyu");
+    });
+
+    it("でゅ still parses as single segment when foreign is disabled, using normal romaji", () => {
+      const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: false, nAlternative: "left" });
+      const segs = splitIntoAzikSegments("でゅ", dict);
+      expect(segs[0].kana).toBe("でゅ");
+      expect(segs[0].normal).toContain("dyu");
+      // azik shortcut reverts to normal (same as dyu) when foreign disabled
+      expect(segs[0].azik).toContain("dyu");
+    });
+  });
 });

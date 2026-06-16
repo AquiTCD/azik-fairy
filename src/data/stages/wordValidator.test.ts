@@ -212,8 +212,9 @@ describe("wordValidator", () => {
       expect(canWordAppearAtLevel("いしゃ", AzikLevel.Lev1c)).toBe(true);
     });
 
-    it("おちゃ is invalid at Lev1c (ちゃ[ca]=Lev1d > Lev1c)", () => {
-      expect(canWordAppearAtLevel("おちゃ", AzikLevel.Lev1c)).toBe(false);
+    it("おちゃ is valid at Lev1c via ち[ti]+ゃ[xya] (ゃ is typeable standalone at Lev1c)", () => {
+      // ちゃ[ca] is Lev1d but ゃ[xya] is Lev1c — so ち+xya path is valid at Lev1c
+      expect(canWordAppearAtLevel("おちゃ", AzikLevel.Lev1c)).toBe(true);
     });
 
     it("かんばん is valid at Lev2a (かん[kz]=Lev2a, ばん[bz]=Lev2a)", () => {

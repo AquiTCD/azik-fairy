@@ -82,7 +82,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   <meta charset="UTF-8">
   <title>${pageTitle}</title>
   <meta name="description" content="${description}">
-  <link rel="canonical" href="https://azik-fairy.solunita.net/">
+  <meta name="robots" content="noindex, nofollow">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:title" content="${pageTitle}">
   <meta property="og:description" content="${description}">

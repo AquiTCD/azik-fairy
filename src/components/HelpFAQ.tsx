@@ -13,6 +13,14 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.1.1",
+    date: "2026-06-16",
+    items: [
+      "「ゅ」入力に関する問題を修正",
+      "X（Twitter）でシェアした際に OGP 画像が表示されない問題を修正",
+    ],
+  },
+  {
     version: "v1.1.0",
     date: "2026-06-16",
     items: [
