@@ -193,7 +193,7 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ごん": { normal: ["gon"], azik: ["gl"] },
 
   "ざん": { normal: ["zan"], azik: ["zz"] },
-  "じん": { normal: ["zin", "jin"], azik: ["zk"] },
+  "じん": { normal: ["zin", "jin"], azik: ["zk", "jk"] },
   "ずん": { normal: ["zun"], azik: ["zj"] },
   "ぜん": { normal: ["zen"], azik: ["zd"] },
   "ぞん": { normal: ["zon"], azik: ["zl"] },

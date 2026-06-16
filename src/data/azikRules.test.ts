@@ -62,6 +62,15 @@ describe("AZIK Rules Engine Tests", () => {
       expect(segs[1].kana).toBe("っちゃ");
       expect(segs[1].azik).toContain(";ca");
     });
+
+    it("should parse じん correctly with both zk and jk", () => {
+      const segs = splitIntoAzikSegments("じんぞく");
+      expect(segs[0].kana).toBe("じん");
+      expect(segs[0].azik).toContain("zk");
+      expect(segs[0].azik).toContain("jk");
+      expect(segs[0].normal).toContain("zin");
+      expect(segs[0].normal).toContain("jin");
+    });
   });
 
   // 2. SKK互換: 母音始まりの撥音・二重母音は別セグメントに分解される
