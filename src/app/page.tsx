@@ -13,6 +13,7 @@ import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AdBanner from "@/components/AdBanner";
 import KeyNavGroup from "@/components/KeyNavGroup";
 import { GameStats } from "@/types/game";
+import resultComments from "../../public/data/result_comments.json";
 
 export interface GameSettings {
   isStrict: boolean;
@@ -274,7 +275,7 @@ export default function Home() {
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.1.1</p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.2.0</p>
             </div>
           </div>
         </FairyScreenLayout>
@@ -319,7 +320,8 @@ export default function Home() {
       {/* リザルト画面 - 横長レイアウト */}
       {gameState === "RESULT" && stats && (
         <FairyScreenLayout
-          fairy={{ message: stats.comment, emotion: stats.rank === "PERFECT" ? "perfect" : stats.rank === "A" ? "proud" : "happy" }}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          fairy={{ message: (resultComments as any)[stats.comment] || stats.comment, emotion: stats.rank === "PERFECT" ? "perfect" : stats.rank === "A" ? "proud" : "happy" }}
           fairyColClassName="animate-in fade-in zoom-in-95 duration-500 flex flex-col gap-4"
           fairySlot={<AdBanner ads={resultAds} layout="vertical" />}
         >
@@ -354,6 +356,10 @@ export default function Home() {
                 <span>AZIK RATIO:</span>
                 <span className="font-bold text-cyan-300">{stats.azikRatio}%</span>
               </div>
+              <div className="flex justify-between">
+                <span>SAVED KEYS:</span>
+                <span className="font-bold text-cyan-300">{stats.savedKeys}</span>
+              </div>
             </div>
 
             {/* ボタン群 */}
@@ -374,11 +380,11 @@ export default function Home() {
                 if (isScoreShare) {
                   const rank = stats.rank;
                   const rankLabel = rank === "PERFECT" ? "✦PERFECT✦" : `${rank}ランク`;
-                  const shareParams = new URLSearchParams({
-                    theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
-                    azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
-                  });
-                  const tweetText = `「AZIK-Fairy」でスコアアタック！\nWPM:${stats.wpm} | 正確率:${stats.accuracy}% | AZIK度:${stats.azikRatio}% | [${rankLabel}]\n#AZIKFairy`;
+                   const shareParams = new URLSearchParams({
+                     theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
+                     azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
+                   });
+                   const tweetText = `「AZIK-Fairy」でスコアアタック！\nWPM:${stats.wpm} | 正確率:${stats.accuracy}% | AZIK度:${stats.azikRatio}% | [${rankLabel}]\n#AZIKFairy`;
                   return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
                 }
                 const tweetText = `「AZIK-Fairy」で効率的なタイピングを練習中！\n#AZIKFairy`;

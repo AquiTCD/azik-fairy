@@ -13,6 +13,15 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.2.0",
+    date: "2026-06-16",
+    items: [
+      "実戦、お題ステージで AZIK キー入力強制モード無効化",
+      "AZIK 入力により省力化できたキー数（SAVED KEYS）の算出とリザルト画面への表示",
+      "タイピング中の全スコア統計のリアルタイム表示機能を追加",
+    ],
+  },
+  {
     version: "v1.1.1",
     date: "2026-06-16",
     items: [
