@@ -15,8 +15,34 @@ const pressStart = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://azik-fairy.solunita.net"),
   title: "AZIK-Fairy | AZIKタイピング養成妖精",
   description: "AZIK入力をゲーム感覚で楽しく、強制モードでスパルタに養成してくれるタイピングゲーム",
+  openGraph: {
+    title: "AZIK-Fairy | AZIKタイピング養成妖精",
+    description: "AZIK入力をゲーム感覚で楽しく、強制モードでスパルタに養成してくれるタイピングゲーム",
+    url: "https://azik-fairy.solunita.net/",
+    siteName: "AZIK-Fairy",
+    locale: "ja_JP",
+    type: "website",
+    images: [
+      {
+        url: "/images/og_image.png",
+        width: 1200,
+        height: 630,
+        alt: "AZIK-Fairy",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AZIK-Fairy | AZIKタイピング養成妖精",
+    description: "AZIK入力をゲーム感覚で楽しく、強制モードでスパルタに養成してくれるタイピングゲーム",
+    images: ["/images/og_image.png"],
+  },
+  alternates: {
+    canonical: "https://azik-fairy.solunita.net/",
+  },
 };
 
 export default function RootLayout({
