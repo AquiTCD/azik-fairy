@@ -1,4 +1,5 @@
 import { StageData } from "../azikRules";
+import { findMinimumLevel, AzikLevel } from "./wordValidator";
 import chunksManifest from "./chunks/manifest.json";
 
 export type StageMeta = Omit<StageData, "words"> & { wordCount: number };
@@ -23,6 +24,7 @@ export const STAGE_MANIFEST: StageMeta[] = [
   { id: "lev3a-chouon-colon",category: "Lev3a",   azikLevel: "Lev3a", wordCount: 1961, name: "長音互換 [:]",                 description: "長音「ー」を [-] の隣の [:] で。指を大きく動かさずに済む互換キー。",                    concept: "長音ー を[:] で入力する互換キー練習。通常の[-]も使えるが[:]のほうが打ちやすい。" },
   { id: "lev3a-g-youon",     category: "Lev3a",   azikLevel: "Lev3a", wordCount:  125, name: "拗音Y代用 [G]",               description: "拗音の Y を [g] で代用。きゃ→kga, にゃ→nga, りゃ→rga など左手が楽になる。",           concept: "Y→G代用キー。拗音 kya/nya/hya 等を kga/nga/hga と打つ。左手の負担を軽減する。" },
   { id: "lev3a-summary",     category: "Lev3a",   azikLevel: "Lev3a", wordCount: 5454, name: "互換キーI まとめ文章",         description: "長音 [:] と 拗音代用 [G] を組み合わせた文章練習。",                                    concept: "Lev3a総合練習。長音[:] と Y→G代用を自然な文章で使いこなす。" },
+  { id: "lev3b-foreign-kana",    category: "Lev3b",   azikLevel: "Lev3b", wordCount:   25, name: "外来語拡張 [TGI/DCI/TGU]",       description: "「てぃ」→[tgi]、「でぃ」→[dci]、「とぅ」→[tgu]。外来語の特殊音節をAZIKで短縮しよう。",                  concept: "外来語拡張キーの練習。てぃ[tgi]・でぃ[dci]・とぅ[tgu] を含む外来語カタカナ語。設定で「外来語拡張」がONの場合に有効。" },
   { id: "lev3b-zc-zf-za-ze", category: "Lev3b",   azikLevel: "Lev3b", wordCount:  339, name: "ざ[ZC] ぜ[ZF]",               description: "打ちにくい「ざ[za]」を [zc] に、「ぜ[ze]」を [zf] に変えて省力化。",                    concept: "Lev3b互換キー第1組。ざ[za→zc], ぜ[ze→zf] の代替入力。" },
   { id: "lev3b-zv-zx-zai-zei",category: "Lev3b",  azikLevel: "Lev3b", wordCount:  217, name: "ざい[ZV] ぜい[ZX]",           description: "打ちにくい「ざい[zq]」を [zv] に、「ぜい[zw]」を [zx] に変えて省力化。",               concept: "Lev3b互換キー第2組。ざい[zq→zv], ぜい[zw→zx] の代替入力。" },
   { id: "lev3b-sf-ss-sai-sei",category: "Lev3b",  azikLevel: "Lev3b", wordCount:  763, name: "さい[SF] せい[SS]",            description: "打ちにくい「さい[sq]」を [sf] に、「せい[sw]」を [ss] に変えて省力化。",                concept: "Lev3b互換キー第3組。さい[sq→sf], せい[sw→ss] の代替入力。" },
@@ -47,16 +49,28 @@ export const STAGES: StageMeta[] = STAGE_MANIFEST;
 
 export async function loadStage(id: string): Promise<StageData> {
   const manifest = chunksManifest as Record<string, number>;
+  let stage: StageData;
+
   if (manifest[id] !== undefined) {
     const chunkIdx = Math.floor(Math.random() * manifest[id]);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore vite:dynamic-import-vars is stricter than webpack; Next.js build works fine
     const mod = await import(/* @vite-ignore */ `./chunks/${id}-${chunkIdx}.json`);
-    return mod.default as StageData;
+    stage = mod.default as StageData;
+  } else {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore vite:dynamic-import-vars is stricter than webpack; Next.js build works fine
+    const mod = await import(/* @vite-ignore */ `./${id}.json`);
+    stage = mod.default as StageData;
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore vite:dynamic-import-vars is stricter than webpack; Next.js build works fine
-  const mod = await import(/* @vite-ignore */ `./${id}.json`);
-  return mod.default as StageData;
+  // 古語・廃字（現代 IME で入力不可）を含む語を全カテゴリで除外
+  const OBSOLETE_KANA = /[ゐゑヰヱ]/;
+  stage.words = stage.words.filter(w => !OBSOLETE_KANA.test(w.kana));
+
+  if (stage.category === "Practice") {
+    stage.words = stage.words.filter(w => findMinimumLevel(w.kana) !== AzikLevel.Lev0);
+  }
+
+  return stage;
 }

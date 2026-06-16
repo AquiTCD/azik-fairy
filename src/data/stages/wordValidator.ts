@@ -228,6 +228,7 @@ export const STAGE_MAX_LEVELS: Record<string, AzikLevel> = {
   "lev3a-chouon-colon":    AzikLevel.Lev3a,
   "lev3a-g-youon":         AzikLevel.Lev3a,
   "lev3a-summary":         AzikLevel.Lev3a,
+  "lev3b-foreign-kana":    AzikLevel.Lev3b,
   "lev3b-zc-zf-za-ze":    AzikLevel.Lev3b,
   "lev3b-zv-zx-zai-zei":  AzikLevel.Lev3b,
   "lev3b-sf-ss-sai-sei":  AzikLevel.Lev3b,
