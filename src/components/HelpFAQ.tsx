@@ -13,6 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.2.3",
+    date: "2026-06-16",
+    items: [
+      "X（Twitter）でのシェア時のスコア表示順と文面を調整",
+    ],
+  },
+  {
     version: "v1.2.2",
     date: "2026-06-16",
     items: [
