@@ -1,5 +1,5 @@
 import { StageData } from "../azikRules";
-import { findMinimumLevel, AzikLevel } from "./wordValidator";
+import { filterStageWords } from "./wordValidator";
 import chunksManifest from "./chunks/manifest.json";
 
 export type StageMeta = Omit<StageData, "words"> & { wordCount: number };
@@ -64,13 +64,5 @@ export async function loadStage(id: string): Promise<StageData> {
     stage = mod.default as StageData;
   }
 
-  // 古語・廃字（現代 IME で入力不可）を含む語を全カテゴリで除外
-  const OBSOLETE_KANA = /[ゐゑヰヱ]/;
-  stage.words = stage.words.filter(w => !OBSOLETE_KANA.test(w.kana));
-
-  if (stage.category === "Practice") {
-    stage.words = stage.words.filter(w => findMinimumLevel(w.kana) !== AzikLevel.Lev0);
-  }
-
-  return stage;
+  return filterStageWords(stage);
 }
