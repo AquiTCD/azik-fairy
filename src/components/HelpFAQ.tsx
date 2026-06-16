@@ -13,6 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.2.2",
+    date: "2026-06-16",
+    items: [
+      "X（Twitter）でのシェア時のツイート本文とハッシュタグを調整（インラインの `#AZIK_Fairy` に統一）",
+    ],
+  },
+  {
     version: "v1.2.1",
     date: "2026-06-16",
     items: [
