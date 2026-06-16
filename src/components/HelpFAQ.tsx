@@ -13,6 +13,16 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.2.0",
+    date: "2026-06-16",
+    items: [
+      "リザルト画面の妖精のセリフデータを JSON に切り出し共通化（URL クエリパラメータを大幅に短縮）",
+      "実戦およびお題ステージで AZIK 以外の通常ローマ字入力を許容（キー入力強制モード無効化）",
+      "通常のローマ字入力と比べて AZIK 入力により省力化できたキー数（SAVED KEYS）の算出とリザルト画面への表示機能を追加",
+      "タイピング中（プレイ画面）の全スコア統計（経過時間、入力文字数、WPM、正確性、ミス数、AZIK率、省力キー数）のリアルタイム表示機能を追加",
+    ],
+  },
+  {
     version: "v1.1.1",
     date: "2026-06-16",
     items: [
