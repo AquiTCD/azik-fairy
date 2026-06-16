@@ -356,6 +356,10 @@ export default function Home() {
                 <span>AZIK RATIO:</span>
                 <span className="font-bold text-cyan-300">{stats.azikRatio}%</span>
               </div>
+              <div className="flex justify-between">
+                <span>SAVED KEYS:</span>
+                <span className="font-bold text-cyan-300">{stats.savedKeys}</span>
+              </div>
             </div>
 
             {/* ボタン群 */}
@@ -376,11 +380,12 @@ export default function Home() {
                 if (isScoreShare) {
                   const rank = stats.rank;
                   const rankLabel = rank === "PERFECT" ? "✦PERFECT✦" : `${rank}ランク`;
-                  const shareParams = new URLSearchParams({
-                    theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
-                    azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
-                  });
-                  const tweetText = `「AZIK-Fairy」でスコアアタック！\nWPM:${stats.wpm} | 正確率:${stats.accuracy}% | AZIK度:${stats.azikRatio}% | [${rankLabel}]\n#AZIKFairy`;
+                   const shareParams = new URLSearchParams({
+                     theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
+                     azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
+                     saved: String(stats.savedKeys),
+                   });
+                   const tweetText = `「AZIK-Fairy」でスコアアタック！\nWPM:${stats.wpm} | 正確率:${stats.accuracy}% | AZIK度:${stats.azikRatio}% (省力:${stats.savedKeys}打) | [${rankLabel}]\n#AZIKFairy`;
                   return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
                 }
                 const tweetText = `「AZIK-Fairy」で効率的なタイピングを練習中！\n#AZIKFairy`;

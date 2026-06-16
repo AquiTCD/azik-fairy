@@ -221,7 +221,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       const currentWord = words[wordIndex];
       const currentSeg = currentWord.segments[segmentIndex];
 
-      const forceNormal = stage?.category === "Challenge";
+      const forceNormal = stage?.category === "Challenge" || stage?.category === "Practice";
       const allowedPatterns = (!forceNormal && settings.isStrict) ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
       const nextBuffer = inputBuffer + key;
       const isValidPrefix = allowedPatterns.some(pattern => pattern.startsWith(nextBuffer));
@@ -253,23 +253,24 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
               const actualKeys = totalCorrectKeys + 1;
               const totalNormal = optimalKeys.totalNormal;
               const totalAzik = optimalKeys.totalAzik;
-              const azikRatio = totalNormal > totalAzik
-                ? Math.max(0, Math.min(100, Math.round(((totalNormal - actualKeys) / (totalNormal - totalAzik)) * 100)))
-                : 100;
-
-              const rank = getRank(accuracy, wpm, azikRatio);
-              const commentIds = rank === "PERFECT" ? ["P1", "P2", "P3", "P4"]
-                : rank === "A" ? ["A1", "A2", "A3", "A4"]
-                : rank === "B" ? ["B1", "B2", "B3", "B4"]
-                : ["C1", "C2", "C3", "C4", "C5"];
-              const commentId = commentIds[Math.floor(Math.random() * commentIds.length)];
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const commentText = (resultComments as any)[commentId] || "";
-
-              setFairyMessage(commentText);
-              const rankEmotion: FairyEmotion = rank === "PERFECT" ? "perfect" : rank === "A" ? "proud" : "happy";
-              setFairyEmotion(rankEmotion);
-              setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId });
+               const azikRatio = totalNormal > totalAzik
+                 ? Math.max(0, Math.min(100, Math.round(((totalNormal - actualKeys) / (totalNormal - totalAzik)) * 100)))
+                 : 100;
+               const savedKeys = Math.max(0, totalNormal - actualKeys);
+ 
+               const rank = getRank(accuracy, wpm, azikRatio);
+               const commentIds = rank === "PERFECT" ? ["P1", "P2", "P3", "P4"]
+                 : rank === "A" ? ["A1", "A2", "A3", "A4"]
+                 : rank === "B" ? ["B1", "B2", "B3", "B4"]
+                 : ["C1", "C2", "C3", "C4", "C5"];
+               const commentId = commentIds[Math.floor(Math.random() * commentIds.length)];
+               // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               const commentText = (resultComments as any)[commentId] || "";
+ 
+               setFairyMessage(commentText);
+               const rankEmotion: FairyEmotion = rank === "PERFECT" ? "perfect" : rank === "A" ? "proud" : "happy";
+               setFairyEmotion(rankEmotion);
+               setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId, savedKeys });
             } else {
               setFairyMessage(getRandomQuote("correctWord"));
               setFairyEmotion("happy"); // 1単語クリア → 喜び
@@ -335,12 +336,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
             {pendingStats.rank === "PERFECT" ? "✦ PERFECT ✦" : `RANK  ${pendingStats.rank}`}
           </div>
 
-          <div className="grid grid-cols-4 gap-2 w-full">
+          <div className="grid grid-cols-5 gap-1.5 w-full">
             {[
               { label: "TIME",  value: `${pendingStats.time.toFixed(1)}`, unit: "s",  color: "text-green-200",  border: "border-green-700" },
               { label: "WPM",   value: `${pendingStats.wpm}`,             unit: "",   color: "text-yellow-300", border: "border-yellow-700" },
               { label: "ACC",   value: `${pendingStats.accuracy}`,        unit: "%",  color: "text-green-300",  border: "border-green-700" },
               { label: "AZIK",  value: `${pendingStats.azikRatio}`,       unit: "%",  color: "text-yellow-400", border: "border-yellow-600" },
+              { label: "SAVED", value: `${pendingStats.savedKeys}`,       unit: "",   color: "text-cyan-300",   border: "border-cyan-700" },
             ].map(({ label, value, unit, color, border }) => (
               <div key={label} className={`flex flex-col items-center justify-between p-2 md:p-3 bg-zinc-800 border-2 ${border} rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] min-w-0`}>
                 <span className="text-[9px] md:text-[10px] font-pixel text-zinc-400 tracking-widest shrink-0">{label}</span>

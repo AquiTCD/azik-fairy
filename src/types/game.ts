@@ -9,4 +9,5 @@ export interface GameStats {
   azikRatio: number;
   rank: RankType;
   comment: string;
+  savedKeys: number;
 }
