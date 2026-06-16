@@ -18,7 +18,16 @@ description: azik-fairy のバージョン管理とリリース準備
 
 現在のバージョンは `package.json` の `version` フィールドで確認する。
 
-## 2. 更新対象ファイル（3箇所）
+## 2. 更新対象ファイル（4箇所）
+
+### `CHANGELOG.md`
+ファイル先頭に新セクションを追加（**source of truth**）：
+```markdown
+## [vX.Y.Z] - YYYY-MM-DD
+
+- 変更点1
+- 変更点2
+```
 
 ### `package.json`
 ```json
@@ -32,7 +41,7 @@ description: azik-fairy のバージョン管理とリリース準備
 ```
 
 ### `src/components/HelpFAQ.tsx`
-`CHANGELOG` 配列の先頭に新エントリを追加：
+`CHANGELOG` 配列の先頭に新エントリを追加（`CHANGELOG.md` と同内容）：
 ```ts
 const CHANGELOG = [
   {
@@ -76,14 +85,10 @@ PR のマージ後に実行：
 git tag vX.Y.Z
 git push origin vX.Y.Z
 
-# GitHub Release を作成（リリースノートは HelpFAQ の items をそのまま流用）
+# GitHub Release を作成（CHANGELOG.md の該当バージョンセクションを抽出）
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
-  --notes "$(cat <<'EOF'
-- 変更点1
-- 変更点2
-EOF
-)"
+  --notes "$(awk '/^## \[vX\.Y\.Z\]/{found=1; next} found && /^## /{exit} found{print}' CHANGELOG.md)"
 ```
 
 ## 備考
