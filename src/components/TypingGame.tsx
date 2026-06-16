@@ -11,15 +11,17 @@ import { getRank } from "@/utils/gameLogic";
 import KeyboardDiagram from "./KeyboardDiagram";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
+import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 
 interface TypingGameProps {
   stageId: string;
   settings: GameSettings;
   onFinish: (stats: GameStats) => void;
   onBackToStageSelect: () => void;
+  onUpdateSettings: (s: GameSettings) => void;
 }
 
-export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect }: TypingGameProps) {
+export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect, onUpdateSettings }: TypingGameProps) {
   const [stage, setStage] = useState<StageData | null>(null);
 
   useEffect(() => {
@@ -396,9 +398,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     <FairyScreenLayout
       wide
       fairy={{ message: fairyMessage, emotion: fairyEmotion }}
-      fairyColClassName="flex flex-col"
+      fairyHeaderSlot={stage ? (
+        <div className="h-7 flex items-center justify-center text-[10px] font-pixel text-green-400 border border-green-800 bg-zinc-950 px-2 rounded leading-none whitespace-nowrap overflow-hidden">
+          {stage.name}
+        </div>
+      ) : undefined}
       fairySlot={
-        <div className="hidden lg:flex flex-col gap-2 mt-4 text-xs font-pixel border-t border-green-900 pt-3 text-green-300">
+        <div className="hidden lg:flex flex-col gap-2 text-xs font-pixel border-t border-green-900 pt-3 text-green-300">
           <div>TIME <span className="font-bold text-green-200">{elapsedTime}s</span></div>
           <div>ACC <span className="font-bold text-yellow-300">
             {totalCorrectKeys + totalMissKeys > 0
@@ -413,7 +419,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       <div className={`flex-1 flex flex-col gap-4 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
 
         {/* 進捗ゲージ */}
-        <div className="w-full bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+        <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
           <div
             className="bg-green-500 h-full transition-all duration-300"
             style={{ width: `${(wordIndex / words.length) * 100}%` }}
@@ -518,11 +524,21 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </div>
         )}
 
-        {/* 戻るボタン */}
-        <div className="flex gap-4 mt-1">
+        {/* 戻るボタン + 音声トグル */}
+        <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             STAGE SELECT
           </GameButton>
+          <button
+            onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+            title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
+            className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
+          >
+            {settings.soundEnabled
+              ? <SpeakerHigh size={18} weight="bold" />
+              : <SpeakerSlash size={18} weight="bold" />
+            }
+          </button>
         </div>
       </div>
 

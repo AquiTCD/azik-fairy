@@ -6,6 +6,8 @@ import FairyHelper, { FairyEmotion } from "./FairyHelper";
 interface FairyScreenLayoutProps {
   fairy: { message: string; emotion: FairyEmotion };
   children: React.ReactNode;
+  /** Extra content rendered above FairyHelper in the fairy column */
+  fairyHeaderSlot?: React.ReactNode;
   /** Extra content rendered below FairyHelper in the fairy column */
   fairySlot?: React.ReactNode;
   /** Border accent color. Default: "green" */
@@ -21,6 +23,7 @@ interface FairyScreenLayoutProps {
 export default function FairyScreenLayout({
   fairy,
   children,
+  fairyHeaderSlot,
   fairySlot,
   accent = "green",
   wide = false,
@@ -35,7 +38,8 @@ export default function FairyScreenLayout({
   return (
     <div className={`flex flex-col lg:flex-row-reverse gap-4 lg:gap-6 w-full ${sizeClass} bg-zinc-900 border-4 border-double ${borderColor} rounded-lg shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-green-400 ${className}`}>
       {/* 右カラム: 妖精 */}
-      <div className={`w-56 xl:w-64 flex-shrink-0 mx-auto lg:mx-0 ${fairyColClassName}`}>
+      <div className={`w-56 xl:w-64 flex-shrink-0 mx-auto lg:mx-0 flex flex-col gap-4 ${fairyColClassName}`}>
+        {fairyHeaderSlot}
         <FairyHelper message={fairy.message} emotion={fairy.emotion} />
         {fairySlot}
       </div>
