@@ -405,11 +405,11 @@ x,あん
       expect(AZIK_DICTIONARY["ょ"].normal).toContain("xyo");
     });
 
-    it("でゅ is parsed as single segment [dyu] with foreign enabled", () => {
+    it("でゅ is parsed as single segment [dhu] with foreign enabled", () => {
       const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: true, nAlternative: "left" });
       const segs = splitIntoAzikSegments("でゅおたろう", dict);
       expect(segs[0].kana).toBe("でゅ");
-      expect(segs[0].normal).toContain("dyu");
+      expect(segs[0].normal).toContain("dhu");
     });
 
     it("てゅ is parsed as single segment [tyu] with foreign enabled", () => {
@@ -430,9 +430,9 @@ x,あん
       const dict = mergeCustomAzikRules({}, { enableSpecial: true, enableForeign: false, nAlternative: "left" });
       const segs = splitIntoAzikSegments("でゅ", dict);
       expect(segs[0].kana).toBe("でゅ");
-      expect(segs[0].normal).toContain("dyu");
-      // azik shortcut reverts to normal (same as dyu) when foreign disabled
-      expect(segs[0].azik).toContain("dyu");
+      expect(segs[0].normal).toContain("dhu");
+      // azik shortcut reverts to normal (same as dhu) when foreign disabled
+      expect(segs[0].azik).toContain("dhu");
     });
   });
 });
