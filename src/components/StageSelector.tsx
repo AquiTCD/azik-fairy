@@ -153,12 +153,16 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
         })}
       </div>
 
-      {/* ステージリストコンテナ */}
       <div
         id={`stage-panel-${activeCategory}`}
         role="tabpanel"
         className="w-full flex flex-col gap-4 overflow-y-auto h-[360px] pr-2 scrollbar-thin scrollbar-thumb-green-700 scrollbar-track-zinc-900"
       >
+        {(activeCategory === "Practice" || activeCategory === "Challenge") && (
+          <div className="text-[10px] font-sans text-cyan-400 bg-cyan-950/40 border border-cyan-800/40 px-3 py-2 rounded leading-relaxed">
+            💡 実戦・お題モードでは、設定画面の「キー入力強制モード（STRICT）」が ON でも、通常のローマ字入力でタイピングを継続できます（AZIKを強制しません）。
+          </div>
+        )}
         {!isCategoryEnabled(activeCategory, settings) && (
           <div className="text-center text-zinc-500 text-sm py-8 font-sans">
             このカテゴリの機能はOFFになっています。<br />

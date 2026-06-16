@@ -383,7 +383,6 @@ export default function Home() {
                    const shareParams = new URLSearchParams({
                      theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
                      azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
-                     saved: String(stats.savedKeys),
                    });
                    const tweetText = `「AZIK-Fairy」でスコアアタック！\nWPM:${stats.wpm} | 正確率:${stats.accuracy}% | AZIK度:${stats.azikRatio}% (省力:${stats.savedKeys}打) | [${rankLabel}]\n#AZIKFairy`;
                   return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
