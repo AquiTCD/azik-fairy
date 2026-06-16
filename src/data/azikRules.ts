@@ -47,6 +47,9 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ぅ": { normal: ["xu", "lu"], azik: ["xu", "lu"] },
   "ぇ": { normal: ["xe", "le"], azik: ["xe", "le"] },
   "ぉ": { normal: ["xo", "lo"], azik: ["xo", "lo"] },
+  "ゃ": { normal: ["xya", "lya"], azik: ["xya"] },
+  "ゅ": { normal: ["xyu", "lyu"], azik: ["xyu"] },
+  "ょ": { normal: ["xyo", "lyo"], azik: ["xyo"] },
 
   // --- 五十音（清音） ---
   "か": { normal: ["ka"], azik: ["ka"] },
@@ -380,6 +383,10 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "でぃ": { normal: ["dhi", "dexi"], azik: ["dci"] },
   "とぅ": { normal: ["twu", "toxu"], azik: ["tgu"] },
   "どぅ": { normal: ["dwu", "doxu"], azik: ["dcu"] },
+  "てゅ": { normal: ["tyu", "teyu"], azik: ["tyu"] },
+  "でゅ": { normal: ["dyu", "deyu"], azik: ["dyu"] },
+  "ふゅ": { normal: ["fyu"],         azik: ["fyu"] },
+  "ふょ": { normal: ["fyo"],         azik: ["fyo"] },
 
   // --- 特殊拡張キー (AzikT x0401word1.txt より) ---
   "かも": { normal: ["kamo"],          azik: ["km"] },
@@ -426,7 +433,7 @@ export interface AzikFeatures {
 const LEFT_HAND_CONSONANTS = new Set(['b', 'c', 'd', 'f', 'g', 'r', 's', 't', 'v', 'w', 'x', 'z']);
 
 const SPECIAL_KANAS = new Set(["こと", "もの", "する", "です", "ます", "という"]);
-const FOREIGN_KANAS = new Set(["てぃ", "でぃ", "とぅ", "どぅ"]);
+const FOREIGN_KANAS = new Set(["てぃ", "でぃ", "とぅ", "どぅ", "てゅ", "でゅ", "ふゅ", "ふょ"]);
 
 export function mergeCustomAzikRules(
   customRules: Record<string, string[]>,
