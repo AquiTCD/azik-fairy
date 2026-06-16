@@ -8,12 +8,43 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dot-gothic), sans-serif;
-  --font-mono: var(--font-press-start), monospace;
+  --font-sans: var(--font-noto), sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@utility font-pixel {
+  font-family: var(--font-press-start), monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-dot-gothic), sans-serif;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-4px); }
+  75%       { transform: translateX(4px); }
+}
+
+@keyframes glow-yellow {
+  0%, 100% {
+    color: #facc15;
+    filter: drop-shadow(0 0 6px rgba(250,204,21,0.5));
+  }
+  50% {
+    color: #fef9c3;
+    filter: drop-shadow(0 0 22px rgba(250,204,21,1)) drop-shadow(0 0 44px rgba(250,204,21,0.5));
+  }
+}
+
+@keyframes glow-green {
+  0%, 100% {
+    color: #4ade80;
+    filter: drop-shadow(0 0 4px rgba(74,222,128,0.4));
+  }
+  50% {
+    color: #bbf7d0;
+    filter: drop-shadow(0 0 18px rgba(74,222,128,1)) drop-shadow(0 0 36px rgba(74,222,128,0.4));
+  }
 }
