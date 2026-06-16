@@ -13,33 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
-    version: "v1.2.3",
-    date: "2026-06-16",
-    items: [
-      "X（Twitter）でのシェア時のスコア表示順と文面を調整",
-    ],
-  },
-  {
-    version: "v1.2.2",
-    date: "2026-06-16",
-    items: [
-      "X（Twitter）でのシェア時のツイート本文とハッシュタグを調整（インラインの `#AZIK_Fairy` に統一）",
-    ],
-  },
-  {
-    version: "v1.2.1",
-    date: "2026-06-16",
-    items: [
-      "X（Twitter）でのシェア時のツイート本文の表現を調整",
-    ],
-  },
-  {
     version: "v1.2.0",
     date: "2026-06-16",
     items: [
       "実戦、お題ステージで AZIK キー入力強制モード無効化",
       "AZIK 入力により省力化できたキー数（SAVED KEYS）の算出とリザルト画面への表示",
       "タイピング中の全スコア統計のリアルタイム表示機能を追加",
+      "X（Twitter）でのシェア時のツイート文面、ハッシュタグ（#AZIK_Fairy）、スコア表示順の調整",
     ],
   },
   {
