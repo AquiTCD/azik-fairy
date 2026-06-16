@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { StageData } from "@/data/azikRules";
 import { STAGES, StageMeta } from "@/data/stages";
 import { GameSettings, StageProgress } from "@/app/page";
@@ -14,7 +14,6 @@ interface StageSelectorProps {
   settings: GameSettings;
 }
 
-// カテゴリが使用可能かどうかを判定
 function isCategoryEnabled(categoryId: string, settings: GameSettings): boolean {
   if (categoryId === "Lev4") return settings.enableSpecial;
   return true;
@@ -25,7 +24,6 @@ type CategoryType = StageData["category"];
 export default function StageSelector({ onSelectStage, onBackToTitle, progress, settings }: StageSelectorProps) {
   const [activeCategory, setActiveCategory] = useState<CategoryType>("Lev1");
 
-  // カテゴリ別のステージ抽出
   const filteredStages = STAGES.filter(s => s.category === activeCategory);
 
   const categories = [
@@ -39,10 +37,77 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
     { id: "Challenge", label: "お題", sub: "全文通し" },
   ] as const;
 
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const stageRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // 画面表示時に最初のタブへ自動フォーカス → 矢印キーを即使えるようにする
+  useEffect(() => {
+    const activeCatIdx = categories.findIndex(c => c.id === activeCategory);
+    const timer = setTimeout(() => {
+      tabRefs.current[activeCatIdx]?.focus();
+    }, 50);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const getFairyMessage = () => {
     const cat = categories.find(c => c.id === activeCategory);
     return `${cat?.label ?? ""}の練習ステージを選んでね！クリアするごとに星が増えてくよ⭐💎`;
   };
+
+  const enabledTabIndices = categories
+    .map((c, i) => ({ c, i }))
+    .filter(({ c }) => isCategoryEnabled(c.id, settings))
+    .map(({ i }) => i);
+
+  const handleTabKeyDown = useCallback((e: React.KeyboardEvent, idx: number) => {
+    const pos = enabledTabIndices.indexOf(idx);
+    if (pos === -1) return;
+
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = enabledTabIndices[(pos + 1) % enabledTabIndices.length];
+      setActiveCategory(categories[next].id);
+      tabRefs.current[next]?.focus();
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const prev = enabledTabIndices[(pos - 1 + enabledTabIndices.length) % enabledTabIndices.length];
+      setActiveCategory(categories[prev].id);
+      tabRefs.current[prev]?.focus();
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      if (isCategoryEnabled(categories[idx].id, settings)) {
+        setActiveCategory(categories[idx].id);
+        // グリッドの最初のステージにフォーカス移動
+        setTimeout(() => stageRefs.current[0]?.focus(), 0);
+      }
+    }
+  }, [enabledTabIndices, categories, settings]);
+
+  const handleStageKeyDown = useCallback((e: React.KeyboardEvent, idx: number) => {
+    const cols = window.innerWidth >= 768 ? 2 : 1;
+    const total = filteredStages.length;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      stageRefs.current[Math.min(idx + cols, total - 1)]?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (idx - cols >= 0) {
+        stageRefs.current[idx - cols]?.focus();
+      } else {
+        // グリッド最上段からタブに戻る
+        const activeCatIdx = categories.findIndex(c => c.id === activeCategory);
+        tabRefs.current[activeCatIdx]?.focus();
+      }
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      stageRefs.current[Math.min(idx + 1, total - 1)]?.focus();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      stageRefs.current[Math.max(idx - 1, 0)]?.focus();
+    }
+  }, [filteredStages.length, activeCategory, categories]);
 
   return (
     <FairyScreenLayout fairy={{ message: getFairyMessage(), emotion: "idle" }}>
@@ -51,20 +116,31 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
         = SELECT LESSON =
       </h2>
 
-      {/* カテゴリタブ切り替え */}
-      <div className="flex flex-wrap gap-2 w-full justify-center border-b border-green-950 pb-4">
-        {categories.map(cat => {
+      {/* カテゴリタブ (role=tablist + 左右矢印ナビ) */}
+      <div
+        role="tablist"
+        aria-label="レッスンカテゴリ"
+        className="flex flex-wrap gap-2 w-full justify-center border-b border-green-950 pb-4"
+      >
+        {categories.map((cat, idx) => {
           const enabled = isCategoryEnabled(cat.id, settings);
+          const isActive = activeCategory === cat.id;
           return (
             <button
               key={cat.id}
+              ref={el => { tabRefs.current[idx] = el; }}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`stage-panel-${cat.id}`}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => enabled && setActiveCategory(cat.id)}
+              onKeyDown={e => handleTabKeyDown(e, idx)}
               disabled={!enabled}
               title={!enabled ? "この機能はOFFになっています (設定から変更できます)" : undefined}
-              className={`px-3 py-2 text-xs md:text-sm font-bold border-2 transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] leading-tight ${
+              className={`px-3 py-2 text-xs md:text-sm font-bold border-2 transition-all duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] leading-tight focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 focus:ring-offset-zinc-900 ${
                 !enabled
                   ? "opacity-35 cursor-not-allowed bg-zinc-900 text-zinc-600 border-zinc-700"
-                  : activeCategory === cat.id
+                  : isActive
                     ? "cursor-pointer bg-green-500 text-black border-green-500"
                     : "cursor-pointer bg-zinc-800 text-green-400 border-zinc-700 hover:border-green-500"
               }`}
@@ -78,7 +154,11 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
       </div>
 
       {/* ステージリストコンテナ */}
-      <div className="w-full flex flex-col gap-4 overflow-y-auto h-[360px] pr-2 scrollbar-thin scrollbar-thumb-green-700 scrollbar-track-zinc-900">
+      <div
+        id={`stage-panel-${activeCategory}`}
+        role="tabpanel"
+        className="w-full flex flex-col gap-4 overflow-y-auto h-[360px] pr-2 scrollbar-thin scrollbar-thumb-green-700 scrollbar-track-zinc-900"
+      >
         {!isCategoryEnabled(activeCategory, settings) && (
           <div className="text-center text-zinc-500 text-sm py-8 font-sans">
             このカテゴリの機能はOFFになっています。<br />
@@ -92,11 +172,14 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
             return (
               <button
                 key={stage.id}
+                ref={el => { stageRefs.current[index] = el; }}
+                tabIndex={index === 0 ? 0 : -1}
                 onClick={() => categoryEnabled && onSelectStage(stage.id)}
+                onKeyDown={e => handleStageKeyDown(e, index)}
                 disabled={!categoryEnabled}
                 className={`flex flex-col items-start p-5 border-2 transition-all duration-150 text-left rounded shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-full ${
                   categoryEnabled
-                    ? "bg-zinc-800 border-green-500 hover:bg-green-500 hover:text-black group cursor-pointer"
+                    ? "bg-zinc-800 border-green-500 hover:bg-green-500 hover:text-black group cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 focus:ring-offset-zinc-900"
                     : "bg-zinc-900 border-zinc-700 opacity-40 cursor-not-allowed"
                 }`}
               >
@@ -108,7 +191,6 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
                     <span className="text-lg font-bold tracking-wider font-sans">{stage.name}</span>
                   </div>
 
-                  {/* 星の表示 */}
                   {stageProg && (
                     <span className="text-yellow-400 font-bold font-pixel group-hover:text-yellow-900 text-sm">
                       {"★".repeat(stageProg.stars) + "☆".repeat(3 - stageProg.stars)}
@@ -119,7 +201,6 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
                   {stage.description}
                 </p>
 
-                {/* ベストスコア表示 */}
                 {stageProg && (
                   <div className="text-[10px] font-pixel text-green-300 group-hover:text-zinc-800 border-t border-green-900/40 group-hover:border-zinc-900/40 pt-1.5 w-full flex justify-between">
                     <span>BEST: <span className="font-bold">{stageProg.bestWpm}</span> WPM</span>
@@ -136,7 +217,7 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
       <GameButton variant="danger" size="sm" onClick={onBackToTitle}>
         BACK TO TITLE
       </GameButton>
-      </div>{/* 左カラム end */}
+      </div>
     </FairyScreenLayout>
   );
 }

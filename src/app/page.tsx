@@ -11,6 +11,7 @@ import HelpFAQ from "@/components/HelpFAQ";
 import GameButton from "@/components/GameButton";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AdBanner from "@/components/AdBanner";
+import KeyNavGroup from "@/components/KeyNavGroup";
 import { GameStats } from "@/types/game";
 
 export interface GameSettings {
@@ -256,7 +257,7 @@ export default function Home() {
               </div>
             )}
 
-            <div className="flex flex-col gap-4 w-full max-w-xs">
+            <KeyNavGroup className="flex flex-col gap-4 w-full max-w-xs">
               <GameButton variant="primary" size="lg" onClick={() => setGameState("STAGE_SELECT")} className="w-full">
                 GAME START
               </GameButton>
@@ -266,14 +267,14 @@ export default function Home() {
               <GameButton variant="ghost" size="sm" onClick={() => setGameState("HELP")} className="w-full py-2">
                 HOW TO PLAY / FAQ
               </GameButton>
-            </div>
+            </KeyNavGroup>
 
             {/* AMAZON ASSOC AD BANNERS */}
             <AdBanner ads={titleAds} />
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.0.0</p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.1.0</p>
             </div>
           </div>
         </FairyScreenLayout>
@@ -296,6 +297,7 @@ export default function Home() {
           settings={settings}
           onFinish={handleFinishGame}
           onBackToStageSelect={() => setGameState("STAGE_SELECT")}
+          onUpdateSettings={handleUpdateSettings}
         />
       )}
 
@@ -355,94 +357,59 @@ export default function Home() {
             </div>
 
             {/* ボタン群 */}
-            <div className="flex flex-col gap-3 w-full">
-              {(() => {
-                const stageMeta = selectedStageId ? STAGES.find(s => s.id === selectedStageId) : null;
-                const stageTitle = stageMeta?.name ?? selectedStageId ?? "";
-                const origin = typeof window !== "undefined" ? window.location.origin : "";
-                const isScoreShare = stageMeta?.category === "Practice" || stageMeta?.category === "Challenge";
+            {(() => {
+              const stageMeta = selectedStageId ? STAGES.find(s => s.id === selectedStageId) : null;
+              const stageTitle = stageMeta?.name ?? selectedStageId ?? "";
+              const origin = typeof window !== "undefined" ? window.location.origin : "";
+              const isScoreShare = stageMeta?.category === "Practice" || stageMeta?.category === "Challenge";
 
-                const shareButtonClass = "w-full font-pixel font-bold tracking-wider rounded cursor-pointer transition-all duration-150 bg-sky-950 text-sky-300 border-2 border-sky-500 hover:bg-sky-500 hover:text-white px-6 py-4 flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]";
-                const XIcon = () => (
-                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current flex-shrink-0" aria-hidden="true">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                );
+              const shareClass = "w-full font-pixel font-bold tracking-wider rounded transition-all duration-150 bg-sky-950 text-sky-300 border-2 border-sky-500 hover:bg-sky-500 hover:text-white focus:bg-sky-500 focus:text-white focus:outline-none px-6 py-4 flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]";
+              const XIcon = () => (
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current flex-shrink-0" aria-hidden="true">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              );
 
+              const tweetUrl = (() => {
                 if (isScoreShare) {
                   const rank = stats.rank;
                   const rankLabel = rank === "PERFECT" ? "✦PERFECT✦" : `${rank}ランク`;
                   const shareParams = new URLSearchParams({
-                    theme: "af",
-                    wpm:   String(stats.wpm),
-                    acc:   String(stats.accuracy),
-                    azik:  String(stats.azikRatio),
-                    title: stageTitle,
-                    rank,
-                    comment: stats.comment,
+                    theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
+                    azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
                   });
-                  const shareUrl = `${origin}/share?${shareParams}`;
                   const tweetText = `「AZIK-Fairy」でスコアアタック！\nWPM:${stats.wpm} | 正確率:${stats.accuracy}% | AZIK度:${stats.azikRatio}% | [${rankLabel}]\n#AZIKFairy`;
-                  const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
-                  return (
-                    <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className="w-full">
-                      <button className={shareButtonClass}>
-                        <XIcon />
-                        <span className="text-sm">POST RESULT</span>
-                      </button>
-                    </a>
-                  );
+                  return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
                 }
-
-                const shareUrl = `${origin}/share?${new URLSearchParams({ theme: "af", training: "true" })}`;
                 const tweetText = `「AZIK-Fairy」で効率的なタイピングを練習中！\n#AZIKFairy`;
-                const tweetUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(shareUrl)}`;
-                return (
-                  <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className="w-full">
-                    <button className={shareButtonClass}>
-                      <XIcon />
-                      <span className="text-sm">POST TO X</span>
-                    </button>
+                return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${new URLSearchParams({ theme: "af", training: "true" })}`)}`;
+              })();
+
+              return (
+                <KeyNavGroup className="flex flex-col gap-3 w-full">
+                  <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={shareClass}>
+                    <XIcon />
+                    <span className="text-sm">{isScoreShare ? "POST RESULT" : "POST TO X"}</span>
                   </a>
-                );
-              })()}
-              {selectedStageId && getNextStageId(selectedStageId) && (
-                <GameButton
-                  variant="primary"
-                  size="md"
-                  onClick={() => startStage(getNextStageId(selectedStageId)!)}
-                  className="w-full"
-                >
-                  NEXT STAGE &gt;
-                </GameButton>
-              )}
-              {selectedStageId && (
-                <GameButton
-                  variant="secondary"
-                  size="md"
-                  onClick={() => startStage(selectedStageId)}
-                  className="w-full"
-                >
-                  RETRY STAGE
-                </GameButton>
-              )}
-              <GameButton
-                variant="ghost"
-                size="sm"
-                onClick={() => setGameState("STAGE_SELECT")}
-                className="w-full"
-              >
-                STAGE SELECT
-              </GameButton>
-              <GameButton
-                variant="danger"
-                size="sm"
-                onClick={() => setGameState("TITLE")}
-                className="w-full"
-              >
-                BACK TO TITLE
-              </GameButton>
-            </div>
+                  {selectedStageId && getNextStageId(selectedStageId) && (
+                    <GameButton variant="primary" size="md" onClick={() => startStage(getNextStageId(selectedStageId)!)} className="w-full">
+                      NEXT STAGE &gt;
+                    </GameButton>
+                  )}
+                  {selectedStageId && (
+                    <GameButton variant="secondary" size="md" onClick={() => startStage(selectedStageId)} className="w-full">
+                      RETRY STAGE
+                    </GameButton>
+                  )}
+                  <GameButton variant="ghost" size="sm" onClick={() => setGameState("STAGE_SELECT")} className="w-full">
+                    STAGE SELECT
+                  </GameButton>
+                  <GameButton variant="danger" size="sm" onClick={() => setGameState("TITLE")} className="w-full">
+                    BACK TO TITLE
+                  </GameButton>
+                </KeyNavGroup>
+              );
+            })()}
 
           </div>
         </FairyScreenLayout>
