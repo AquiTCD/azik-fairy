@@ -27,8 +27,9 @@ describe("share function OGP response", () => {
 
     const html = await response.text();
     
-    // Check for canonical, site_name, and locale
-    expect(html).toContain('<link rel="canonical" href="https://azik-fairy.solunita.net/">');
+    // Check for noindex, site_name, and locale
+    expect(html).toContain('<meta name="robots" content="noindex, nofollow">');
+    expect(html).not.toContain('<link rel="canonical"');
     expect(html).toContain('<meta property="og:site_name" content="AZIK-Fairy">');
     expect(html).toContain('<meta property="og:locale" content="ja_JP">');
   });
