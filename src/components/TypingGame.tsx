@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment } from "@/data/stages/wordValidator";
+import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment, STAGE_KEY_PREDS } from "@/data/stages/wordValidator";
 import { GameSettings } from "@/app/page";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -135,7 +135,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     ],
   });
 
-  const { playMiss, playCorrect } = useAzikSound(settings.soundEnabled);
+  const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
 
   const getRandomQuote = (category: keyof typeof fairyQuotes.current) => {
     const quotes = fairyQuotes.current[category];
@@ -270,16 +270,38 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
       const allowedPatterns = (() => {
         if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
-        if (settings.isFullTraining || isPracticeOrChallenge) return currentSeg.azik;
-        // FOCUS training: Lev1-4 ステージ対象レベルのセグメントのみ AZIK 必須
+
         const stageLevel = STAGE_MAX_LEVELS[stageId];
-        if (!stageLevel || stageLevel === AzikLevel.Practice) {
+        if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
           return currentSeg.azik;
         }
+
         const isSummaryStage = stageId.includes("summary");
-        return isTargetSegment(currentSeg, stageLevel, isSummaryStage)
-          ? currentSeg.azik
-          : [...currentSeg.normal, ...currentSeg.azik];
+        const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
+
+        // Lev3a/Lev3b 非まとめ: サブステージ専用述語で判定（isTargetSegment をバイパス）
+        const stagePred = STAGE_KEY_PREDS[stageId];
+        if (!isSummaryStage && stagePred) {
+          const targetKeys = currentSeg.azik.filter(k => stagePred(getCore(k)));
+          if (targetKeys.length > 0) return targetKeys;
+          // このサブパターンのターゲットキーなし → 非対象セグメント
+          return settings.isFullTraining
+            ? currentSeg.azik
+            : [...currentSeg.normal, ...currentSeg.azik];
+        }
+
+        // Lev1/Lev2 / まとめステージ: AzikLevel ベース
+        const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
+        if (!isTarget) {
+          return settings.isFullTraining
+            ? currentSeg.azik
+            : [...currentSeg.normal, ...currentSeg.azik];
+        }
+        if (!isSummaryStage) {
+          const targetKeys = currentSeg.azik.filter(k => classifyAzikKey(getCore(k)) === stageLevel);
+          if (targetKeys.length > 0) return targetKeys;
+        }
+        return currentSeg.azik;
       })();
       const nextBuffer = inputBuffer + key;
       const isValidPrefix = allowedPatterns.some(pattern => pattern.startsWith(nextBuffer));
@@ -291,10 +313,10 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         const isCompleted = allowedPatterns.includes(nextBuffer);
 
         if (isCompleted) {
-          playCorrect();
           setInputBuffer("");
 
           if (segmentIndex + 1 < currentWord.segments.length) {
+            playCorrect();
             setSegmentIndex(prev => prev + 1);
           } else {
             const nextWordIndex = wordIndex + 1;
@@ -302,6 +324,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
             setSegmentIndex(0);
 
             if (nextWordIndex >= words.length) {
+              playStageClear();
               const totalTime = Math.max((Date.now() - (currentStartTime || Date.now())) / 1000, 1);
               const totalKeys = totalCorrectKeys + 1;
               const accuracy = Math.round((totalKeys / (totalKeys + totalMissKeys)) * 100);
@@ -330,6 +353,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
                setFairyEmotion(rankEmotion);
                setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId, savedKeys });
             } else {
+              playWordComplete();
               setFairyMessage(getRandomQuote("correctWord"));
               setFairyEmotion("happy"); // 1単語クリア → 喜び
             }
@@ -578,7 +602,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </div>
         )}
 
-        {/* 戻るボタン + 音声トグル */}
+        {/* 戻るボタン + 音声ON/OFFトグル */}
         <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             STAGE SELECT

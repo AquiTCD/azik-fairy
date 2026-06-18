@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { GameSettings } from "@/app/page";
+import { SoundThemeName } from "@/hooks/useAzikSound";
 import { parseExternalRomajiTable } from "@/data/azikRules";
 import GameButton from "@/components/GameButton";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
@@ -289,20 +290,36 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
             {/* サウンド */}
             <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex justify-between items-center gap-4">
-                <span className="font-bold text-sm md:text-base tracking-wider">SOUND EFFECTS:</span>
-                <button
-                  onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
-                  className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.soundEnabled
-                    ? "bg-green-500 text-black border-green-500"
-                    : "bg-zinc-700 text-green-400 border-green-500"
+              <div className="flex justify-between items-start gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">SOUND THEME:</span>
+                <div className="flex gap-2 flex-wrap justify-end">
+                  <button
+                    onClick={() => onUpdateSettings({ ...settings, soundEnabled: false })}
+                    className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
+                      !settings.soundEnabled
+                        ? "bg-green-500 text-black border-green-500"
+                        : "bg-zinc-700 text-green-400 border-green-500"
                     }`}
-                >
-                  {settings.soundEnabled ? "ON" : "OFF"}
-                </button>
+                  >
+                    OFF
+                  </button>
+                  {(["soft", "8bit", "typewriter"] as SoundThemeName[]).map(t => (
+                    <button
+                      key={t}
+                      onClick={() => onUpdateSettings({ ...settings, soundEnabled: true, soundTheme: t })}
+                      className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
+                        settings.soundEnabled && settings.soundTheme === t
+                          ? "bg-green-500 text-black border-green-500"
+                          : "bg-zinc-700 text-green-400 border-green-500"
+                      }`}
+                    >
+                      {t === "typewriter" ? "TYPE" : t.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
               </div>
               <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-                入力正解・ミス時のビープ音のON/OFFを切り替えます。
+                効果音のテーマを選択します。OFF / SOFT / 8BIT / TYPE の4種類。ゲーム画面からもON/OFFのみ切り替え可能です。
               </p>
             </div>
 

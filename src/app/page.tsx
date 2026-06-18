@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { SoundThemeName } from "@/hooks/useAzikSound";
 import { getRandomAds } from "@/data/adData";
 import { calcStars, calcStreak, getNextStageId } from "@/utils/gameLogic";
 import { STAGES } from "@/data/stages";
@@ -23,6 +24,7 @@ export interface GameSettings {
   customRules: Record<string, string[]>; // { "ん": ["q"], "っ": [";", ":"], ... }
   keyboardLayout: "US" | "JIS";
   soundEnabled: boolean;
+  soundTheme: SoundThemeName;
   wordsPerSession: number; // 0 = unlimited
   enableSpecial: boolean;   // 特殊拡張 (こと/もの/する/です/ます)
   enableForeign: boolean;   // 外来語拡張 (tgi/dci/tgu/dcu = てぃ/でぃ/とぅ/どぅ)
@@ -55,7 +57,8 @@ const DEFAULT_SETTINGS: GameSettings = {
   showTable: true,
   customRules: {},
   keyboardLayout: "JIS",
-  soundEnabled: true,
+  soundEnabled: false,
+  soundTheme: "soft" as SoundThemeName,
   wordsPerSession: 30,
   enableSpecial: true,
   enableForeign: true,
@@ -102,6 +105,14 @@ export default function Home() {
             else if (Array.isArray(v)) migrated[k] = v as string[];
           }
           parsed.customRules = migrated;
+        }
+        // Migrate old soundTheme:"off"/"default" → soundEnabled + soundTheme split
+        if (parsed.soundTheme === "off") {
+          parsed.soundEnabled = false;
+          parsed.soundTheme = "soft";
+        } else if (parsed.soundTheme === "default") {
+          parsed.soundEnabled = true;
+          parsed.soundTheme = "soft";
         }
         setSettings({ ...DEFAULT_SETTINGS, ...parsed });
       } catch (e) {
@@ -277,7 +288,7 @@ export default function Home() {
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.4.0</p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.5.0</p>
             </div>
           </div>
         </FairyScreenLayout>
