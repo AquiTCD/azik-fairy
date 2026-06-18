@@ -16,7 +16,8 @@ import { GameStats } from "@/types/game";
 import resultComments from "../../public/data/result_comments.json";
 
 export interface GameSettings {
-  isStrict: boolean;
+  isTraining: boolean;
+  isFullTraining: boolean;
   showGuide: boolean;
   showTable: boolean;
   customRules: Record<string, string[]>; // { "ん": ["q"], "っ": [";", ":"], ... }
@@ -48,7 +49,8 @@ const STORAGE_KEY = "azik-fairy-settings";
 const PROGRESS_STORAGE_KEY = "azik-fairy-progress";
 
 const DEFAULT_SETTINGS: GameSettings = {
-  isStrict: false,
+  isTraining: true,
+  isFullTraining: false,
   showGuide: true,
   showTable: true,
   customRules: {},
@@ -288,6 +290,7 @@ export default function Home() {
           onBackToTitle={() => setGameState("TITLE")}
           progress={progress.stageProgress}
           settings={settings}
+          onUpdateSettings={handleUpdateSettings}
         />
       )}
 
@@ -367,7 +370,9 @@ export default function Home() {
               const stageMeta = selectedStageId ? STAGES.find(s => s.id === selectedStageId) : null;
               const stageTitle = stageMeta?.name ?? selectedStageId ?? "";
               const origin = typeof window !== "undefined" ? window.location.origin : "";
-              const isScoreShare = stageMeta?.category === "Practice" || stageMeta?.category === "Challenge";
+              // Lev1-4 は常に training シェア。Practice/Challenge は settings.isTraining で決まる。
+              const isPracticeOrChallengeStage = stageMeta?.category === "Practice" || stageMeta?.category === "Challenge";
+              const isTrainingShare = !isPracticeOrChallengeStage || settings.isTraining;
 
               const shareClass = "w-full font-pixel font-bold tracking-wider rounded transition-all duration-150 bg-sky-950 text-sky-300 border-2 border-sky-500 hover:bg-sky-500 hover:text-white focus:bg-sky-500 focus:text-white focus:outline-none px-6 py-4 flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]";
               const XIcon = () => (
@@ -377,17 +382,17 @@ export default function Home() {
               );
 
               const tweetUrl = (() => {
-                if (isScoreShare) {
+                if (!isTrainingShare) {
                   const rank = stats.rank;
                   const rankLabel = rank === "PERFECT" ? "✦PERFECT✦" : `${rank}ランク`;
-                   const shareParams = new URLSearchParams({
-                     theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
-                     azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
-                   });
-                    const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でスコアアタック！\nステージ: 「${stageTitle}」\n【 ${rankLabel} 】\nスピード: ${stats.wpm} WPM | 正確率: ${stats.accuracy}% | AZIK率: ${stats.azikRatio}%`;
+                  const shareParams = new URLSearchParams({
+                    theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
+                    azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
+                  });
+                  const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でスコアアタック！\nステージ: 「${stageTitle}」\n【 ${rankLabel} 】\nスピード: ${stats.wpm} WPM | 正確率: ${stats.accuracy}% | AZIK率: ${stats.azikRatio}%`;
                   return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
                 }
-                const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy で効率的なタイピングを練習中！`;
+                const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でトレーニング中！`;
                 return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${new URLSearchParams({ theme: "af", training: "true" })}`)}`;
               })();
 
@@ -395,7 +400,7 @@ export default function Home() {
                 <KeyNavGroup className="flex flex-col gap-3 w-full">
                   <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={shareClass}>
                     <XIcon />
-                    <span className="text-sm">{isScoreShare ? "POST RESULT" : "POST TO X"}</span>
+                    <span className="text-sm">{isTrainingShare ? "POST TRAINING" : "POST RESULT"}</span>
                   </a>
                   {selectedStageId && getNextStageId(selectedStageId) && (
                     <GameButton variant="primary" size="md" onClick={() => startStage(getNextStageId(selectedStageId)!)} className="w-full">

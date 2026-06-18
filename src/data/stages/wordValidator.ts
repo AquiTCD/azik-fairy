@@ -1,4 +1,4 @@
-import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping, StageData } from "../azikRules";
+import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping, AzikSegment, StageData } from "../azikRules";
 
 // -------------------------------------------------------------
 // AZIKレベル定義
@@ -219,6 +219,40 @@ export function filterStageWords(stage: StageData): StageData {
       ? words.filter(w => findMinimumLevel(w.kana) !== AzikLevel.Lev0)
       : words,
   };
+}
+
+/**
+ * AZIKパターンが対象レベルのショートカットを含むか判定する
+ *
+ * 促音複合パターン（;kz 等）は先頭の ; を剥がしてコアで判定する。
+ * これにより っかん(;kz) が Lev2a ステージで「対象あり」と正しく判定される。
+ */
+export function containsTargetLevel(pattern: string, target: AzikLevel): boolean {
+  const core = pattern.startsWith(";") ? pattern.slice(1) : pattern;
+  return classifyAzikKey(core) === target;
+}
+
+/**
+ * セグメントがステージのターゲットレベルのキーを含むか判定する
+ *
+ * - 通常ステージ: azikLevel に一致するセグメントのみ対象
+ * - まとめステージ: Lev1a 〜 stageLevel の全レベルが対象
+ */
+export function isTargetSegment(
+  seg: AzikSegment,
+  stageLevel: AzikLevel,
+  isSummaryStage: boolean,
+): boolean {
+  if (isSummaryStage) {
+    const stageOrd = levelOrdinal(stageLevel);
+    const lev1aOrd = levelOrdinal(AzikLevel.Lev1a);
+    return seg.azik.some(pattern => {
+      const core = pattern.startsWith(";") ? pattern.slice(1) : pattern;
+      const ord = levelOrdinal(classifyAzikKey(core));
+      return ord >= lev1aOrd && ord <= stageOrd;
+    });
+  }
+  return seg.azik.some(pattern => containsTargetLevel(pattern, stageLevel));
 }
 
 /**
