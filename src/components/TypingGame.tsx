@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
+import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment } from "@/data/stages/wordValidator";
 import { GameSettings } from "@/app/page";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -263,8 +264,23 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       const currentWord = words[wordIndex];
       const currentSeg = currentWord.segments[segmentIndex];
 
-      const forceNormal = stage?.category === "Challenge" || stage?.category === "Practice";
-      const allowedPatterns = (!forceNormal && settings.isStrict) ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
+      // Lev1-4 は常に training。Practice/Challenge は settings.isTraining で切り替え。
+      const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
+      const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
+
+      const allowedPatterns = (() => {
+        if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
+        if (settings.isFullTraining || isPracticeOrChallenge) return currentSeg.azik;
+        // FOCUS training: Lev1-4 ステージ対象レベルのセグメントのみ AZIK 必須
+        const stageLevel = STAGE_MAX_LEVELS[stageId];
+        if (!stageLevel || stageLevel === AzikLevel.Practice) {
+          return currentSeg.azik;
+        }
+        const isSummaryStage = stageId.includes("summary");
+        return isTargetSegment(currentSeg, stageLevel, isSummaryStage)
+          ? currentSeg.azik
+          : [...currentSeg.normal, ...currentSeg.azik];
+      })();
       const nextBuffer = inputBuffer + key;
       const isValidPrefix = allowedPatterns.some(pattern => pattern.startsWith(nextBuffer));
 
@@ -322,7 +338,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       } else {
         playMiss();
         setTotalMissKeys(prev => prev + 1);
-        if (settings.isStrict) {
+        if (settings.isTraining) {
           setIsWiggling(true);
           setFairyMessage(getRandomQuote("wrongStrict"));
           setFairyEmotion("warning");
@@ -340,7 +356,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [words, wordIndex, segmentIndex, inputBuffer, startTime, totalCorrectKeys, totalMissKeys, settings.isStrict, isFinished, onFinish]);
+  }, [words, wordIndex, segmentIndex, inputBuffer, startTime, totalCorrectKeys, totalMissKeys, settings.isTraining, settings.isFullTraining, isFinished, onFinish]);
 
   if (words.length === 0) {
     return <div className="text-green-400 font-pixel text-xl">LOADING STAGE DATA...</div>;
@@ -405,9 +421,12 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const currentWord = words[wordIndex];
   const currentSeg: AzikSegment | undefined = currentWord?.segments[segmentIndex];
 
+  const isPlayingPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
+  const isEffectivelyTraining = !isPlayingPracticeOrChallenge || settings.isTraining;
+
   const azikHint = currentSeg
     ? `${currentSeg.kana} ➔ ${currentSeg.azik.map(k => `[${k}]`).join(" or ")}` +
-      (!settings.isStrict ? ` (通常: ${currentSeg.normal.map(k => `[${k}]`).join("/")})` : "")
+      (!isEffectivelyTraining ? ` (通常: ${currentSeg.normal.map(k => `[${k}]`).join("/")})` : "")
     : "";
 
   const azikNextKeys = currentSeg
@@ -429,7 +448,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       wide
       fairy={{ message: fairyMessage, emotion: fairyEmotion }}
       fairyHeaderSlot={stage ? (
-        <div className="h-7 flex items-center justify-center text-[10px] font-pixel text-green-400 border border-green-800 bg-zinc-950 px-2 rounded leading-none whitespace-nowrap overflow-hidden">
+        <div className="h-7 flex items-center justify-center text-[10px] font-sans text-green-400 border border-green-800 bg-zinc-950 px-2 rounded leading-none whitespace-nowrap overflow-hidden">
           {stage.name}
         </div>
       ) : undefined}
@@ -538,7 +557,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           <div className="w-full p-3 bg-zinc-800/80 border-2 border-dashed border-green-800 rounded text-xs leading-relaxed text-left flex flex-col gap-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <div className="font-bold text-green-300 flex justify-between font-pixel">
               <span>💡 AZIK HINT:</span>
-              <span className="animate-pulse">{settings.isStrict ? "STRICT ON" : "NORMAL"}</span>
+              <span className="animate-pulse">{isEffectivelyTraining ? (settings.isFullTraining ? "TRAINING/FULL" : "TRAINING/FOCUS") : "NORMAL"}</span>
             </div>
             <div className="font-pixel text-zinc-200 border-b border-zinc-700 pb-1.5 mb-1">
               {azikHint}

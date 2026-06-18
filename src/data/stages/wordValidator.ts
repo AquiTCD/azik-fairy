@@ -1,4 +1,4 @@
-import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping, StageData } from "../azikRules";
+import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping, AzikSegment, StageData } from "../azikRules";
 
 // -------------------------------------------------------------
 // AZIKレベル定義
@@ -222,6 +222,40 @@ export function filterStageWords(stage: StageData): StageData {
 }
 
 /**
+ * AZIKパターンが対象レベルのショートカットを含むか判定する
+ *
+ * 促音複合パターン（;kz 等）は先頭の ; を剥がしてコアで判定する。
+ * これにより っかん(;kz) が Lev2a ステージで「対象あり」と正しく判定される。
+ */
+export function containsTargetLevel(pattern: string, target: AzikLevel): boolean {
+  const core = (pattern.startsWith(";") && pattern.length > 1) ? pattern.slice(1) : pattern;
+  return classifyAzikKey(core) === target;
+}
+
+/**
+ * セグメントがステージのターゲットレベルのキーを含むか判定する
+ *
+ * - 通常ステージ: azikLevel に一致するセグメントのみ対象
+ * - まとめステージ: Lev1a 〜 stageLevel の全レベルが対象
+ */
+export function isTargetSegment(
+  seg: AzikSegment,
+  stageLevel: AzikLevel,
+  isSummaryStage: boolean,
+): boolean {
+  if (isSummaryStage) {
+    const stageOrd = levelOrdinal(stageLevel);
+    const lev1aOrd = levelOrdinal(AzikLevel.Lev1a);
+    return seg.azik.some(pattern => {
+      const core = (pattern.startsWith(";") && pattern.length > 1) ? pattern.slice(1) : pattern;
+      const ord = levelOrdinal(classifyAzikKey(core));
+      return ord >= lev1aOrd && ord <= stageOrd;
+    });
+  }
+  return seg.azik.some(pattern => containsTargetLevel(pattern, stageLevel));
+}
+
+/**
  * ステージIDに対応するAzikLevelを返すヘルパー
  * ステージJSONの azikLevel フィールドと対応
  */
@@ -244,6 +278,7 @@ export const STAGE_MAX_LEVELS: Record<string, AzikLevel> = {
   "lev2b-summary":         AzikLevel.Lev2b,
   "lev3a-chouon-colon":    AzikLevel.Lev3a,
   "lev3a-g-youon":         AzikLevel.Lev3a,
+  "lev3a-compat-f":        AzikLevel.Lev3a,
   "lev3a-summary":         AzikLevel.Lev3a,
   "lev3b-foreign-kana":    AzikLevel.Lev3b,
   "lev3b-zc-zf-za-ze":    AzikLevel.Lev3b,

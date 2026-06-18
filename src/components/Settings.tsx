@@ -43,7 +43,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
   const customizableKeys = getCustomizableKeys(settings.keyboardLayout);
 
-  const toggleSetting = (key: keyof Omit<GameSettings, "customRules" | "wordsPerSession" | "keyboardLayout" | "enableSpecial" | "enableForeign">) => {
+  const toggleSetting = (key: keyof Omit<GameSettings, "customRules" | "wordsPerSession" | "keyboardLayout" | "enableSpecial" | "enableForeign" | "nAlternative">) => {
     onUpdateSettings({
       ...settings,
       [key]: !settings[key],
@@ -84,8 +84,8 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  // handleKeyChange は下で定義するが、React が警告しないよう capturingKey のみ依存に
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // handleKeyChange は下で定義するが、React が警告しないよう capturingKey のみ依存に
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [capturingKey]);
 
   // 個別フォームのキー変更 (UI は primary key のみ編集)
@@ -170,296 +170,307 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
   return (
     <FairyScreenLayout fairy={{ message: "設定でプレイスタイルをカスタマイズしよ！キーも自由に変えられるよ💅✨", emotion: "idle" }}>
       <div className="flex-1 flex flex-col gap-4">
-      <h2 className="text-2xl md:text-3xl font-bold text-center animate-pulse tracking-widest border-b-2 border-green-500 pb-2 w-full font-pixel">
-        = OPTIONS & CUSTOM =
-      </h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center animate-pulse tracking-widest border-b-2 border-green-500 pb-2 w-full font-pixel">
+          = OPTIONS & CUSTOM =
+        </h2>
 
-      {/* 設定コンテナ (縦スクロール対応) */}
-      <div className="flex flex-col gap-6 w-full overflow-y-auto max-h-[420px] pr-2 scrollbar-thin scrollbar-thumb-green-700 scrollbar-track-zinc-900">
-        
-        {/* 基本設定セクション */}
-        <div className="flex flex-col gap-4">
-          <h3 className="text-sm font-bold text-green-300 border-b border-green-950 pb-1">■ SYSTEM SETTINGS</h3>
-          
-          {/* 強制モード */}
-          <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex justify-between items-center gap-4">
-              <span className="font-bold text-sm md:text-base tracking-wider">INPUT METHOD:</span>
-              <button
-                onClick={() => toggleSetting("isStrict")}
-                className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                  settings.isStrict
-                    ? "bg-green-500 text-black border-green-500"
-                    : "bg-red-500 text-white border-red-500"
-                }`}
-              >
-                {settings.isStrict ? "STRICT (IGNORE)" : "NORMAL (MISS)"}
-              </button>
-            </div>
-            <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-              {settings.isStrict
-                ? "強制スルーモード。非AZIKキーの入力を完全に無視します（入力バッファはリセットされず、ミスはカウントされます）。"
-                : "ノーマルモード。通常ローマ字入力も許容しますが、ミスは打鍵ミスとしてカウントされます。"}
-              {settings.isStrict && (
-                <span className="block mt-1 text-yellow-400 font-bold">※基礎・応用・発展・特殊の練習ステージのみ有効</span>
-              )}
-            </p>
-          </div>
+        {/* 設定コンテナ (縦スクロール対応) */}
+        <div className="flex flex-col gap-6 w-full overflow-y-auto max-h-[420px] pr-2 scrollbar-thin scrollbar-thumb-green-700 scrollbar-track-zinc-900">
 
-          {/* キーガイド */}
-          <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex justify-between items-center gap-4">
-              <span className="font-bold text-sm md:text-base tracking-wider">KEY GUIDE:</span>
-              <button
-                onClick={() => toggleSetting("showGuide")}
-                className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                  settings.showGuide
-                    ? "bg-green-500 text-black border-green-500"
-                    : "bg-zinc-700 text-green-400 border-green-500"
-                }`}
-              >
-                {settings.showGuide ? "SHOW" : "HIDE"}
-              </button>
-            </div>
-            <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-              タイピング画面で、次に押すべきAZIKのキーガイドを文字の下に表示します。
-            </p>
-          </div>
+          {/* 基本設定セクション */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-sm font-bold text-green-300 border-b border-green-950 pb-1">■ SYSTEM SETTINGS</h3>
 
-          {/* ヒント表 */}
-          <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex justify-between items-center gap-4">
-              <span className="font-bold text-sm md:text-base tracking-wider">AZIK HELP TABLE:</span>
-              <button
-                onClick={() => toggleSetting("showTable")}
-                className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                  settings.showTable
-                    ? "bg-green-500 text-black border-green-500"
-                    : "bg-zinc-700 text-green-400 border-green-500"
-                }`}
-              >
-                {settings.showTable ? "SHOW" : "HIDE"}
-              </button>
-            </div>
-            <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-              プレイ画面下部に、現在入力中のキーに対応するAZIKの省略対応ルールを常時ヒント表示します。
-            </p>
-          </div>
-
-          {/* キーボードレイアウト */}
-          <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex justify-between items-center gap-4">
-              <span className="font-bold text-sm md:text-base tracking-wider">KEYBOARD LAYOUT:</span>
-              <div className="flex gap-2">
-                {(["JIS", "US"] as const).map(layout => (
-                  <button
-                    key={layout}
-                    onClick={() => handleLayoutChange(layout)}
-                    className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                      settings.keyboardLayout === layout
-                        ? "bg-green-500 text-black border-green-500"
-                        : "bg-zinc-700 text-green-400 border-green-500 hover:bg-green-900"
-                    }`}
-                  >
-                    {layout}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-              タイピング画面のキーボード図のレイアウトを切り替えます（US配列 / JIS配列）。
-            </p>
-          </div>
-
-          {/* サウンド */}
-          <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex justify-between items-center gap-4">
-              <span className="font-bold text-sm md:text-base tracking-wider">SOUND EFFECTS:</span>
-              <button
-                onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
-                className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                  settings.soundEnabled
-                    ? "bg-green-500 text-black border-green-500"
-                    : "bg-zinc-700 text-green-400 border-green-500"
-                }`}
-              >
-                {settings.soundEnabled ? "ON" : "OFF"}
-              </button>
-            </div>
-            <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-              入力正解・ミス時のビープ音のON/OFFを切り替えます。
-            </p>
-          </div>
-
-          {/* セッション語彙数（練習ステージ用） */}
-          <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-            <div className="flex justify-between items-center gap-4">
-              <span className="font-bold text-sm md:text-base tracking-wider">WORDS / STAGE:</span>
-              <div className="flex items-center gap-2">
-                {[10, 20, 30, 50, 0].map(n => (
-                  <button
-                    key={n}
-                    onClick={() => onUpdateSettings({ ...settings, wordsPerSession: n })}
-                    className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                      settings.wordsPerSession === n
-                        ? "bg-green-500 text-black border-green-500"
-                        : "bg-zinc-700 text-green-400 border-green-500 hover:bg-green-900"
-                    }`}
-                  >
-                    {n === 0 ? "ALL" : n}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-              基礎〜特殊の練習ステージのみ適用。ランダムサンプリングで件数を制限します。実戦は50件固定、お題は全件通し。
-            </p>
-          </div>
-        </div>
-
-        {/* キー設定セクション */}
-        <div className="flex flex-col gap-4 mt-2">
-          <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-green-950 pb-2 gap-2">
-            <h3 className="text-sm font-bold text-green-300">■ KEY CONFIG</h3>
-
-            {/* サブタブ切り替え */}
-            <div className="flex gap-1.5">
-              {(["FORM", "JSON", "TSV_SKK"] as const).map(tab => (
+            {/* 実戦・お題ステージのトレーニングモード */}
+            <div className="flex flex-col gap-3 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">挑戦ステージ MODE:</span>
                 <button
-                  key={tab}
-                  onClick={() => setActiveSubTab(tab)}
-                  className={`px-2 py-0.5 text-[9px] md:text-[10px] border font-bold rounded cursor-pointer ${
-                    activeSubTab === tab
-                      ? "bg-green-500 text-black border-green-500"
-                      : "bg-zinc-800 text-green-400 border-zinc-700 hover:border-green-500"
-                  }`}
-                >
-                  {tab === "FORM" ? "個別フォーム" : tab === "JSON" ? "JSON一括" : "TSV/SKKインポート"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* AZIKフィーチャー + N代替設定 */}
-          <div className="flex flex-col gap-3 p-3 bg-zinc-800 border border-zinc-700 rounded">
-            <span className="text-sm font-extrabold font-sans text-zinc-300 tracking-wider">AZIK FEATURES:</span>
-
-            {/* ON/OFFトグル */}
-            <div className="flex flex-col gap-2">
-              {([
-                { key: "enableSpecial", label: "特殊拡張", desc: "こと[kt] もの[mn] する[sr] です[ds] ます[ms] など" },
-                { key: "enableForeign", label: "外来語拡張", desc: "てぃ[tgi] でぃ[dci] とぅ[tgp] どぅ[dcp]" },
-              ] as const).map(({ key, label, desc }) => (
-                <div key={key} className="flex items-center justify-between gap-3">
-                  <div>
-                    <span className="text-sm font-extrabold font-sans text-green-300">{label}</span>
-                    <span className="text-xs text-zinc-300 ml-2 font-sans">{desc}</span>
-                  </div>
-                  <button
-                    onClick={() => onUpdateSettings({ ...settings, [key]: !settings[key] })}
-                    className={`px-3 py-0.5 text-xs font-pixel font-bold border-2 flex-shrink-0 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                      settings[key]
-                        ? "bg-green-500 text-black border-green-500"
-                        : "bg-zinc-700 text-green-400 border-green-500"
+                  onClick={() => onUpdateSettings({ ...settings, isTraining: !settings.isTraining })}
+                  className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.isTraining
+                    ? "bg-green-500 text-black border-green-500"
+                    : "bg-yellow-500 text-black border-yellow-500"
                     }`}
-                  >
-                    {settings[key] ? "ON" : "OFF"}
-                  </button>
-                </div>
-              ))}
-            </div>
+                >
+                  {settings.isTraining ? "TRAINING" : "CHALLENGE"}
+                </button>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                挑戦ステージのデフォルトモードを設定します。<br />
+                CHALLENGE（スコアアタック）時はスコアパラメータ付きでシェアできます。<br />
+                （基礎〜特殊の練習ステージは常にTRAININGモード）
+              </p>
 
-            {/* N代替 3択 */}
-            <div className="border-t border-zinc-700 pt-2.5">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <span className="text-sm font-extrabold font-sans text-green-300">N代替 (撥音)</span>
-                  <span className="text-xs text-zinc-300 ml-2 font-sans">sz→sn / kz→kn など</span>
-                </div>
-                <div className="flex gap-1.5 flex-shrink-0">
+              {/* FOCUS / FULL */}
+              <div className="flex flex-col gap-1.5 border-t border-zinc-700 pt-3">
+                <span className="text-xs font-bold text-zinc-300 tracking-wider">TRAINING SUB-MODE:</span>
+                <div className="flex gap-2">
                   {([
-                    { val: "off",  label: "OFF",  title: "Zのみ (源流AZIK)" },
-                    { val: "left", label: "LEFT", title: "左手子音のみ g/s/t/d/b/r/w/f/c/z/x" },
-                    { val: "all",  label: "ALL",  title: "全子音 k/j/h 含む" },
-                  ] as const).map(({ val, label, title }) => (
+                    { value: false, label: "FOCUS", desc: "ステージ学習範囲のキーのみAZIK必須" },
+                    { value: true, label: "FULL", desc: "全AZIKショートカット強制" },
+                  ] as const).map(({ value, label, desc }) => (
                     <button
-                      key={val}
-                      title={title}
-                      onClick={() => onUpdateSettings({ ...settings, nAlternative: val })}
-                      className={`px-2.5 py-0.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                        settings.nAlternative === val
-                          ? "bg-green-500 text-black border-green-500"
-                          : "bg-zinc-700 text-green-400 border-zinc-600 hover:border-green-500"
-                      }`}
+                      key={label}
+                      onClick={() => onUpdateSettings({ ...settings, isFullTraining: value })}
+                      className={`flex-1 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.isFullTraining === value
+                        ? "bg-green-500 text-black border-green-500"
+                        : "bg-zinc-700 text-zinc-400 border-zinc-600 hover:border-green-500"
+                        }`}
                     >
                       {label}
+                      <span className="text-[9px] opacity-70 block font-sans">{desc}</span>
                     </button>
                   ))}
                 </div>
               </div>
-              <p className="text-xs text-zinc-400 font-sans leading-relaxed mt-1.5">
-                撥音ZショートカットへのNの追加。LEFT=左手子音のみ、ALL=k/j/h含む全子音。
+            </div>
+
+            {/* キーガイド */}
+            <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">KEY GUIDE:</span>
+                <button
+                  onClick={() => toggleSetting("showGuide")}
+                  className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.showGuide
+                    ? "bg-green-500 text-black border-green-500"
+                    : "bg-zinc-700 text-green-400 border-green-500"
+                    }`}
+                >
+                  {settings.showGuide ? "SHOW" : "HIDE"}
+                </button>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                タイピング画面で、次に押すべきAZIKのキーガイドを文字の下に表示します。
               </p>
             </div>
 
-            <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-              OFFにした機能は該当ショートカットが無効になり、対応練習ステージも非表示になります。
-            </p>
+            {/* ヒント表 */}
+            <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">AZIK HELP TABLE:</span>
+                <button
+                  onClick={() => toggleSetting("showTable")}
+                  className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.showTable
+                    ? "bg-green-500 text-black border-green-500"
+                    : "bg-zinc-700 text-green-400 border-green-500"
+                    }`}
+                >
+                  {settings.showTable ? "SHOW" : "HIDE"}
+                </button>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                プレイ画面下部に、現在入力中のキーに対応するAZIKの省略対応ルールを常時ヒント表示します。
+              </p>
+            </div>
+
+            {/* キーボードレイアウト */}
+            <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">KEYBOARD LAYOUT:</span>
+                <div className="flex gap-2">
+                  {(["JIS", "US"] as const).map(layout => (
+                    <button
+                      key={layout}
+                      onClick={() => handleLayoutChange(layout)}
+                      className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.keyboardLayout === layout
+                        ? "bg-green-500 text-black border-green-500"
+                        : "bg-zinc-700 text-green-400 border-green-500 hover:bg-green-900"
+                        }`}
+                    >
+                      {layout}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                タイピング画面のキーボード図のレイアウトを切り替えます（US配列 / JIS配列）。
+              </p>
+            </div>
+
+            {/* サウンド */}
+            <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">SOUND EFFECTS:</span>
+                <button
+                  onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+                  className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.soundEnabled
+                    ? "bg-green-500 text-black border-green-500"
+                    : "bg-zinc-700 text-green-400 border-green-500"
+                    }`}
+                >
+                  {settings.soundEnabled ? "ON" : "OFF"}
+                </button>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                入力正解・ミス時のビープ音のON/OFFを切り替えます。
+              </p>
+            </div>
+
+            {/* セッション語彙数（練習ステージ用） */}
+            <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">WORDS / STAGE:</span>
+                <div className="flex items-center gap-2">
+                  {[10, 20, 30, 50, 0].map(n => (
+                    <button
+                      key={n}
+                      onClick={() => onUpdateSettings({ ...settings, wordsPerSession: n })}
+                      className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.wordsPerSession === n
+                        ? "bg-green-500 text-black border-green-500"
+                        : "bg-zinc-700 text-green-400 border-green-500 hover:bg-green-900"
+                        }`}
+                    >
+                      {n === 0 ? "ALL" : n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                基礎〜特殊の練習ステージのみ適用。ランダムサンプリングで件数を制限します。実戦は50件固定、お題は全件通し。
+              </p>
+            </div>
           </div>
 
-          {activeSubTab === "JSON" && (
-            /* JSONエディタ */
-            <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-2 border-green-500 rounded">
-              <div className="text-[10px] leading-relaxed text-zinc-400">
-                <span className="text-green-300 font-bold">【コピー用サンプルJSON】</span><br />
-                以下をコピーしてカスタマイズし、下の入力欄に貼り付けて適用できます。複数キーは配列で指定可能です：
-                <pre className="bg-zinc-900 border border-zinc-800 p-2 mt-1.5 text-[9px] rounded text-green-500 overflow-x-auto select-all">
-{`{
+          {/* キー設定セクション */}
+          <div className="flex flex-col gap-4 mt-2">
+            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-green-950 pb-2 gap-2">
+              <h3 className="text-sm font-bold text-green-300">■ KEY CONFIG</h3>
+
+              {/* サブタブ切り替え */}
+              <div className="flex gap-1.5">
+                {(["FORM", "JSON", "TSV_SKK"] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveSubTab(tab)}
+                    className={`px-2 py-0.5 text-[9px] md:text-[10px] border font-bold rounded cursor-pointer ${activeSubTab === tab
+                      ? "bg-green-500 text-black border-green-500"
+                      : "bg-zinc-800 text-green-400 border-zinc-700 hover:border-green-500"
+                      }`}
+                  >
+                    {tab === "FORM" ? "個別フォーム" : tab === "JSON" ? "JSON一括" : "TSV/SKKインポート"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* AZIKフィーチャー + N代替設定 */}
+            <div className="flex flex-col gap-3 p-3 bg-zinc-800 border border-zinc-700 rounded">
+              <span className="text-sm font-extrabold font-sans text-zinc-300 tracking-wider">AZIK FEATURES:</span>
+
+              {/* ON/OFFトグル */}
+              <div className="flex flex-col gap-2">
+                {([
+                  { key: "enableSpecial", label: "特殊拡張", desc: "こと[kt] もの[mn] する[sr] です[ds] ます[ms] など" },
+                  { key: "enableForeign", label: "外来語拡張", desc: "てぃ[tgi] でぃ[dci] とぅ[tgp] どぅ[dcp]" },
+                ] as const).map(({ key, label, desc }) => (
+                  <div key={key} className="flex items-center justify-between gap-3">
+                    <div>
+                      <span className="text-sm font-extrabold font-sans text-green-300">{label}</span>
+                      <span className="text-xs text-zinc-300 ml-2 font-sans">{desc}</span>
+                    </div>
+                    <button
+                      onClick={() => onUpdateSettings({ ...settings, [key]: !settings[key] })}
+                      className={`px-3 py-0.5 text-xs font-pixel font-bold border-2 flex-shrink-0 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings[key]
+                        ? "bg-green-500 text-black border-green-500"
+                        : "bg-zinc-700 text-green-400 border-green-500"
+                        }`}
+                    >
+                      {settings[key] ? "ON" : "OFF"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* N代替 3択 */}
+              <div className="border-t border-zinc-700 pt-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-sm font-extrabold font-sans text-green-300">N代替 (撥音)</span>
+                    <span className="text-xs text-zinc-300 ml-2 font-sans">sz→sn / kz→kn など</span>
+                  </div>
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    {([
+                      { val: "off", label: "OFF", title: "Zのみ (源流AZIK)" },
+                      { val: "left", label: "LEFT", title: "左手子音のみ g/s/t/d/b/r/w/f/c/z/x" },
+                      { val: "all", label: "ALL", title: "全子音 k/j/h 含む" },
+                    ] as const).map(({ val, label, title }) => (
+                      <button
+                        key={val}
+                        title={title}
+                        onClick={() => onUpdateSettings({ ...settings, nAlternative: val })}
+                        className={`px-2.5 py-0.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.nAlternative === val
+                          ? "bg-green-500 text-black border-green-500"
+                          : "bg-zinc-700 text-green-400 border-zinc-600 hover:border-green-500"
+                          }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-400 font-sans leading-relaxed mt-1.5">
+                  撥音ZショートカットへのNの追加。LEFT=左手子音のみ、ALL=k/j/h含む全子音。
+                </p>
+              </div>
+
+              <p className="text-xs text-zinc-400 font-sans leading-relaxed">
+                OFFにした機能は該当ショートカットが無効になり、対応練習ステージも非表示になります。
+              </p>
+            </div>
+
+            {activeSubTab === "JSON" && (
+              /* JSONエディタ */
+              <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-2 border-green-500 rounded">
+                <div className="text-[10px] leading-relaxed text-zinc-400">
+                  <span className="text-green-300 font-bold">【コピー用サンプルJSON】</span><br />
+                  以下をコピーしてカスタマイズし、下の入力欄に貼り付けて適用できます。複数キーは配列で指定可能です：
+                  <pre className="bg-zinc-900 border border-zinc-800 p-2 mt-1.5 text-[9px] rounded text-green-500 overflow-x-auto select-all">
+                    {`{
   "ん": ["q"],
   "っ": [";", ":"],
   "ー": [":"]
 }`}
-                </pre>
-                <span className="text-zinc-500 block mt-1">撥音/二重母音の拡張キー（あん=z等）はTSV/SKK importから変更できます。</span>
+                  </pre>
+                  <span className="text-zinc-500 block mt-1">撥音/二重母音の拡張キー（あん=z等）はTSV/SKK importから変更できます。</span>
+                </div>
+                <div className="border-t border-zinc-800 pt-2.5">
+                  <span className="text-xs text-green-300 block mb-1">JSON INPUT:</span>
+                  <textarea
+                    value={jsonInput}
+                    onChange={e => setJsonInput(e.target.value)}
+                    rows={6}
+                    className="w-full bg-zinc-900 border border-green-800 text-green-400 p-2 font-mono text-xs focus:outline-none focus:border-green-500 rounded"
+                    placeholder='{ "ん": "q", "っ": ";" }'
+                  />
+                </div>
+                {jsonError && <p className="text-[10px] text-red-500 leading-normal">{jsonError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    onClick={applyJsonRules}
+                    className="px-3 py-1 bg-green-500 text-black font-bold text-xs border border-green-500 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-green-500 cursor-pointer"
+                  >
+                    JSON適用
+                  </button>
+                </div>
               </div>
-              <div className="border-t border-zinc-800 pt-2.5">
-                <span className="text-xs text-green-300 block mb-1">JSON INPUT:</span>
-                <textarea
-                  value={jsonInput}
-                  onChange={e => setJsonInput(e.target.value)}
-                  rows={6}
-                  className="w-full bg-zinc-900 border border-green-800 text-green-400 p-2 font-mono text-xs focus:outline-none focus:border-green-500 rounded"
-                  placeholder='{ "ん": "q", "っ": ";" }'
-                />
-              </div>
-              {jsonError && <p className="text-[10px] text-red-500 leading-normal">{jsonError}</p>}
-              <div className="flex gap-2">
-                <button
-                  onClick={applyJsonRules}
-                  className="px-3 py-1 bg-green-500 text-black font-bold text-xs border border-green-500 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-green-500 cursor-pointer"
-                >
-                  JSON適用
-                </button>
-              </div>
-            </div>
-          )}
+            )}
 
-          {activeSubTab === "TSV_SKK" && (
-            /* TSV/SKKインポーター */
-            <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-2 border-green-500 rounded">
-              <div className="text-[10px] leading-relaxed text-zinc-400 font-sans">
-                <span className="text-green-300 font-bold">【TSV/SKK設定コピペインポート】</span><br />
-                Google日本語入力のローマ字表（TSV）や、macSKK等の <code className="text-yellow-400">kana-rule.conf</code> の内容をそのまま貼り付けて適用できます。
-                該当するAZIKキー定義（単音ん・っ、撥音拡張、二重母音等）のみを自動で検出して現在の設定にマージします。コメント行（#）は自動で無視されます。
-              </div>
-              <div className="border-t border-zinc-800 pt-2.5">
-                <span className="text-xs text-green-300 block mb-1">SETTINGS DATA (TSV / CSV / conf):</span>
-                <textarea
-                  value={tsvSkkInput}
-                  onChange={e => setTsvSkkInput(e.target.value)}
-                  rows={8}
-                  className="w-full bg-zinc-900 border border-green-800 text-green-400 p-2 font-mono text-xs focus:outline-none focus:border-green-500 rounded"
-                  placeholder={`# 例: Google日本語入力 TSV の場合
+            {activeSubTab === "TSV_SKK" && (
+              /* TSV/SKKインポーター */
+              <div className="flex flex-col gap-3 p-4 bg-zinc-950 border-2 border-green-500 rounded">
+                <div className="text-[10px] leading-relaxed text-zinc-400 font-sans">
+                  <span className="text-green-300 font-bold">【TSV/SKK設定コピペインポート】</span><br />
+                  Google日本語入力のローマ字表（TSV）や、macSKK等の <code className="text-yellow-400">kana-rule.conf</code> の内容をそのまま貼り付けて適用できます。
+                  該当するAZIKキー定義（単音ん・っ、撥音拡張、二重母音等）のみを自動で検出して現在の設定にマージします。コメント行（#）は自動で無視されます。
+                </div>
+                <div className="border-t border-zinc-800 pt-2.5">
+                  <span className="text-xs text-green-300 block mb-1">SETTINGS DATA (TSV / CSV / conf):</span>
+                  <textarea
+                    value={tsvSkkInput}
+                    onChange={e => setTsvSkkInput(e.target.value)}
+                    rows={8}
+                    className="w-full bg-zinc-900 border border-green-800 text-green-400 p-2 font-mono text-xs focus:outline-none focus:border-green-500 rounded"
+                    placeholder={`# 例: Google日本語入力 TSV の場合
 q\tん
 ;\tっ
 z\tあん
@@ -468,104 +479,103 @@ z\tあん
 q,ん
 ;,っ
 z,あん`}
-                />
+                  />
+                </div>
+                {tsvSkkError && <p className="text-[10px] text-red-500 leading-normal">{tsvSkkError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    onClick={applyTsvSkkRules}
+                    className="px-3 py-1 bg-green-500 text-black font-bold text-xs border border-green-500 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-green-500 cursor-pointer"
+                  >
+                    インポート適用
+                  </button>
+                </div>
               </div>
-              {tsvSkkError && <p className="text-[10px] text-red-500 leading-normal">{tsvSkkError}</p>}
-              <div className="flex gap-2">
-                <button
-                  onClick={applyTsvSkkRules}
-                  className="px-3 py-1 bg-green-500 text-black font-bold text-xs border border-green-500 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-green-500 cursor-pointer"
-                >
-                  インポート適用
-                </button>
-              </div>
-            </div>
-          )}
+            )}
 
-          {activeSubTab === "FORM" && (
-            /* 個別フォームエディタ: クリックでキャプチャ */
-            <div className="flex flex-col gap-2">
-              <p className="text-[10px] text-zinc-500 font-sans">キーアイコンをクリックして次に押したキーで登録。ESCでキャンセル。</p>
-              <div className="grid grid-cols-3 gap-3">
-                {customizableKeys.map(item => {
-                  const keys = settings.customRules[item.key];
-                  const primaryVal = keys?.[0] ?? item.defaultVal;
-                  const altKeys = keys?.slice(1) ?? [];
-                  const isCustom = keys !== undefined && (keys[0] !== item.defaultVal || keys.length > 1);
-                  const isCapturing = capturingKey === item.key;
+            {activeSubTab === "FORM" && (
+              /* 個別フォームエディタ: クリックでキャプチャ */
+              <div className="flex flex-col gap-2">
+                <p className="text-[10px] text-zinc-500 font-sans">キーアイコンをクリックして次に押したキーで登録。ESCでキャンセル。</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {customizableKeys.map(item => {
+                    const keys = settings.customRules[item.key];
+                    const primaryVal = keys?.[0] ?? item.defaultVal;
+                    const altKeys = keys?.slice(1) ?? [];
+                    const isCustom = keys !== undefined && (keys[0] !== item.defaultVal || keys.length > 1);
+                    const isCapturing = capturingKey === item.key;
 
-                  return (
-                    <div
-                      key={item.key}
-                      className="flex flex-col gap-1.5 p-3 bg-zinc-800 border border-green-800 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] opacity-80">{item.label}</span>
-                        {isCustom && <span className="text-[9px] text-yellow-400 font-sans font-bold">Custom</span>}
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {/* クリックでキャプチャ開始するキーキャップ */}
-                        <button
-                          onClick={() => setCapturingKey(isCapturing ? null : item.key)}
-                          title="クリックして次に押したキーで登録"
-                          className={`min-w-[2.5rem] px-2 py-1.5 text-base font-bold font-mono border-2 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-100 cursor-pointer ${
-                            isCapturing
+                    return (
+                      <div
+                        key={item.key}
+                        className="flex flex-col gap-1.5 p-3 bg-zinc-800 border border-green-800 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] opacity-80">{item.label}</span>
+                          {isCustom && <span className="text-[9px] text-yellow-400 font-sans font-bold">Custom</span>}
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* クリックでキャプチャ開始するキーキャップ */}
+                          <button
+                            onClick={() => setCapturingKey(isCapturing ? null : item.key)}
+                            title="クリックして次に押したキーで登録"
+                            className={`min-w-[2.5rem] px-2 py-1.5 text-base font-bold font-mono border-2 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-100 cursor-pointer ${isCapturing
                               ? "bg-yellow-400 text-black border-yellow-400 animate-pulse"
                               : isCustom
                                 ? "bg-green-500 text-black border-green-400 hover:bg-green-400"
                                 : "bg-zinc-900 text-green-300 border-green-700 hover:border-green-500 hover:bg-zinc-700"
-                          }`}
-                        >
-                          {isCapturing ? "?" : primaryVal.toUpperCase()}
-                        </button>
-                        {altKeys.map(k => (
-                          <span key={k} className="text-[10px] font-mono font-bold text-green-400 bg-zinc-900 border border-green-800 rounded px-1.5 py-0.5 uppercase">{k}</span>
-                        ))}
+                              }`}
+                          >
+                            {isCapturing ? "?" : primaryVal.toUpperCase()}
+                          </button>
+                          {altKeys.map(k => (
+                            <span key={k} className="text-[10px] font-mono font-bold text-green-400 bg-zinc-900 border border-green-800 rounded px-1.5 py-0.5 uppercase">{k}</span>
+                          ))}
+                        </div>
+                        {isCapturing && (
+                          <span className="text-[9px] text-yellow-300 font-sans animate-pulse">キー待ち... (ESCでキャンセル)</span>
+                        )}
                       </div>
-                      {isCapturing && (
-                        <span className="text-[9px] text-yellow-300 font-sans animate-pulse">キー待ち... (ESCでキャンセル)</span>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* リセットボタン */}
-          <div className="flex justify-end mt-1">
-            <button
-              onClick={resetToDefault}
-              className="px-3 py-1.5 bg-zinc-800 border-2 border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-black transition-colors duration-150 rounded text-xs shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer font-pixel font-bold"
-            >
-              RESET TO DEFAULT KEYS
-            </button>
+            {/* リセットボタン */}
+            <div className="flex justify-end mt-1">
+              <button
+                onClick={resetToDefault}
+                className="px-3 py-1.5 bg-zinc-800 border-2 border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-black transition-colors duration-150 rounded text-xs shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer font-pixel font-bold"
+              >
+                RESET TO DEFAULT KEYS
+              </button>
+            </div>
+
+          </div>
+
+          {/* DANGER ZONE */}
+          <div className="flex flex-col gap-3 mt-2 border-t-2 border-red-900 pt-4">
+            <h3 className="text-sm font-bold text-red-400 font-pixel">■ DANGER ZONE</h3>
+            <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border-2 border-red-800 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div>
+                <span className="font-bold text-sm tracking-wider text-red-400 font-pixel">CLEAR ALL PROGRESS:</span>
+                <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">すべてのステージスコア・星・クリア記録を削除します。この操作は元に戻せません。</p>
+              </div>
+              <button
+                onClick={onClearProgress}
+                className="px-3 py-2 bg-zinc-900 border-2 border-red-600 text-red-500 hover:bg-red-600 hover:text-white transition-colors duration-150 rounded text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer font-bold font-pixel whitespace-nowrap"
+              >
+                CLEAR
+              </button>
+            </div>
           </div>
 
         </div>
 
-        {/* DANGER ZONE */}
-        <div className="flex flex-col gap-3 mt-2 border-t-2 border-red-900 pt-4">
-          <h3 className="text-sm font-bold text-red-400 font-pixel">■ DANGER ZONE</h3>
-          <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border-2 border-red-800 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-            <div>
-              <span className="font-bold text-sm tracking-wider text-red-400 font-pixel">CLEAR ALL PROGRESS:</span>
-              <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">すべてのステージスコア・星・クリア記録を削除します。この操作は元に戻せません。</p>
-            </div>
-            <button
-              onClick={onClearProgress}
-              className="px-3 py-2 bg-zinc-900 border-2 border-red-600 text-red-500 hover:bg-red-600 hover:text-white transition-colors duration-150 rounded text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer font-bold font-pixel whitespace-nowrap"
-            >
-              CLEAR
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-      <GameButton variant="danger" size="sm" onClick={onBackToTitle}>
-        BACK TO TITLE
-      </GameButton>
+        <GameButton variant="danger" size="sm" onClick={onBackToTitle}>
+          BACK TO TITLE
+        </GameButton>
       </div>{/* 左カラム end */}
     </FairyScreenLayout>
   );

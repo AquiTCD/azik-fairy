@@ -13,6 +13,15 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.4.0",
+    date: "2026-06-18",
+    items: [
+      "TRAINING / CHALLENGE 入力モードを導入",
+      "ステージ構成と表示を整理",
+      "X（Twitter）シェア機能を改善",
+    ],
+  },
+  {
     version: "v1.3.0",
     date: "2026-06-17",
     items: [
