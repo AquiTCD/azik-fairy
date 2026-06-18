@@ -286,9 +286,18 @@ export default function Home() {
             {/* AMAZON ASSOC AD BANNERS */}
             <AdBanner ads={titleAds} />
 
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSeX8QOLxetOJ9GgAiByaZGesA_EExHvHs07xmdX1gttuHsvVQ/viewform?usp=publish-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full text-center text-xs font-pixel border border-green-800 px-4 py-2 text-green-600 hover:text-green-300 hover:border-green-500 hover:bg-green-950 rounded transition-colors"
+            >
+              SEND FEEDBACK
+            </a>
+
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.5.0</p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.5.0 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
             </div>
           </div>
         </FairyScreenLayout>

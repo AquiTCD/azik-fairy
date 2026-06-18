@@ -13,6 +13,14 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.6.0",
+    date: "2026-06-19",
+    items: [
+      "フィードバックフォームへのリンクを追加",
+      "プライバシーポリシーの追加",
+    ],
+  },
+  {
     version: "v1.5.0",
     date: "2026-06-19",
     items: [
@@ -286,6 +294,18 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
                 </ul>
               </div>
             ))}
+            <div className="border-t border-zinc-800 pt-4 text-center opacity-75">
+              <p className="mb-1">バグ報告・ご意見・ご要望はフィードバックフォームへ</p>
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSeX8QOLxetOJ9GgAiByaZGesA_EExHvHs07xmdX1gttuHsvVQ/viewform?usp=publish-editor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-400 hover:underline font-pixel"
+              >
+                SEND FEEDBACK
+              </a>
+              <p className="mt-1 text-zinc-600">（Googleフォームが開きます）</p>
+            </div>
           </div>
         )}
 
