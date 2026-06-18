@@ -39,7 +39,18 @@ export default function PrivacyPage() {
 
         <section className="flex flex-col gap-3">
           <h2 className="text-base font-bold text-green-300 border-b border-zinc-800 pb-1">
-            3. フィードバックフォームについて
+            3. X（Twitter）シェア機能について
+          </h2>
+          <p className="text-sm leading-relaxed">
+            結果画面の「POST RESULT」ボタンを押すと、ゲームスコア（WPM・正確率・ランクなど）がURLパラメータとして X（Twitter）のサーバーへ送信されます。
+            この操作は任意であり、ボタンを押さない限りデータは送信されません。
+            X による情報の取り扱いについては <a href="https://twitter.com/privacy" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">X のプライバシーポリシー</a> をご確認ください。
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-base font-bold text-green-300 border-b border-zinc-800 pb-1">
+            4. フィードバックフォームについて
           </h2>
           <p className="text-sm leading-relaxed">
             フィードバックの収集にはGoogleフォームを使用しています。フォームに入力・送信した情報はGoogleのサーバーに保存されます。
@@ -50,11 +61,18 @@ export default function PrivacyPage() {
 
         <section className="flex flex-col gap-3">
           <h2 className="text-base font-bold text-green-300 border-b border-zinc-800 pb-1">
-            4. お問い合わせ
+            5. お問い合わせ
           </h2>
           <p className="text-sm leading-relaxed">
             本ポリシーに関するお問い合わせは、
-            <a href="https://github.com/AquiTCD/azik-fairy" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">GitHubリポジトリ</a> のIssueよりご連絡ください。
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSeX8QOLxetOJ9GgAiByaZGesA_EExHvHs07xmdX1gttuHsvVQ/viewform?usp=publish-editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-400 hover:underline"
+            >
+              フィードバックフォーム
+            </a> よりご連絡ください。
           </p>
         </section>
 
