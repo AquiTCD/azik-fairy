@@ -309,27 +309,36 @@ export function hasWordTargetKey(
 
 /** ステージIDごとの純粋性ルール。ここにないステージはチェック対象外。 */
 export const STAGE_PURITY_RULES: Record<string, {
-  targetLevel: AzikLevel;
-  targetSuffix: string | null;
+  /** 許容するターゲットレベルの配列（複数指定可） */
+  targetLevels: AzikLevel[];
+  /** セット時、ターゲットキーの末尾がこの文字と一致する必要がある */
+  targetSuffix?: string;
   /** このキーを持つセグメントは「ターゲット代替なし」とみなして除外 */
   bannedKeyPred?: (key: string) => boolean;
 }> = {
-  // x[非母音] (xp/xh/xz/xj/xl = しょう/しゅう/しゃん/しゅん/しょん) は
+  // x[非母音] (xp/xh/xz/xj/xl) は Lev1c + Lev2a/2b の複合形。
   // 単体の x+母音 ショートカットと混在すると FOCUS モードで xou が通らなくなるため除外
-  "lev1-sha":   { targetLevel: AzikLevel.Lev1c, targetSuffix: null,
+  "lev1-sha":   { targetLevels: [AzikLevel.Lev1c],
     bannedKeyPred: (k) => k.startsWith("x") && k.length >= 2 && !"aeiou".includes(k[1]) },
   // c[非母音] (cp/ch/cz/cj/cl) も同様
-  "lev1-cha":   { targetLevel: AzikLevel.Lev1d, targetSuffix: null,
+  "lev1-cha":   { targetLevels: [AzikLevel.Lev1d],
     bannedKeyPred: (k) => k.startsWith("c") && k.length >= 2 && !"aeiou".includes(k[1]) },
-  "lev2a-an-z": { targetLevel: AzikLevel.Lev2a, targetSuffix: "z" },
-  "lev2a-in-k": { targetLevel: AzikLevel.Lev2a, targetSuffix: "k" },
-  "lev2a-un-j": { targetLevel: AzikLevel.Lev2a, targetSuffix: "j" },
-  "lev2a-en-d": { targetLevel: AzikLevel.Lev2a, targetSuffix: "d" },
-  "lev2a-on-l": { targetLevel: AzikLevel.Lev2a, targetSuffix: "l" },
-  "lev2b-ai-q": { targetLevel: AzikLevel.Lev2b, targetSuffix: "q" },
-  "lev2b-uu-h": { targetLevel: AzikLevel.Lev2b, targetSuffix: "h" },
-  "lev2b-ei-w": { targetLevel: AzikLevel.Lev2b, targetSuffix: "w" },
-  "lev2b-ou-p": { targetLevel: AzikLevel.Lev2b, targetSuffix: "p" },
+  // Lev1 まとめ: Lev1a-1d 全許容。x/c 複合形は Lev2 知識を要するため全バン
+  "lev1-summary": { targetLevels: [AzikLevel.Lev1a, AzikLevel.Lev1b, AzikLevel.Lev1c, AzikLevel.Lev1d],
+    bannedKeyPred: (k) => (k.startsWith("x") || k.startsWith("c")) && k.length >= 2 && !"aeiou".includes(k[1]) },
+  "lev2a-an-z": { targetLevels: [AzikLevel.Lev2a], targetSuffix: "z" },
+  "lev2a-in-k": { targetLevels: [AzikLevel.Lev2a], targetSuffix: "k" },
+  "lev2a-un-j": { targetLevels: [AzikLevel.Lev2a], targetSuffix: "j" },
+  "lev2a-en-d": { targetLevels: [AzikLevel.Lev2a], targetSuffix: "d" },
+  "lev2a-on-l": { targetLevels: [AzikLevel.Lev2a], targetSuffix: "l" },
+  // Lev2a まとめ: Lev1*+Lev2a 許容。xp/xh/cp/ch は Lev2b(ou→p, uu→h) を要するためバン
+  // xz/xl/xj (Lev2a 鼻音) は許容
+  "lev2a-summary": { targetLevels: [AzikLevel.Lev1a, AzikLevel.Lev1b, AzikLevel.Lev1c, AzikLevel.Lev1d, AzikLevel.Lev2a],
+    bannedKeyPred: (k) => (k.startsWith("x") || k.startsWith("c")) && k.length >= 2 && (k[1] === "p" || k[1] === "h") },
+  "lev2b-ai-q": { targetLevels: [AzikLevel.Lev2b], targetSuffix: "q" },
+  "lev2b-uu-h": { targetLevels: [AzikLevel.Lev2b], targetSuffix: "h" },
+  "lev2b-ei-w": { targetLevels: [AzikLevel.Lev2b], targetSuffix: "w" },
+  "lev2b-ou-p": { targetLevels: [AzikLevel.Lev2b], targetSuffix: "p" },
 };
 
 /** キーが Lev0/互換（Lev3a/3b/4）かを返す — どのステージでも常に許容 */
@@ -340,11 +349,11 @@ function isBaseKey(key: string): boolean {
 }
 
 /** キーがお題ステージのターゲットショートカットかを返す */
-function isTargetKey(key: string, targetLevel: AzikLevel, targetSuffix: string | null): boolean {
+function isTargetKey(key: string, targetLevels: AzikLevel[], targetSuffix?: string): boolean {
   const core = (key.startsWith(";") && key.length > 1) ? key.slice(1) : key;
   const lv = classifyAzikKey(core);
-  if (lv !== targetLevel) return false;
-  if (targetSuffix === null) return true;
+  if (!targetLevels.includes(lv)) return false;
+  if (targetSuffix === undefined) return true;
   return core[core.length - 1] === targetSuffix;
 }
 
@@ -362,13 +371,13 @@ function isTargetKey(key: string, targetLevel: AzikLevel, targetSuffix: string |
  */
 function isSegmentPure(
   seg: AzikSegment,
-  targetLevel: AzikLevel,
-  targetSuffix: string | null,
+  targetLevels: AzikLevel[],
+  targetSuffix: string | undefined,
   bannedKeyPred?: (key: string) => boolean,
 ): boolean {
   if (seg.azik.length === 0) return true;
   const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
-  const targetKeys = seg.azik.filter(k => isTargetKey(k, targetLevel, targetSuffix));
+  const targetKeys = seg.azik.filter(k => isTargetKey(k, targetLevels, targetSuffix));
   if (targetKeys.length > 0) {
     if (bannedKeyPred) {
       const hasNonBanned = targetKeys.some(k => !bannedKeyPred(getCore(k)));
@@ -395,7 +404,7 @@ export function isWordPureForStage(
   const rule = STAGE_PURITY_RULES[stageId];
   if (!rule) return true;
   const segments = splitIntoAzikSegments(kana, dictionary);
-  return segments.every(seg => isSegmentPure(seg, rule.targetLevel, rule.targetSuffix, rule.bannedKeyPred));
+  return segments.every(seg => isSegmentPure(seg, rule.targetLevels, rule.targetSuffix, rule.bannedKeyPred));
 }
 
 // -------------------------------------------------------------
