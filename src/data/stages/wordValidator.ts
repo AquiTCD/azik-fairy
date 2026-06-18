@@ -308,9 +308,19 @@ export function hasWordTargetKey(
 // -------------------------------------------------------------
 
 /** ステージIDごとの純粋性ルール。ここにないステージはチェック対象外。 */
-export const STAGE_PURITY_RULES: Record<string, { targetLevel: AzikLevel; targetSuffix: string | null }> = {
-  "lev1-sha":   { targetLevel: AzikLevel.Lev1c, targetSuffix: null },
-  "lev1-cha":   { targetLevel: AzikLevel.Lev1d, targetSuffix: null },
+export const STAGE_PURITY_RULES: Record<string, {
+  targetLevel: AzikLevel;
+  targetSuffix: string | null;
+  /** このキーを持つセグメントは「ターゲット代替なし」とみなして除外 */
+  bannedKeyPred?: (key: string) => boolean;
+}> = {
+  // x[非母音] (xp/xh/xz/xj/xl = しょう/しゅう/しゃん/しゅん/しょん) は
+  // 単体の x+母音 ショートカットと混在すると FOCUS モードで xou が通らなくなるため除外
+  "lev1-sha":   { targetLevel: AzikLevel.Lev1c, targetSuffix: null,
+    bannedKeyPred: (k) => k.startsWith("x") && k.length >= 2 && !"aeiou".includes(k[1]) },
+  // c[非母音] (cp/ch/cz/cj/cl) も同様
+  "lev1-cha":   { targetLevel: AzikLevel.Lev1d, targetSuffix: null,
+    bannedKeyPred: (k) => k.startsWith("c") && k.length >= 2 && !"aeiou".includes(k[1]) },
   "lev2a-an-z": { targetLevel: AzikLevel.Lev2a, targetSuffix: "z" },
   "lev2a-in-k": { targetLevel: AzikLevel.Lev2a, targetSuffix: "k" },
   "lev2a-un-j": { targetLevel: AzikLevel.Lev2a, targetSuffix: "j" },
@@ -343,20 +353,29 @@ function isTargetKey(key: string, targetLevel: AzikLevel, targetSuffix: string |
  *
  * pure の条件（いずれか）:
  *   1. AZIK配列が空（基本ローマ字のみ）
- *   2. ターゲットキーを持つ（FOCUSモードで正しく強制される）
+ *   2. ターゲットキーを持ち、かつ非バンドのターゲットキーが1つ以上ある
  *   3. ターゲットキーを持たないが、全AZIKキーが Lev0/互換 のみ
  *
- * ケース2に "sw" と "ss" が共存する例（せい）:
- *   sw = Lev2b → ターゲット外, ss = Lev3b → 互換
- *   ターゲットキーなし → ケース3 判定 → sw が Lev2b → pure = false（汚染）
+ * bannedKeyPred がある場合、ターゲットキーが全てバンド対象なら impure。
+ * 例: lev1-sha で "しょう"→["xp"] は xp がバンド → pure = false
+ *     lev1-sha で "ちぇ"→["ce","cf"] は ce が非バンド → pure = true
  */
 function isSegmentPure(
   seg: AzikSegment,
   targetLevel: AzikLevel,
   targetSuffix: string | null,
+  bannedKeyPred?: (key: string) => boolean,
 ): boolean {
   if (seg.azik.length === 0) return true;
-  if (seg.azik.some(k => isTargetKey(k, targetLevel, targetSuffix))) return true;
+  const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
+  const targetKeys = seg.azik.filter(k => isTargetKey(k, targetLevel, targetSuffix));
+  if (targetKeys.length > 0) {
+    if (bannedKeyPred) {
+      const hasNonBanned = targetKeys.some(k => !bannedKeyPred(getCore(k)));
+      if (!hasNonBanned) return false;
+    }
+    return true;
+  }
   return seg.azik.every(isBaseKey);
 }
 
@@ -376,7 +395,7 @@ export function isWordPureForStage(
   const rule = STAGE_PURITY_RULES[stageId];
   if (!rule) return true;
   const segments = splitIntoAzikSegments(kana, dictionary);
-  return segments.every(seg => isSegmentPure(seg, rule.targetLevel, rule.targetSuffix));
+  return segments.every(seg => isSegmentPure(seg, rule.targetLevel, rule.targetSuffix, rule.bannedKeyPred));
 }
 
 // -------------------------------------------------------------
