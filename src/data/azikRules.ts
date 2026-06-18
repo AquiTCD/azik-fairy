@@ -580,8 +580,12 @@ export function mergeCustomAzikRules(
     { parent: "おう", defaultKey: "p" },
   ];
 
-  for (const key of ["ん", "っ", "ー"] as const) {
+  for (const key of ["ん", "っ"] as const) {
     if (customRules[key]?.length) merged[key].azik = customRules[key];
+  }
+  // ー: custom key は追加ヴァリアント。"-" は常に残す（AZIKの目的はヴァリアント追加であって置換でない）
+  if (customRules["ー"]?.length) {
+    merged["ー"].azik = Array.from(new Set(["-", ...customRules["ー"]]));
   }
 
   const specialRules = ["こと", "もの", "する", "です", "ます", "という"];
