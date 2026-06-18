@@ -289,6 +289,11 @@ export default function Home() {
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
               <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.5.0</p>
+              <p className="flex justify-center gap-3">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSeX8QOLxetOJ9GgAiByaZGesA_EExHvHs07xmdX1gttuHsvVQ/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 hover:underline">FEEDBACK</a>
+                <span>|</span>
+                <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a>
+              </p>
             </div>
           </div>
         </FairyScreenLayout>

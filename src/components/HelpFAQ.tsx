@@ -286,6 +286,18 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
                 </ul>
               </div>
             ))}
+            <div className="border-t border-zinc-800 pt-4 text-center opacity-75">
+              <p className="mb-1">バグ報告・ご意見・ご要望はフィードバックフォームへ</p>
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSeX8QOLxetOJ9GgAiByaZGesA_EExHvHs07xmdX1gttuHsvVQ/viewform?usp=publish-editor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-400 hover:underline font-pixel"
+              >
+                SEND FEEDBACK
+              </a>
+              <p className="mt-1 text-zinc-600">（Googleフォームが開きます）</p>
+            </div>
           </div>
         )}
 
