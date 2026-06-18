@@ -228,7 +228,7 @@ export function filterStageWords(stage: StageData): StageData {
  * これにより っかん(;kz) が Lev2a ステージで「対象あり」と正しく判定される。
  */
 export function containsTargetLevel(pattern: string, target: AzikLevel): boolean {
-  const core = pattern.startsWith(";") ? pattern.slice(1) : pattern;
+  const core = (pattern.startsWith(";") && pattern.length > 1) ? pattern.slice(1) : pattern;
   return classifyAzikKey(core) === target;
 }
 
@@ -247,7 +247,7 @@ export function isTargetSegment(
     const stageOrd = levelOrdinal(stageLevel);
     const lev1aOrd = levelOrdinal(AzikLevel.Lev1a);
     return seg.azik.some(pattern => {
-      const core = pattern.startsWith(";") ? pattern.slice(1) : pattern;
+      const core = (pattern.startsWith(";") && pattern.length > 1) ? pattern.slice(1) : pattern;
       const ord = levelOrdinal(classifyAzikKey(core));
       return ord >= lev1aOrd && ord <= stageOrd;
     });

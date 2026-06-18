@@ -7,8 +7,10 @@ import {
   canWordAppearAtLevel,
   findMinimumLevel,
   filterStageWords,
+  containsTargetLevel,
+  isTargetSegment,
 } from "./wordValidator";
-import type { StageData } from "../azikRules";
+import type { StageData, AzikSegment } from "../azikRules";
 import { AZIK_DICTIONARY } from "../azikRules";
 
 describe("wordValidator", () => {
@@ -273,6 +275,100 @@ describe("wordValidator", () => {
       expect(findMinimumLevel("こと")).toBe(AzikLevel.Lev4);
       expect(findMinimumLevel("もの")).toBe(AzikLevel.Lev4);
       expect(findMinimumLevel("する")).toBe(AzikLevel.Lev4);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // containsTargetLevel
+  // ---------------------------------------------------------------
+  describe("containsTargetLevel", () => {
+    it("matches plain pattern to exact target level", () => {
+      expect(containsTargetLevel("kz", AzikLevel.Lev2a)).toBe(true);
+      expect(containsTargetLevel("kp", AzikLevel.Lev2b)).toBe(true);
+      expect(containsTargetLevel("q",  AzikLevel.Lev1b)).toBe(true);
+      expect(containsTargetLevel(";",  AzikLevel.Lev1a)).toBe(true);
+    });
+
+    it("returns false when pattern level does not match target", () => {
+      expect(containsTargetLevel("kz", AzikLevel.Lev2b)).toBe(false);
+      expect(containsTargetLevel("kp", AzikLevel.Lev2a)).toBe(false);
+      expect(containsTargetLevel("ka", AzikLevel.Lev2a)).toBe(false);
+    });
+
+    it("strips leading ; from sokuon compound before classifying core", () => {
+      // ;kz = っかん → core kz is Lev2a
+      expect(containsTargetLevel(";kz", AzikLevel.Lev2a)).toBe(true);
+      expect(containsTargetLevel(";kz", AzikLevel.Lev1a)).toBe(false);
+      // ;ta = った → core ta is Lev0
+      expect(containsTargetLevel(";ta", AzikLevel.Lev0)).toBe(true);
+    });
+
+    it("bare ; (sokuon shortcut alone) classifies as Lev1a", () => {
+      expect(containsTargetLevel(";", AzikLevel.Lev1a)).toBe(true);
+      expect(containsTargetLevel(";", AzikLevel.Lev0)).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // isTargetSegment
+  // ---------------------------------------------------------------
+  describe("isTargetSegment", () => {
+    const seg = (azik: string[]): AzikSegment => ({ kana: "x", normal: ["x"], azik });
+
+    describe("non-summary stage", () => {
+      it("returns true when any azik pattern matches the stage level exactly", () => {
+        // Lev2a stage: kz should be a target
+        expect(isTargetSegment(seg(["kz"]), AzikLevel.Lev2a, false)).toBe(true);
+        // Lev1b stage: q should be a target
+        expect(isTargetSegment(seg(["q"]),  AzikLevel.Lev1b, false)).toBe(true);
+      });
+
+      it("returns false when no azik pattern matches the stage level", () => {
+        // Lev2a stage: plain ka is Lev0, not Lev2a
+        expect(isTargetSegment(seg(["ka"]), AzikLevel.Lev2a, false)).toBe(false);
+        // Lev2a stage: kp is Lev2b, not Lev2a
+        expect(isTargetSegment(seg(["kp"]), AzikLevel.Lev2a, false)).toBe(false);
+      });
+
+      it("returns true when one of multiple patterns matches (others may not)", () => {
+        // normal ka + azik kz — kz is Lev2a target
+        expect(isTargetSegment(seg(["ka", "kz"]), AzikLevel.Lev2a, false)).toBe(true);
+      });
+
+      it("handles sokuon compound patterns correctly", () => {
+        // ;kz = っかん — core kz is Lev2a
+        expect(isTargetSegment(seg([";kz"]), AzikLevel.Lev2a, false)).toBe(true);
+        expect(isTargetSegment(seg([";kz"]), AzikLevel.Lev1a, false)).toBe(false);
+      });
+    });
+
+    describe("summary stage", () => {
+      it("accepts patterns from Lev1a up to stageLevel (cumulative range)", () => {
+        // Summary at Lev2a: Lev1a/Lev1b/Lev1c/Lev1d/Lev2a all count
+        expect(isTargetSegment(seg([";"]),  AzikLevel.Lev2a, true)).toBe(true);  // Lev1a
+        expect(isTargetSegment(seg(["q"]),  AzikLevel.Lev2a, true)).toBe(true);  // Lev1b
+        expect(isTargetSegment(seg(["xa"]), AzikLevel.Lev2a, true)).toBe(true);  // Lev1c
+        expect(isTargetSegment(seg(["ca"]), AzikLevel.Lev2a, true)).toBe(true);  // Lev1d
+        expect(isTargetSegment(seg(["kz"]), AzikLevel.Lev2a, true)).toBe(true);  // Lev2a
+      });
+
+      it("rejects Lev0 patterns in summary stage (below Lev1a threshold)", () => {
+        expect(isTargetSegment(seg(["ka"]), AzikLevel.Lev2a, true)).toBe(false);
+      });
+
+      it("rejects patterns above stageLevel in summary stage", () => {
+        // Summary at Lev2a: kp is Lev2b > Lev2a → not a target
+        expect(isTargetSegment(seg(["kp"]), AzikLevel.Lev2a, true)).toBe(false);
+        // Summary at Lev1b: xa is Lev1c > Lev1b → not a target
+        expect(isTargetSegment(seg(["xa"]), AzikLevel.Lev1b, true)).toBe(false);
+      });
+
+      it("accepts sokuon compound in summary stage when core is in range", () => {
+        // ;kz core=kz=Lev2a, summary at Lev2a → in range
+        expect(isTargetSegment(seg([";kz"]), AzikLevel.Lev2a, true)).toBe(true);
+        // ;kz core=kz=Lev2a, summary at Lev1b (max=Lev1b < Lev2a) → out of range
+        expect(isTargetSegment(seg([";kz"]), AzikLevel.Lev1b, true)).toBe(false);
+      });
     });
   });
 
