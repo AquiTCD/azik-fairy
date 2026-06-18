@@ -36,7 +36,14 @@ function playTone(
   osc.stop(ctx.currentTime + startOffset + duration);
 }
 
-function playNoise(ctx: AudioContext, gainVal: number, duration: number, startOffset = 0) {
+function playNoise(
+  ctx: AudioContext,
+  gainVal: number,
+  duration: number,
+  startOffset = 0,
+  filterFreq = 1200,
+  filterQ = 0.5,
+) {
   const bufferSize = Math.floor(ctx.sampleRate * duration);
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -47,8 +54,8 @@ function playNoise(ctx: AudioContext, gainVal: number, duration: number, startOf
 
   const filter = ctx.createBiquadFilter();
   filter.type = "bandpass";
-  filter.frequency.value = 1200;
-  filter.Q.value = 0.5;
+  filter.frequency.value = filterFreq;
+  filter.Q.value = filterQ;
 
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(gainVal, ctx.currentTime + startOffset);
@@ -65,29 +72,18 @@ type ThemeSounds = Record<SoundEvent, (ctx: AudioContext) => void>;
 
 const SOUND_THEMES: Record<SoundThemeName, ThemeSounds> = {
   typewriter: {
-    correct: (ctx) => playNoise(ctx, 0.3, 0.04),
-    miss: (ctx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "square";
-      osc.frequency.setValueAtTime(80, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.08);
-    },
-    wordComplete: (ctx) => {
-      // 控えめなベル：少し重めの打鍵 + 短い余韻
-      playNoise(ctx, 0.25, 0.05);
-      playTone(ctx, "triangle", 1320, 0.05, 0.18, 0.04);
-    },
+    // タイプバーがプラテンを叩く音（高域バンドパス）
+    correct: (ctx) => playNoise(ctx, 0.3, 0.04, 0, 1200, 0.5),
+    // キーが詰まったときの重い打鍵（低域バンドパス）
+    miss: (ctx) => playNoise(ctx, 0.45, 0.07, 0, 250, 1.5),
+    // スペースバーの重い打鍵（中低域、より長い余韻）
+    wordComplete: (ctx) => playNoise(ctx, 0.4, 0.09, 0, 420, 2.0),
+    // キャリッジリターン: ラチェット音×7 → ドン
     stageClear: (ctx) => {
-      [1320, 1760, 2093, 2637].forEach((freq, i) => {
-        playTone(ctx, "triangle", freq, 0.1, 0.25, i * 0.15);
-      });
+      for (let i = 0; i < 7; i++) {
+        playNoise(ctx, 0.18, 0.022, i * 0.055, 700 + i * 40, 0.9);
+      }
+      playNoise(ctx, 0.4, 0.06, 0.42, 280, 1.8);
     },
   },
 
