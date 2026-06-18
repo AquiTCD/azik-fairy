@@ -255,6 +255,87 @@ export function isTargetSegment(
   return seg.azik.some(pattern => containsTargetLevel(pattern, stageLevel));
 }
 
+// -------------------------------------------------------------
+// ステージ純粋性チェック
+// Lev1/Lev2 ステージでは、お題以外のAZIKショートカットを含む語を汚染とみなす。
+// 許容: Lev0（基本ローマ字）/ Lev3a・3b・4（互換・語短縮）/ お題のショートカット
+// 汚染: 上記以外のすべてのAZIKショートカット（他ステージのお題を含む）
+// -------------------------------------------------------------
+
+/** ステージIDごとの純粋性ルール。ここにないステージはチェック対象外。 */
+export const STAGE_PURITY_RULES: Record<string, { targetLevel: AzikLevel; targetSuffix: string | null }> = {
+  "lev1-sha":   { targetLevel: AzikLevel.Lev1c, targetSuffix: null },
+  "lev1-cha":   { targetLevel: AzikLevel.Lev1d, targetSuffix: null },
+  "lev2a-an-z": { targetLevel: AzikLevel.Lev2a, targetSuffix: "z" },
+  "lev2a-in-k": { targetLevel: AzikLevel.Lev2a, targetSuffix: "k" },
+  "lev2a-un-j": { targetLevel: AzikLevel.Lev2a, targetSuffix: "j" },
+  "lev2a-en-d": { targetLevel: AzikLevel.Lev2a, targetSuffix: "d" },
+  "lev2a-on-l": { targetLevel: AzikLevel.Lev2a, targetSuffix: "l" },
+  "lev2b-ai-q": { targetLevel: AzikLevel.Lev2b, targetSuffix: "q" },
+  "lev2b-uu-h": { targetLevel: AzikLevel.Lev2b, targetSuffix: "h" },
+  "lev2b-ei-w": { targetLevel: AzikLevel.Lev2b, targetSuffix: "w" },
+  "lev2b-ou-p": { targetLevel: AzikLevel.Lev2b, targetSuffix: "p" },
+};
+
+/** キーが Lev0/互換（Lev3a/3b/4）かを返す — どのステージでも常に許容 */
+function isBaseKey(key: string): boolean {
+  const core = (key.startsWith(";") && key.length > 1) ? key.slice(1) : key;
+  const lv = classifyAzikKey(core);
+  return lv === AzikLevel.Lev0 || lv === AzikLevel.Lev3a || lv === AzikLevel.Lev3b || lv === AzikLevel.Lev4;
+}
+
+/** キーがお題ステージのターゲットショートカットかを返す */
+function isTargetKey(key: string, targetLevel: AzikLevel, targetSuffix: string | null): boolean {
+  const core = (key.startsWith(";") && key.length > 1) ? key.slice(1) : key;
+  const lv = classifyAzikKey(core);
+  if (lv !== targetLevel) return false;
+  if (targetSuffix === null) return true;
+  return core[core.length - 1] === targetSuffix;
+}
+
+/**
+ * セグメントが純粋かを返す
+ *
+ * pure の条件（いずれか）:
+ *   1. AZIK配列が空（基本ローマ字のみ）
+ *   2. ターゲットキーを持つ（FOCUSモードで正しく強制される）
+ *   3. ターゲットキーを持たないが、全AZIKキーが Lev0/互換 のみ
+ *
+ * ケース2に "sw" と "ss" が共存する例（せい）:
+ *   sw = Lev2b → ターゲット外, ss = Lev3b → 互換
+ *   ターゲットキーなし → ケース3 判定 → sw が Lev2b → pure = false（汚染）
+ */
+function isSegmentPure(
+  seg: AzikSegment,
+  targetLevel: AzikLevel,
+  targetSuffix: string | null,
+): boolean {
+  if (seg.azik.length === 0) return true;
+  if (seg.azik.some(k => isTargetKey(k, targetLevel, targetSuffix))) return true;
+  return seg.azik.every(isBaseKey);
+}
+
+/**
+ * 指定ステージにとって語が「純粋」かを返す
+ * STAGE_PURITY_RULES に登録されていないステージは常に true。
+ *
+ * 純粋 = 全セグメントが isSegmentPure を満たす。
+ * 汚染されたセグメントとは、「Lev0 / 互換 / お題ショートカット」以外の
+ * AZIKキーしか持たないセグメントのこと。
+ */
+export function isWordPureForStage(
+  kana: string,
+  stageId: string,
+  dictionary: Record<string, AzikMapping> = AZIK_DICTIONARY,
+): boolean {
+  const rule = STAGE_PURITY_RULES[stageId];
+  if (!rule) return true;
+  const segments = splitIntoAzikSegments(kana, dictionary);
+  return segments.every(seg => isSegmentPure(seg, rule.targetLevel, rule.targetSuffix));
+}
+
+// -------------------------------------------------------------
+
 /**
  * ステージIDに対応するAzikLevelを返すヘルパー
  * ステージJSONの azikLevel フィールドと対応
