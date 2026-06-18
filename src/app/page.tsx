@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { SoundThemeName } from "@/hooks/useAzikSound";
 import { getRandomAds } from "@/data/adData";
 import { calcStars, calcStreak, getNextStageId } from "@/utils/gameLogic";
 import { STAGES } from "@/data/stages";
@@ -22,7 +23,7 @@ export interface GameSettings {
   showTable: boolean;
   customRules: Record<string, string[]>; // { "ん": ["q"], "っ": [";", ":"], ... }
   keyboardLayout: "US" | "JIS";
-  soundEnabled: boolean;
+  soundTheme: SoundThemeName;
   wordsPerSession: number; // 0 = unlimited
   enableSpecial: boolean;   // 特殊拡張 (こと/もの/する/です/ます)
   enableForeign: boolean;   // 外来語拡張 (tgi/dci/tgu/dcu = てぃ/でぃ/とぅ/どぅ)
@@ -55,7 +56,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   showTable: true,
   customRules: {},
   keyboardLayout: "JIS",
-  soundEnabled: true,
+  soundTheme: "off" as SoundThemeName,
   wordsPerSession: 30,
   enableSpecial: true,
   enableForeign: true,
@@ -102,6 +103,11 @@ export default function Home() {
             else if (Array.isArray(v)) migrated[k] = v as string[];
           }
           parsed.customRules = migrated;
+        }
+        // Migrate soundEnabled: boolean → soundTheme: SoundThemeName
+        if (typeof parsed.soundEnabled === "boolean") {
+          parsed.soundTheme = parsed.soundEnabled ? "default" : "off";
+          delete parsed.soundEnabled;
         }
         setSettings({ ...DEFAULT_SETTINGS, ...parsed });
       } catch (e) {

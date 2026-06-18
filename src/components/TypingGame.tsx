@@ -11,8 +11,7 @@ import { GameStats } from "@/types/game";
 import { getRank } from "@/utils/gameLogic";
 import KeyboardDiagram from "./KeyboardDiagram";
 import GameButton from "./GameButton";
-import { useAzikSound } from "@/hooks/useAzikSound";
-import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
+import { useAzikSound, SoundThemeName } from "@/hooks/useAzikSound";
 import resultComments from "../../public/data/result_comments.json";
 
 interface TypingGameProps {
@@ -135,7 +134,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     ],
   });
 
-  const { playMiss, playCorrect } = useAzikSound(settings.soundEnabled);
+  const { playCorrect, playMiss, playWordComplete, playGameStart, playButton, playStageClear } = useAzikSound(settings.soundTheme);
 
   const getRandomQuote = (category: keyof typeof fairyQuotes.current) => {
     const quotes = fairyQuotes.current[category];
@@ -256,6 +255,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       if (startTime === null) {
         currentStartTime = Date.now();
         setStartTime(currentStartTime);
+        playGameStart();
         setFairyMessage(getRandomQuote("start"));
         setFairyEmotion("excited"); // 初打鍵 → やる気モード
       }
@@ -324,6 +324,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
             setSegmentIndex(0);
 
             if (nextWordIndex >= words.length) {
+              playStageClear();
               const totalTime = Math.max((Date.now() - (currentStartTime || Date.now())) / 1000, 1);
               const totalKeys = totalCorrectKeys + 1;
               const accuracy = Math.round((totalKeys / (totalKeys + totalMissKeys)) * 100);
@@ -352,6 +353,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
                setFairyEmotion(rankEmotion);
                setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId, savedKeys });
             } else {
+              playWordComplete();
               setFairyMessage(getRandomQuote("correctWord"));
               setFairyEmotion("happy"); // 1単語クリア → 喜び
             }
@@ -600,21 +602,26 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </div>
         )}
 
-        {/* 戻るボタン + 音声トグル */}
+        {/* 戻るボタン + サウンドテーマ選択 */}
         <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             STAGE SELECT
           </GameButton>
-          <button
-            onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
-            title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
-            className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
-          >
-            {settings.soundEnabled
-              ? <SpeakerHigh size={18} weight="bold" />
-              : <SpeakerSlash size={18} weight="bold" />
-            }
-          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-pixel text-zinc-500">SFX:</span>
+            <select
+              value={settings.soundTheme}
+              onChange={e => {
+                playButton();
+                onUpdateSettings({ ...settings, soundTheme: e.target.value as SoundThemeName });
+              }}
+              className="text-[10px] font-pixel bg-zinc-800 border border-zinc-700 text-zinc-400 rounded px-1.5 py-1 hover:border-green-700 focus:outline-none transition-colors duration-150 cursor-pointer"
+            >
+              {(["off", "default", "typewriter", "8bit", "soft"] as SoundThemeName[]).map(t => (
+                <option key={t} value={t}>{t.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
