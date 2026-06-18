@@ -23,6 +23,7 @@ export interface GameSettings {
   showTable: boolean;
   customRules: Record<string, string[]>; // { "ん": ["q"], "っ": [";", ":"], ... }
   keyboardLayout: "US" | "JIS";
+  soundEnabled: boolean;
   soundTheme: SoundThemeName;
   wordsPerSession: number; // 0 = unlimited
   enableSpecial: boolean;   // 特殊拡張 (こと/もの/する/です/ます)
@@ -56,7 +57,8 @@ const DEFAULT_SETTINGS: GameSettings = {
   showTable: true,
   customRules: {},
   keyboardLayout: "JIS",
-  soundTheme: "off" as SoundThemeName,
+  soundEnabled: false,
+  soundTheme: "soft" as SoundThemeName,
   wordsPerSession: 30,
   enableSpecial: true,
   enableForeign: true,
@@ -104,10 +106,13 @@ export default function Home() {
           }
           parsed.customRules = migrated;
         }
-        // Migrate soundEnabled: boolean → soundTheme: SoundThemeName
-        if (typeof parsed.soundEnabled === "boolean") {
-          parsed.soundTheme = parsed.soundEnabled ? "default" : "off";
-          delete parsed.soundEnabled;
+        // Migrate old soundTheme:"off"/"default" → soundEnabled + soundTheme split
+        if (parsed.soundTheme === "off") {
+          parsed.soundEnabled = false;
+          parsed.soundTheme = "soft";
+        } else if (parsed.soundTheme === "default") {
+          parsed.soundEnabled = true;
+          parsed.soundTheme = "soft";
         }
         setSettings({ ...DEFAULT_SETTINGS, ...parsed });
       } catch (e) {

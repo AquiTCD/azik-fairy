@@ -11,7 +11,8 @@ import { GameStats } from "@/types/game";
 import { getRank } from "@/utils/gameLogic";
 import KeyboardDiagram from "./KeyboardDiagram";
 import GameButton from "./GameButton";
-import { useAzikSound, SoundThemeName } from "@/hooks/useAzikSound";
+import { useAzikSound } from "@/hooks/useAzikSound";
+import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import resultComments from "../../public/data/result_comments.json";
 
 interface TypingGameProps {
@@ -134,7 +135,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     ],
   });
 
-  const { playCorrect, playMiss, playWordComplete, playGameStart, playButton, playStageClear } = useAzikSound(settings.soundTheme);
+  const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
 
   const getRandomQuote = (category: keyof typeof fairyQuotes.current) => {
     const quotes = fairyQuotes.current[category];
@@ -255,7 +256,6 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       if (startTime === null) {
         currentStartTime = Date.now();
         setStartTime(currentStartTime);
-        playGameStart();
         setFairyMessage(getRandomQuote("start"));
         setFairyEmotion("excited"); // 初打鍵 → やる気モード
       }
@@ -313,10 +313,10 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         const isCompleted = allowedPatterns.includes(nextBuffer);
 
         if (isCompleted) {
-          playCorrect();
           setInputBuffer("");
 
           if (segmentIndex + 1 < currentWord.segments.length) {
+            playCorrect();
             setSegmentIndex(prev => prev + 1);
           } else {
             const nextWordIndex = wordIndex + 1;
@@ -602,26 +602,21 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </div>
         )}
 
-        {/* 戻るボタン + サウンドテーマ選択 */}
+        {/* 戻るボタン + 音声ON/OFFトグル */}
         <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             STAGE SELECT
           </GameButton>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-pixel text-zinc-500">SFX:</span>
-            <select
-              value={settings.soundTheme}
-              onChange={e => {
-                playButton();
-                onUpdateSettings({ ...settings, soundTheme: e.target.value as SoundThemeName });
-              }}
-              className="text-[10px] font-pixel bg-zinc-800 border border-zinc-700 text-zinc-400 rounded px-1.5 py-1 hover:border-green-700 focus:outline-none transition-colors duration-150 cursor-pointer"
-            >
-              {(["off", "default", "typewriter", "8bit", "soft"] as SoundThemeName[]).map(t => (
-                <option key={t} value={t}>{t.toUpperCase()}</option>
-              ))}
-            </select>
-          </div>
+          <button
+            onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+            title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
+            className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
+          >
+            {settings.soundEnabled
+              ? <SpeakerHigh size={18} weight="bold" />
+              : <SpeakerSlash size={18} weight="bold" />
+            }
+          </button>
         </div>
       </div>
 

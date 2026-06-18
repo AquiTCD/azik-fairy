@@ -293,23 +293,33 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
               <div className="flex justify-between items-start gap-4">
                 <span className="font-bold text-sm md:text-base tracking-wider">SOUND THEME:</span>
                 <div className="flex gap-2 flex-wrap justify-end">
-                  {(["off", "default", "typewriter", "8bit", "soft"] as SoundThemeName[]).map(t => (
+                  <button
+                    onClick={() => onUpdateSettings({ ...settings, soundEnabled: false })}
+                    className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
+                      !settings.soundEnabled
+                        ? "bg-green-500 text-black border-green-500"
+                        : "bg-zinc-700 text-green-400 border-green-500"
+                    }`}
+                  >
+                    OFF
+                  </button>
+                  {(["soft", "8bit", "typewriter"] as SoundThemeName[]).map(t => (
                     <button
                       key={t}
-                      onClick={() => onUpdateSettings({ ...settings, soundTheme: t })}
+                      onClick={() => onUpdateSettings({ ...settings, soundEnabled: true, soundTheme: t })}
                       className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                        settings.soundTheme === t
+                        settings.soundEnabled && settings.soundTheme === t
                           ? "bg-green-500 text-black border-green-500"
                           : "bg-zinc-700 text-green-400 border-green-500"
                       }`}
                     >
-                      {t.toUpperCase()}
+                      {t === "typewriter" ? "TYPE" : t.toUpperCase()}
                     </button>
                   ))}
                 </div>
               </div>
               <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-                効果音のテーマを選択します。OFFで無音。DEFAULT / TYPEWRITER / 8BIT / SOFT の4種類から選択できます。
+                効果音のテーマを選択します。OFF / SOFT / 8BIT / TYPE の4種類。ゲーム画面からもON/OFFのみ切り替え可能です。
               </p>
             </div>
 

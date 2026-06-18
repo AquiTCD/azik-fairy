@@ -12,9 +12,9 @@ function getCtx(): AudioContext | null {
   }
 }
 
-export type SoundThemeName = "off" | "default" | "typewriter" | "8bit" | "soft";
+export type SoundThemeName = "soft" | "8bit" | "typewriter";
 
-type SoundEvent = "correct" | "miss" | "wordComplete" | "gameStart" | "button" | "countdown" | "stageClear";
+type SoundEvent = "correct" | "miss" | "wordComplete" | "stageClear";
 
 function playTone(
   ctx: AudioContext,
@@ -63,28 +63,7 @@ function playNoise(ctx: AudioContext, gainVal: number, duration: number, startOf
 
 type ThemeSounds = Record<SoundEvent, (ctx: AudioContext) => void>;
 
-const SOUND_THEMES: Record<Exclude<SoundThemeName, "off">, ThemeSounds> = {
-  default: {
-    correct: (ctx) => playTone(ctx, "sine", 880, 0.08, 0.06),
-    miss: (ctx) => playTone(ctx, "square", 110, 0.15, 0.12),
-    wordComplete: (ctx) => {
-      playTone(ctx, "sine", 880, 0.06, 0.07);
-      playTone(ctx, "sine", 1100, 0.06, 0.07, 0.07);
-      playTone(ctx, "sine", 1320, 0.08, 0.12, 0.14);
-    },
-    gameStart: (ctx) => {
-      playTone(ctx, "sine", 440, 0.06, 0.07);
-      playTone(ctx, "sine", 660, 0.06, 0.07, 0.08);
-    },
-    button: (ctx) => playTone(ctx, "triangle", 440, 0.06, 0.05),
-    countdown: (ctx) => playTone(ctx, "triangle", 660, 0.06, 0.05),
-    stageClear: (ctx) => {
-      [523, 659, 784, 1047].forEach((freq, i) => {
-        playTone(ctx, "sine", freq, 0.08, 0.15, i * 0.12);
-      });
-    },
-  },
-
+const SOUND_THEMES: Record<SoundThemeName, ThemeSounds> = {
   typewriter: {
     correct: (ctx) => playNoise(ctx, 0.3, 0.04),
     miss: (ctx) => {
@@ -101,26 +80,10 @@ const SOUND_THEMES: Record<Exclude<SoundThemeName, "off">, ThemeSounds> = {
       osc.stop(ctx.currentTime + 0.08);
     },
     wordComplete: (ctx) => {
-      // チン！ bell
-      playTone(ctx, "triangle", 1760, 0.12, 0.4);
-      playTone(ctx, "sine", 3520, 0.04, 0.3);
+      // 控えめなベル：少し重めの打鍵 + 短い余韻
+      playNoise(ctx, 0.25, 0.05);
+      playTone(ctx, "triangle", 1320, 0.05, 0.18, 0.04);
     },
-    gameStart: (ctx) => {
-      // carriage return sweep
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "square";
-      osc.frequency.setValueAtTime(200, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.25);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.25);
-    },
-    button: (ctx) => playNoise(ctx, 0.2, 0.03),
-    countdown: (ctx) => playNoise(ctx, 0.15, 0.025),
     stageClear: (ctx) => {
       [1320, 1760, 2093, 2637].forEach((freq, i) => {
         playTone(ctx, "triangle", freq, 0.1, 0.25, i * 0.15);
@@ -148,13 +111,6 @@ const SOUND_THEMES: Record<Exclude<SoundThemeName, "off">, ThemeSounds> = {
       playTone(ctx, "square", 988, 0.08, 0.06);
       playTone(ctx, "square", 1319, 0.1, 0.1, 0.06);
     },
-    gameStart: (ctx) => {
-      [330, 440, 523, 659].forEach((freq, i) => {
-        playTone(ctx, "square", freq, 0.08, 0.07, i * 0.07);
-      });
-    },
-    button: (ctx) => playTone(ctx, "square", 440, 0.07, 0.03),
-    countdown: (ctx) => playTone(ctx, "square", 660, 0.08, 0.04),
     stageClear: (ctx) => {
       [523, 659, 784, 659, 784, 1047].forEach((freq, i) => {
         playTone(ctx, "square", freq, 0.1, 0.1, i * 0.1);
@@ -170,22 +126,6 @@ const SOUND_THEMES: Record<Exclude<SoundThemeName, "off">, ThemeSounds> = {
       playTone(ctx, "sine", 988, 0.05, 0.12, 0.1);
       playTone(ctx, "sine", 1175, 0.05, 0.18, 0.2);
     },
-    gameStart: (ctx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(440, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.2);
-    },
-    button: (ctx) => playTone(ctx, "sine", 880, 0.04, 0.05),
-    countdown: (ctx) => playTone(ctx, "sine", 660, 0.04, 0.06),
     stageClear: (ctx) => {
       [523, 659, 784, 880, 1046].forEach((freq, i) => {
         playTone(ctx, "sine", freq, 0.05, 0.18, i * 0.1);
@@ -194,7 +134,7 @@ const SOUND_THEMES: Record<Exclude<SoundThemeName, "off">, ThemeSounds> = {
   },
 };
 
-export function useAzikSound(theme: SoundThemeName) {
+export function useAzikSound(theme: SoundThemeName | "off") {
   const play = (event: SoundEvent) => {
     if (theme === "off") return;
     const ctx = getCtx();
@@ -210,9 +150,6 @@ export function useAzikSound(theme: SoundThemeName) {
     playCorrect: () => play("correct"),
     playMiss: () => play("miss"),
     playWordComplete: () => play("wordComplete"),
-    playGameStart: () => play("gameStart"),
-    playButton: () => play("button"),
-    playCountdown: () => play("countdown"),
     playStageClear: () => play("stageClear"),
   };
 }
