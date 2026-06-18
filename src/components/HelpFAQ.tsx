@@ -16,9 +16,9 @@ const CHANGELOG = [
     version: "v1.4.0",
     date: "2026-06-18",
     items: [
-      "入力モード制御を刷新",
-      "ステージを整理",
-      "SNS(X)シェアを改善",
+      "TRAINING / CHALLENGE 入力モードを導入",
+      "ステージ構成と表示を整理",
+      "X（Twitter）シェア機能を改善",
     ],
   },
   {
