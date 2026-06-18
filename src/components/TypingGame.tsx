@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment } from "@/data/stages/wordValidator";
+import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment } from "@/data/stages/wordValidator";
 import { GameSettings } from "@/app/page";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -270,16 +270,33 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
       const allowedPatterns = (() => {
         if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
-        if (settings.isFullTraining || isPracticeOrChallenge) return currentSeg.azik;
-        // FOCUS training: Lev1-4 ステージ対象レベルのセグメントのみ AZIK 必須
+
         const stageLevel = STAGE_MAX_LEVELS[stageId];
-        if (!stageLevel || stageLevel === AzikLevel.Practice) {
+        // Practice/Challenge/未登録ステージは制限なし
+        if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
           return currentSeg.azik;
         }
+
         const isSummaryStage = stageId.includes("summary");
-        return isTargetSegment(currentSeg, stageLevel, isSummaryStage)
-          ? currentSeg.azik
-          : [...currentSeg.normal, ...currentSeg.azik];
+        const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
+
+        if (!isTarget) {
+          // 非対象セグメント: ALL は AZIK 必須、FOCUS は normal 許可
+          return settings.isFullTraining
+            ? currentSeg.azik
+            : [...currentSeg.normal, ...currentSeg.azik];
+        }
+
+        // 対象セグメント: まとめ以外はステージレベルのキーのみ許可（Lev0 の代替キーを除外）
+        if (!isSummaryStage) {
+          const targetKeys = currentSeg.azik.filter(k => {
+            const core = k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
+            return classifyAzikKey(core) === stageLevel;
+          });
+          if (targetKeys.length > 0) return targetKeys;
+        }
+
+        return currentSeg.azik;
       })();
       const nextBuffer = inputBuffer + key;
       const isValidPrefix = allowedPatterns.some(pattern => pattern.startsWith(nextBuffer));
