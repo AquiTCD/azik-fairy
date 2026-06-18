@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment } from "@/data/stages/wordValidator";
+import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment, STAGE_KEY_PREDS } from "@/data/stages/wordValidator";
 import { GameSettings } from "@/app/page";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -272,30 +272,35 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
 
         const stageLevel = STAGE_MAX_LEVELS[stageId];
-        // Practice/Challenge/未登録ステージは制限なし
         if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
           return currentSeg.azik;
         }
 
         const isSummaryStage = stageId.includes("summary");
-        const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
+        const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
 
-        if (!isTarget) {
-          // 非対象セグメント: ALL は AZIK 必須、FOCUS は normal 許可
+        // Lev3a/Lev3b 非まとめ: サブステージ専用述語で判定（isTargetSegment をバイパス）
+        const stagePred = STAGE_KEY_PREDS[stageId];
+        if (!isSummaryStage && stagePred) {
+          const targetKeys = currentSeg.azik.filter(k => stagePred(getCore(k)));
+          if (targetKeys.length > 0) return targetKeys;
+          // このサブパターンのターゲットキーなし → 非対象セグメント
           return settings.isFullTraining
             ? currentSeg.azik
             : [...currentSeg.normal, ...currentSeg.azik];
         }
 
-        // 対象セグメント: まとめ以外はステージレベルのキーのみ許可（Lev0 の代替キーを除外）
+        // Lev1/Lev2 / まとめステージ: AzikLevel ベース
+        const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
+        if (!isTarget) {
+          return settings.isFullTraining
+            ? currentSeg.azik
+            : [...currentSeg.normal, ...currentSeg.azik];
+        }
         if (!isSummaryStage) {
-          const targetKeys = currentSeg.azik.filter(k => {
-            const core = k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
-            return classifyAzikKey(core) === stageLevel;
-          });
+          const targetKeys = currentSeg.azik.filter(k => classifyAzikKey(getCore(k)) === stageLevel);
           if (targetKeys.length > 0) return targetKeys;
         }
-
         return currentSeg.azik;
       })();
       const nextBuffer = inputBuffer + key;

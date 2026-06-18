@@ -256,6 +256,51 @@ export function isTargetSegment(
 }
 
 // -------------------------------------------------------------
+// サブステージ専用キー判別
+// Lev3a/Lev3b は同一 AzikLevel 内に複数サブパターンを持つため、
+// ステージIDごとにターゲットキーを判別する述語を定義する。
+// allowedPatterns フィルターとボキャブラリー検証の両方で使用する。
+// -------------------------------------------------------------
+
+/** コアキー文字列がステージのターゲットパターンに一致するか判別する述語 */
+export type StageKeyPredicate = (core: string) => boolean;
+
+/**
+ * ステージIDごとのターゲットキー判別述語。
+ * ここにないステージは AzikLevel ベースのフィルターを使う。
+ */
+export const STAGE_KEY_PREDS: Record<string, StageKeyPredicate> = {
+  "lev3a-chouon-colon": (k) => k === ":",
+  "lev3a-g-youon":      (k) => k.length >= 3 && k[1] === "g",
+  "lev3a-compat-f":     (k) => k.length === 2 && k[1] === "f",
+  "lev3b-zc-zf-za-ze":  (k) => k === "zc" || k === "zf",
+  "lev3b-zv-zx-zai-zei":(k) => k === "zv" || k === "zx",
+  "lev3b-sf-ss-sai-sei": (k) => k === "sf" || k === "ss",
+};
+
+/**
+ * 語がそのステージのターゲットキーを一つ以上含むか返す。
+ * Lev3a/Lev3b サブステージ向け: STAGE_KEY_PREDS に登録されていないステージは常に true。
+ *
+ * 用途: lev3a-compat-f に G代用語しか含まない語（例: きょく）を除外する。
+ */
+export function hasWordTargetKey(
+  kana: string,
+  stageId: string,
+  dictionary: Record<string, AzikMapping> = AZIK_DICTIONARY,
+): boolean {
+  const pred = STAGE_KEY_PREDS[stageId];
+  if (!pred) return true;
+  const segments = splitIntoAzikSegments(kana, dictionary);
+  return segments.some(seg =>
+    seg.azik.some(k => {
+      const core = (k.startsWith(";") && k.length > 1) ? k.slice(1) : k;
+      return pred(core);
+    }),
+  );
+}
+
+// -------------------------------------------------------------
 // ステージ純粋性チェック
 // Lev1/Lev2 ステージでは、お題以外のAZIKショートカットを含む語を汚染とみなす。
 // 許容: Lev0（基本ローマ字）/ Lev3a・3b・4（互換・語短縮）/ お題のショートカット
