@@ -32,13 +32,13 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
   );
 
   const categories = [
-    { id: "Lev1",      label: "基礎",  sub: "単打拡張" },
-    { id: "Lev2a",    label: "応用①", sub: "撥音" },
-    { id: "Lev2b",    label: "応用②", sub: "二重母音" },
-    { id: "Lev3a",    label: "発展①", sub: "互換I" },
-    { id: "Lev3b",    label: "発展②", sub: "互換II" },
-    { id: "Lev4",     label: "特殊",  sub: "語短縮" },
-    { id: "Practice", label: "挑戦",  sub: "実戦・お題" },
+    { id: "Lev1",     label: "単打",    sub: "っ/ん/シャ/チャ" },
+    { id: "Lev2a",   label: "撥音",    sub: "○ん拡張" },
+    { id: "Lev2b",   label: "二重母音", sub: "○い/○う拡張" },
+    { id: "Lev3a",   label: "互換I",   sub: "長音/G/F" },
+    { id: "Lev3b",   label: "互換II",  sub: "ZC/ZF/SF..." },
+    { id: "Lev4",    label: "語短縮",   sub: "こと/もの..." },
+    { id: "Practice", label: "挑戦",   sub: "実戦・お題" },
   ] as const;
 
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -130,18 +130,18 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
             : "bg-zinc-900 border-zinc-700 opacity-40 cursor-not-allowed"
         }`}
       >
-        <div className="flex items-center justify-between w-full mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs px-2 py-0.5 bg-green-500 text-black font-bold group-hover:bg-black group-hover:text-green-500">
-              <span className="font-sans">{badgeLabel}</span><span className="font-sans">-{subIdx + 1}</span>
-            </span>
-            <span className="text-lg font-bold tracking-wider font-sans">{stage.name}</span>
-          </div>
+        <div className="flex items-center justify-between w-full mb-1">
+          <span className="text-xs px-2 py-0.5 bg-green-500 text-black font-bold font-sans group-hover:bg-black group-hover:text-green-500">
+            {badgeLabel}-{subIdx + 1}
+          </span>
           {stageProg && (
             <span className="text-yellow-400 font-bold font-pixel group-hover:text-yellow-900 text-sm">
               {"★".repeat(stageProg.stars) + "☆".repeat(3 - stageProg.stars)}
             </span>
           )}
+        </div>
+        <div className="w-full mb-2">
+          <span className="text-lg font-bold tracking-wider font-sans">{stage.name}</span>
         </div>
         <p className="text-xs opacity-80 leading-relaxed font-sans text-zinc-300 group-hover:text-zinc-900 flex-grow mb-2">
           {stage.description}

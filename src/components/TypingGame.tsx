@@ -448,7 +448,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       wide
       fairy={{ message: fairyMessage, emotion: fairyEmotion }}
       fairyHeaderSlot={stage ? (
-        <div className="h-7 flex items-center justify-center text-[10px] font-pixel text-green-400 border border-green-800 bg-zinc-950 px-2 rounded leading-none whitespace-nowrap overflow-hidden">
+        <div className="h-7 flex items-center justify-center text-[10px] font-sans text-green-400 border border-green-800 bg-zinc-950 px-2 rounded leading-none whitespace-nowrap overflow-hidden">
           {stage.name}
         </div>
       ) : undefined}
