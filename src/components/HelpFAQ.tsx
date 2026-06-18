@@ -13,6 +13,18 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.4.0",
+    date: "2026-06-18",
+    items: [
+      "TRAINING / CHALLENGE モードを導入し、入力モード制御を刷新（Lev1〜4 は常に TRAINING、実戦・お題は切り替え可）",
+      "TRAINING モード内に FOCUS（対象レベルのみ AZIK 必須）と FULL（全セグメント AZIK 必須）のサブモードを追加",
+      "カテゴリ名・ステージ表示を整理し、バッジとタイトルを分離、フォントを統一",
+      "「語尾互換 [F]」（kf/df/nf/hf/mf/yf/jf）レッスンを新規追加",
+      "WeatherTyping 形式の単語リストを既存ステージにマージし、練習語彙を大幅拡充",
+      "X（Twitter）シェア時にトレーニング結果（ステージ名・ランク）も送信するよう改善",
+    ],
+  },
+  {
     version: "v1.3.0",
     date: "2026-06-17",
     items: [
