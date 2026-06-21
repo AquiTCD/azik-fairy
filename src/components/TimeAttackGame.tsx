@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { TypingWord, createTypingWord, AzikSegment, mergeCustomAzikRules } from "@/data/azikRules";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { TypingWord, AzikSegment, createTypingWord, mergeCustomAzikRules } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { GameSettings, TimeAttackBest } from "@/types/game";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import GameButton from "@/components/GameButton";
 import { buildTimeAttackTweetUrl } from "@/utils/tweetUtils";
 import XIcon from "@/components/XIcon";
+import { useTypingInput } from "@/hooks/useTypingInput";
 
 const TIME_LIMIT = 60;
 const WORDS_BUFFER = 60;
@@ -21,17 +22,11 @@ interface TimeAttackGameProps {
 
 export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }: TimeAttackGameProps) {
   const [words, setWords] = useState<TypingWord[]>([]);
-  const [wordIndex, setWordIndex] = useState(0);
-  const [segmentIndex, setSegmentIndex] = useState(0);
-  const [inputBuffer, setInputBuffer] = useState("");
-  const [totalCorrectKeys, setTotalCorrectKeys] = useState(0);
-  const [missCount, setMissCount] = useState(0);
   const [completedWordCount, setCompletedWordCount] = useState(0);
-  const [startTime, setStartTime] = useState<number | null>(null);
   const [remaining, setRemaining] = useState(TIME_LIMIT);
   const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState<{ wpm: number; accuracy: number } | null>(null);
-  const [isWiggling, setIsWiggling] = useState(false);
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const totalKeysRef = useRef(0);
   const missCountRef = useRef(0);
@@ -43,46 +38,84 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
     nAlternative: settings.nAlternative,
   }), [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative]);
 
-  const loadWords = async (): Promise<TypingWord[]> => {
+  const loadWords = useCallback(async (): Promise<TypingWord[]> => {
     const stage = await loadStage("practice-words-1");
     const shuffled = [...stage.words].sort(() => Math.random() - 0.5).slice(0, WORDS_BUFFER);
     return shuffled.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
-  };
+  }, [customDictionary]);
 
-  const resetGame = () => {
-    setIsFinished(false);
-    setResult(null);
-    setStartTime(null);
-    setRemaining(TIME_LIMIT);
-    setWordIndex(0);
-    setSegmentIndex(0);
-    setInputBuffer("");
-    setTotalCorrectKeys(0);
-    setMissCount(0);
-    setCompletedWordCount(0);
-    totalKeysRef.current = 0;
-    missCountRef.current = 0;
-    completedCharsRef.current = 0;
-    loadWords().then(setWords);
-  };
-
-  useEffect(() => {
-    loadWords().then(setWords);
-  }, []);
-
-  const finish = (keys: number, misses: number, elapsed: number) => {
+  const finish = useCallback((keys: number, misses: number, elapsed: number) => {
     const wpm = Math.round((keys / Math.max(elapsed, 1)) * 60);
     const accuracy = keys + misses > 0 ? Math.round((keys / (keys + misses)) * 100) : 100;
     const r = { wpm, accuracy };
     setResult(r);
     setIsFinished(true);
     onFinish(r);
-  };
+  }, [onFinish]);
+
+  const getAllowedPatterns = useCallback((seg: AzikSegment) => seg.azik, []);
+
+  const onCorrectKey = useCallback(() => {
+    totalKeysRef.current += 1;
+  }, []);
+
+  const onMissKey = useCallback(() => {
+    missCountRef.current += 1;
+  }, []);
+
+  // words を ref で持つことで onWordComplete クロージャが常に最新を参照できる
+  const wordsStateRef = useRef(words);
+  wordsStateRef.current = words;
+
+  const onWordComplete = useCallback((completedWordIdx: number) => {
+    const ws = wordsStateRef.current;
+    const completedWord = ws[completedWordIdx];
+    completedCharsRef.current += completedWord?.segments.length ?? 0;
+    setCompletedWordCount(prev => prev + 1);
+    if (completedWordIdx + 1 >= ws.length) {
+      loadWords().then(extra => setWords(prev => [...prev, ...extra]));
+    }
+  }, [loadWords]);
+
+  const {
+    wordIndex,
+    segmentIndex,
+    inputBuffer,
+    totalCorrectKeys,
+    totalMissKeys,
+    isWiggling,
+    startedAt,
+    reset: hookReset,
+  } = useTypingInput({
+    words,
+    getAllowedPatterns,
+    disabled: isFinished,
+    wiggleOnMiss: true,
+    onCorrectKey,
+    onMissKey,
+    onWordComplete,
+  });
+
+  const resetGame = useCallback(() => {
+    hookReset();
+    setIsFinished(false);
+    setResult(null);
+    setRemaining(TIME_LIMIT);
+    setCompletedWordCount(0);
+    totalKeysRef.current = 0;
+    missCountRef.current = 0;
+    completedCharsRef.current = 0;
+    loadWords().then(setWords);
+  }, [hookReset, loadWords]);
 
   useEffect(() => {
-    if (!startTime || isFinished) return;
+    loadWords().then(setWords);
+  }, [loadWords]);
+
+  useEffect(() => {
+    if (!startedAt || isFinished) return;
     timerRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
+      const elapsed = (Date.now() - startedAt) / 1000;
       const rem = Math.max(0, TIME_LIMIT - elapsed);
       setRemaining(rem);
       if (rem <= 0) {
@@ -91,66 +124,15 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
       }
     }, 100);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [startTime, isFinished]);
+  }, [startedAt, isFinished, finish]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) return;
-      if (words.length === 0 || isFinished) return;
-
-      if (!startTime) setStartTime(Date.now());
-
-      const key = e.key.toLowerCase();
-      const currentWord = words[wordIndex];
-      if (!currentWord) return;
-      const currentSeg: AzikSegment = currentWord.segments[segmentIndex];
-
-      // タイムアタックは常時 AZIK strict
-      const allowedPatterns = currentSeg.azik;
-      const nextBuffer = inputBuffer + key;
-      const isValidPrefix = allowedPatterns.some(p => p.startsWith(nextBuffer));
-
-      if (isValidPrefix) {
-        setInputBuffer(nextBuffer);
-        totalKeysRef.current += 1;
-        setTotalCorrectKeys(prev => prev + 1);
-
-        if (allowedPatterns.includes(nextBuffer)) {
-          setInputBuffer("");
-          if (segmentIndex + 1 < currentWord.segments.length) {
-            setSegmentIndex(prev => prev + 1);
-          } else {
-            completedCharsRef.current += currentWord.segments.length;
-            setCompletedWordCount(prev => prev + 1);
-            const nextWordIndex = wordIndex + 1;
-            if (nextWordIndex >= words.length) {
-              // バッファ切れ: 追加ロード
-              loadWords().then(extra => setWords(prev => [...prev, ...extra]));
-            }
-            setWordIndex(nextWordIndex);
-            setSegmentIndex(0);
-          }
-        }
-      } else {
-        missCountRef.current += 1;
-        setMissCount(prev => prev + 1);
-        setIsWiggling(true);
-        setTimeout(() => setIsWiggling(false), 300);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [words, wordIndex, segmentIndex, inputBuffer, startTime, isFinished]);
-
-  const progressPct = startTime ? Math.min(100, ((TIME_LIMIT - remaining) / TIME_LIMIT) * 100) : 0;
+  const progressPct = startedAt ? Math.min(100, ((TIME_LIMIT - remaining) / TIME_LIMIT) * 100) : 0;
   const isNewBest = result && (!prevBest || result.wpm > prevBest.wpm);
 
   if (words.length === 0) {
     return <div className="text-green-400 font-pixel text-xl text-center">LOADING...</div>;
   }
 
-  // リザルト表示
   if (isFinished && result) {
     const shareUrl = buildTimeAttackTweetUrl(result.wpm, result.accuracy, typeof window !== "undefined" ? window.location.origin : "https://azik-fairy.solunita.net");
 
@@ -207,7 +189,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
   const currentSeg: AzikSegment | undefined = currentWord?.segments[segmentIndex];
 
   return (
-    <FairyScreenLayout wide fairy={{ message: startTime ? "全力で打ちまくれ！AZIKで爆速タイパーになれ！🔥" : "キーを押してスタート！1分間でどれだけ打てる！？⚡", emotion: startTime ? "excited" : "idle" }}>
+    <FairyScreenLayout wide fairy={{ message: startedAt ? "全力で打ちまくれ！AZIKで爆速タイパーになれ！🔥" : "キーを押してスタート！1分間でどれだけ打てる！？⚡", emotion: startedAt ? "excited" : "idle" }}>
       <div className={`flex-1 flex flex-col gap-4 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_3]" : ""}`}>
 
         {/* タイマー表示 */}
@@ -229,14 +211,14 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
         {/* スコア表示 */}
         <div className="flex justify-around text-xs font-pixel text-zinc-400 border border-zinc-800 rounded px-3 py-2">
           <span>KEYS: <span className="text-white font-bold">{totalCorrectKeys}</span></span>
-          <span>MISS: <span className={`font-bold ${missCount > 0 ? "text-red-400" : "text-white"}`}>{missCount}</span></span>
+          <span>MISS: <span className={`font-bold ${totalMissKeys > 0 ? "text-red-400" : "text-white"}`}>{totalMissKeys}</span></span>
           <span>WORDS: <span className="text-white font-bold">{completedWordCount}</span></span>
           {prevBest && <span>BEST: <span className="text-yellow-400 font-bold">{prevBest.wpm}</span> WPM</span>}
         </div>
 
         {/* タイピングボード */}
         <div className="w-full flex flex-col items-center p-6 bg-zinc-950 border-2 border-green-500 rounded-md min-h-[140px] justify-center shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]">
-          {!startTime ? (
+          {!startedAt ? (
             /* スタート前: お題を隠す */
             <div className="flex flex-col items-center gap-3">
               <div className="text-zinc-700 font-pixel text-2xl tracking-widest">? ? ? ? ?</div>
@@ -270,11 +252,11 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
               {currentSeg && settings.showGuide && (
                 <div className="mt-4 flex gap-2 font-pixel text-sm">
                   {currentSeg.azik.map(pattern => {
-                    const remaining = pattern.slice(inputBuffer.length);
+                    const rem = pattern.slice(inputBuffer.length);
                     return (
                       <div key={pattern} className="bg-zinc-800 px-3 py-1.5 border border-zinc-700 rounded text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                         <span className="text-zinc-500">{inputBuffer}</span>
-                        <span className="text-green-400 font-bold animate-pulse uppercase">{remaining}</span>
+                        <span className="text-green-400 font-bold animate-pulse uppercase">{rem}</span>
                       </div>
                     );
                   })}
@@ -285,7 +267,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
         </div>
 
         {/* 次の単語プレビュー */}
-        {startTime && words[wordIndex + 1] && (
+        {startedAt && words[wordIndex + 1] && (
           <div className="text-center text-zinc-600 text-sm font-sans">
             次: {words[wordIndex + 1]?.kanji}
           </div>

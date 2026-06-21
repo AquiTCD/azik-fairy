@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
+import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
+import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -118,31 +119,150 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   }, [stageId]);
 
   const [words, setWords] = useState<TypingWord[]>([]);
-  const [wordIndex, setWordIndex] = useState(0);
-  const [segmentIndex, setSegmentIndex] = useState(0);
-  const [inputBuffer, setInputBuffer] = useState("");
-
-  const [totalCorrectKeys, setTotalCorrectKeys] = useState(0);
-  const [totalMissKeys, setTotalMissKeys] = useState(0);
-  const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
-
   const [optimalKeys, setOptimalKeys] = useState({ totalNormal: 0, totalAzik: 0 });
-
   const [fairyMessage, setFairyMessage] = useState("準備はおっけー？キーを押すとタイピングスタートだよ！✨");
   const [fairyEmotion, setFairyEmotion] = useState<FairyEmotion>("idle");
-
-  const [isWiggling, setIsWiggling] = useState(false);
-
-  // STAGE COMPLETE 中に "PRESS ANY KEY" で渡す統計
   const [pendingStats, setPendingStats] = useState<GameStats | null>(null);
 
-  // ヒートマップ: refで管理（完了時に読み取り）
   const keyHeatmapRef = useRef<Record<string, { miss: number; attempt: number }>>({});
-
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  // hook から返る startedAt/optimalKeys を callback closure で参照するための ref
+  const startedAtRef = useRef<number | null>(null);
+  const optimalKeysRef = useRef({ totalNormal: 0, totalAzik: 0 });
 
   const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
+
+  const getAllowedPatterns = useCallback((currentSeg: AzikSegment): string[] => {
+    const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
+    const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
+
+    if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
+
+    const stageLevel = STAGE_MAX_LEVELS[stageId];
+    if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
+      return currentSeg.azik;
+    }
+
+    const isSummaryStage = stageId.includes("summary");
+    const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
+
+    const stagePred = STAGE_KEY_PREDS[stageId];
+    if (!isSummaryStage && stagePred) {
+      const targetKeys = currentSeg.azik.filter(k => stagePred(getCore(k)));
+      if (targetKeys.length > 0) return targetKeys;
+      return settings.isFullTraining ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
+    }
+
+    const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
+    if (!isTarget) {
+      return settings.isFullTraining ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
+    }
+    if (!isSummaryStage) {
+      const targetKeys = currentSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
+      if (targetKeys.length > 0) return targetKeys;
+    }
+    return currentSeg.azik;
+  }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining]);
+
+  const onFirstKey = useCallback(() => {
+    setFairyMessage(getRandomQuote("start"));
+    setFairyEmotion("excited");
+  }, []);
+
+  const onSegmentComplete = useCallback(() => {
+    playCorrect();
+  }, [playCorrect]);
+
+  const onWordComplete = useCallback(() => {
+    playWordComplete();
+    setFairyMessage(getRandomQuote("correctWord"));
+    setFairyEmotion("happy");
+  }, [playWordComplete]);
+
+  const onAllComplete = useCallback((finalState: TypingKeyState) => {
+    playStageClear();
+    const totalTime = Math.max((Date.now() - (startedAtRef.current || Date.now())) / 1000, 1);
+    const totalKeys = finalState.totalCorrectKeys;
+    const accuracy = Math.round((totalKeys / (totalKeys + finalState.totalMissKeys)) * 100);
+    const wpm = Math.round((totalKeys / totalTime) * 60);
+
+    const { totalNormal, totalAzik } = optimalKeysRef.current;
+    const azikRatio = totalNormal > totalAzik
+      ? Math.max(0, Math.min(100, Math.round(((totalNormal - totalKeys) / (totalNormal - totalAzik)) * 100)))
+      : 100;
+    const savedKeys = Math.max(0, totalNormal - totalKeys);
+
+    const rank = getRank(accuracy, wpm, azikRatio);
+    const commentIds = rank === "PERFECT" ? ["P1", "P2", "P3", "P4"]
+      : rank === "A" ? ["A1", "A2", "A3", "A4"]
+      : rank === "B" ? ["B1", "B2", "B3", "B4"]
+      : ["C1", "C2", "C3", "C4", "C5"];
+    const commentId = commentIds[Math.floor(Math.random() * commentIds.length)];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const commentText = (resultComments as any)[commentId] || "";
+
+    setFairyMessage(commentText);
+    const rankEmotion: FairyEmotion = rank === "PERFECT" ? "perfect" : rank === "A" ? "proud" : "happy";
+    setFairyEmotion(rankEmotion);
+    setPendingStats({
+      time: totalTime, wpm, accuracy, totalKeys,
+      missCount: finalState.totalMissKeys, azikRatio, rank,
+      comment: commentId, savedKeys, keyHeatmap: keyHeatmapRef.current,
+    });
+  }, [playStageClear]);
+
+  const onCorrectKey = useCallback((_key: string, expectedKey: string | undefined) => {
+    if (expectedKey) {
+      const prev = keyHeatmapRef.current;
+      const entry = prev[expectedKey] ?? { miss: 0, attempt: 0 };
+      keyHeatmapRef.current = { ...prev, [expectedKey]: { ...entry, attempt: entry.attempt + 1 } };
+    }
+  }, []);
+
+  const onMissKey = useCallback((_key: string, expectedKey: string | undefined) => {
+    if (expectedKey) {
+      const prev = keyHeatmapRef.current;
+      const entry = prev[expectedKey] ?? { miss: 0, attempt: 0 };
+      keyHeatmapRef.current = { ...prev, [expectedKey]: { ...entry, attempt: entry.attempt + 1, miss: entry.miss + 1 } };
+    }
+    playMiss();
+    if (settings.isTraining) {
+      setFairyMessage(getRandomQuote("wrongStrict"));
+      setFairyEmotion("warning");
+      setTimeout(() => setFairyEmotion("excited"), 600);
+    } else {
+      setFairyMessage(getRandomQuote("wrongNormal"));
+      setFairyEmotion("warning");
+      setTimeout(() => setFairyEmotion("excited"), 600);
+    }
+  }, [playMiss, settings.isTraining]);
+
+  const {
+    wordIndex,
+    segmentIndex,
+    inputBuffer,
+    totalCorrectKeys,
+    totalMissKeys,
+    isWiggling,
+    startedAt,
+    reset: hookReset,
+  } = useTypingInput({
+    words,
+    getAllowedPatterns,
+    disabled: !!pendingStats,
+    wiggleOnMiss: settings.isTraining,
+    onFirstKey,
+    onSegmentComplete,
+    onWordComplete,
+    onAllComplete,
+    onCorrectKey,
+    onMissKey,
+  });
+
+  // onAllComplete が refs 経由でアクセスできるよう hook 戻り値を同期
+  startedAtRef.current = startedAt;
+  optimalKeysRef.current = optimalKeys;
 
   const getRealtimeSavedKeys = () => {
     const { optimalNormal } = calcOptimalProgress(words, wordIndex, segmentIndex);
@@ -202,14 +322,9 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     const counts = calculateOptimalKeyCounts(initializedWords);
     setWords(initializedWords);
     setOptimalKeys(counts);
-    setWordIndex(0);
-    setSegmentIndex(0);
-    setInputBuffer("");
-    setStartTime(null);
     setElapsedTime(0);
-    setTotalCorrectKeys(0);
-    setTotalMissKeys(0);
     keyHeatmapRef.current = {};
+    hookReset();
 
     const msg = stage.id === WEAKNESS_STAGE_ID
       ? "弱点集中練習！苦手なキーを克服するよ！💪"
@@ -220,170 +335,12 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   }, [stage, customDictionary, weaknessOverrideWords]);
 
   useEffect(() => {
-    if (startTime !== null && !isFinished()) {
-      timerRef.current = setInterval(() => {
-        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
-      }, 1000);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [startTime]);
-
-  const isFinished = useCallback(() => {
-    return words.length > 0 && wordIndex >= words.length;
-  }, [words, wordIndex]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey || isFinished()) return;
-      if (words.length === 0) return;
-
-      let currentStartTime = startTime;
-      if (startTime === null) {
-        currentStartTime = Date.now();
-        setStartTime(currentStartTime);
-        setFairyMessage(getRandomQuote("start"));
-        setFairyEmotion("excited");
-      }
-
-      const key = e.key.toLowerCase();
-      const currentWord = words[wordIndex];
-      const currentSeg = currentWord.segments[segmentIndex];
-
-      const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
-      const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
-
-      const allowedPatterns = (() => {
-        if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
-
-        const stageLevel = STAGE_MAX_LEVELS[stageId];
-        if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
-          return currentSeg.azik;
-        }
-
-        const isSummaryStage = stageId.includes("summary");
-        const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
-
-        const stagePred = STAGE_KEY_PREDS[stageId];
-        if (!isSummaryStage && stagePred) {
-          const targetKeys = currentSeg.azik.filter(k => stagePred(getCore(k)));
-          if (targetKeys.length > 0) return targetKeys;
-          return settings.isFullTraining
-            ? currentSeg.azik
-            : [...currentSeg.normal, ...currentSeg.azik];
-        }
-
-        const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
-        if (!isTarget) {
-          return settings.isFullTraining
-            ? currentSeg.azik
-            : [...currentSeg.normal, ...currentSeg.azik];
-        }
-        if (!isSummaryStage) {
-          const targetKeys = currentSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
-          if (targetKeys.length > 0) return targetKeys;
-        }
-        return currentSeg.azik;
-      })();
-
-      // ヒートマップ: expected key を記録
-      const expectedKey = allowedPatterns
-        .map(p => p[inputBuffer.length])
-        .filter(Boolean)[0];
-
-      const nextBuffer = inputBuffer + key;
-      const isValidPrefix = allowedPatterns.some(pattern => pattern.startsWith(nextBuffer));
-
-      // attempt は毎回カウント（valid/invalid 問わず）
-      if (expectedKey) {
-        const prev = keyHeatmapRef.current;
-        const entry = prev[expectedKey] ?? { miss: 0, attempt: 0 };
-        keyHeatmapRef.current = { ...prev, [expectedKey]: { ...entry, attempt: entry.attempt + 1 } };
-      }
-
-      if (isValidPrefix) {
-        setInputBuffer(nextBuffer);
-        setTotalCorrectKeys(prev => prev + 1);
-
-        const isCompleted = allowedPatterns.includes(nextBuffer);
-
-        if (isCompleted) {
-          setInputBuffer("");
-
-          if (segmentIndex + 1 < currentWord.segments.length) {
-            playCorrect();
-            setSegmentIndex(prev => prev + 1);
-          } else {
-            const nextWordIndex = wordIndex + 1;
-            setWordIndex(nextWordIndex);
-            setSegmentIndex(0);
-
-            if (nextWordIndex >= words.length) {
-              playStageClear();
-              const totalTime = Math.max((Date.now() - (currentStartTime || Date.now())) / 1000, 1);
-              const totalKeys = totalCorrectKeys + 1;
-              const accuracy = Math.round((totalKeys / (totalKeys + totalMissKeys)) * 100);
-              const wpm = Math.round((totalKeys / totalTime) * 60);
-
-              const actualKeys = totalCorrectKeys + 1;
-              const totalNormal = optimalKeys.totalNormal;
-              const totalAzik = optimalKeys.totalAzik;
-               const azikRatio = totalNormal > totalAzik
-                 ? Math.max(0, Math.min(100, Math.round(((totalNormal - actualKeys) / (totalNormal - totalAzik)) * 100)))
-                 : 100;
-               const savedKeys = Math.max(0, totalNormal - actualKeys);
-
-               const rank = getRank(accuracy, wpm, azikRatio);
-               const commentIds = rank === "PERFECT" ? ["P1", "P2", "P3", "P4"]
-                 : rank === "A" ? ["A1", "A2", "A3", "A4"]
-                 : rank === "B" ? ["B1", "B2", "B3", "B4"]
-                 : ["C1", "C2", "C3", "C4", "C5"];
-               const commentId = commentIds[Math.floor(Math.random() * commentIds.length)];
-               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-               const commentText = (resultComments as any)[commentId] || "";
-
-               setFairyMessage(commentText);
-               const rankEmotion: FairyEmotion = rank === "PERFECT" ? "perfect" : rank === "A" ? "proud" : "happy";
-               setFairyEmotion(rankEmotion);
-               setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId, savedKeys, keyHeatmap: keyHeatmapRef.current });
-            } else {
-              playWordComplete();
-              setFairyMessage(getRandomQuote("correctWord"));
-              setFairyEmotion("happy");
-            }
-          }
-        }
-      } else {
-        // ミス: miss もカウント
-        if (expectedKey) {
-          const prev = keyHeatmapRef.current;
-          const entry = prev[expectedKey] ?? { miss: 0, attempt: 0 };
-          // attempt は上でカウント済みなので miss のみ追加
-          keyHeatmapRef.current = { ...prev, [expectedKey]: { ...entry, miss: entry.miss + 1 } };
-        }
-
-        playMiss();
-        setTotalMissKeys(prev => prev + 1);
-        if (settings.isTraining) {
-          setIsWiggling(true);
-          setFairyMessage(getRandomQuote("wrongStrict"));
-          setFairyEmotion("warning");
-          setTimeout(() => {
-            setIsWiggling(false);
-            setFairyEmotion("excited");
-          }, 600);
-        } else {
-          setFairyMessage(getRandomQuote("wrongNormal"));
-          setFairyEmotion("warning");
-          setTimeout(() => setFairyEmotion("excited"), 600);
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [words, wordIndex, segmentIndex, inputBuffer, startTime, totalCorrectKeys, totalMissKeys, settings.isTraining, settings.isFullTraining, isFinished, onFinish]);
+    if (startedAt === null || pendingStats) return;
+    timerRef.current = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startedAt) / 1000));
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [startedAt, pendingStats]);
 
   if (words.length === 0) {
     return <div className="text-green-400 font-pixel text-xl">LOADING STAGE DATA...</div>;
@@ -472,8 +429,8 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
   // ゴースト位置計算（経過時間ベース）
   const ghostProgress = (() => {
-    if (!ghostBestWpm || !settings.ghostRaceEnabled || !startTime) return null;
-    const elapsed = (Date.now() - startTime) / 1000;
+    if (!ghostBestWpm || !settings.ghostRaceEnabled || !startedAt) return null;
+    const elapsed = (Date.now() - startedAt) / 1000;
     const ghostChars = (ghostBestWpm / 60) * elapsed;
     return Math.min(1, ghostChars / Math.max(optimalKeys.totalAzik, 1));
   })();

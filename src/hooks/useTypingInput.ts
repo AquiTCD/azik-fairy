@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { AzikSegment } from "@/data/azikRules";
 
 // ---------- 純粋関数 (テスト可能なコア) ----------
@@ -99,16 +99,16 @@ export function processTypingKey(
 // ---------- React hook (純粋関数のラッパー) ----------
 
 export interface UseTypingInputOptions {
-  segments: AzikSegment[] | null;
+  words: Array<{ segments: AzikSegment[] }>;
   getAllowedPatterns: (seg: AzikSegment) => string[];
-  totalWords: number;
   disabled?: boolean;
+  wiggleOnMiss?: boolean;
+  onFirstKey?: () => void;
   onSegmentComplete?: () => void;
-  onWordComplete?: (wordIndex: number) => void;
-  onAllComplete?: () => void;
+  onWordComplete?: (completedWordIndex: number) => void;
+  onAllComplete?: (finalState: TypingKeyState) => void;
   onCorrectKey?: (key: string, expectedKey: string | undefined) => void;
   onMissKey?: (key: string, expectedKey: string | undefined) => void;
-  onFirstKey?: () => void;
 }
 
 export interface UseTypingInputReturn {
@@ -123,16 +123,16 @@ export interface UseTypingInputReturn {
 }
 
 export function useTypingInput({
-  segments,
+  words,
   getAllowedPatterns,
-  totalWords,
   disabled = false,
+  wiggleOnMiss = true,
+  onFirstKey,
   onSegmentComplete,
   onWordComplete,
   onAllComplete,
   onCorrectKey,
   onMissKey,
-  onFirstKey,
 }: UseTypingInputOptions): UseTypingInputReturn {
   const [typingState, setTypingState] = useState<TypingKeyState>({
     wordIndex: 0,
@@ -144,57 +144,102 @@ export function useTypingInput({
   const [isWiggling, setIsWiggling] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
 
-  // stale closure 回避用 ref
+  // すべての外部値を ref で持つ → useEffect dep array が [] になり、
+  // keydown ハンドラは一度だけ登録される
   const stateRef = useRef(typingState);
   stateRef.current = typingState;
 
-  const reset = (overrides?: Partial<TypingKeyState>) => {
-    const next: TypingKeyState = { wordIndex: 0, segmentIndex: 0, inputBuffer: "", totalCorrectKeys: 0, totalMissKeys: 0, ...overrides };
+  const startedAtRef = useRef(startedAt);
+  startedAtRef.current = startedAt;
+
+  const wordsRef = useRef(words);
+  wordsRef.current = words;
+
+  const getAllowedPatternsRef = useRef(getAllowedPatterns);
+  getAllowedPatternsRef.current = getAllowedPatterns;
+
+  const disabledRef = useRef(disabled);
+  disabledRef.current = disabled;
+
+  const wiggleOnMissRef = useRef(wiggleOnMiss);
+  wiggleOnMissRef.current = wiggleOnMiss;
+
+  const onFirstKeyRef = useRef(onFirstKey);
+  onFirstKeyRef.current = onFirstKey;
+  const onSegmentCompleteRef = useRef(onSegmentComplete);
+  onSegmentCompleteRef.current = onSegmentComplete;
+  const onWordCompleteRef = useRef(onWordComplete);
+  onWordCompleteRef.current = onWordComplete;
+  const onAllCompleteRef = useRef(onAllComplete);
+  onAllCompleteRef.current = onAllComplete;
+  const onCorrectKeyRef = useRef(onCorrectKey);
+  onCorrectKeyRef.current = onCorrectKey;
+  const onMissKeyRef = useRef(onMissKey);
+  onMissKeyRef.current = onMissKey;
+
+  const reset = useCallback((overrides?: Partial<TypingKeyState>) => {
+    const next: TypingKeyState = {
+      wordIndex: 0,
+      segmentIndex: 0,
+      inputBuffer: "",
+      totalCorrectKeys: 0,
+      totalMissKeys: 0,
+      ...overrides,
+    };
     setTypingState(next);
+    stateRef.current = next;
     setIsWiggling(false);
     setStartedAt(null);
-  };
+    startedAtRef.current = null;
+  }, []);
 
   useEffect(() => {
-    if (disabled || !segments) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) return;
+      if (disabledRef.current || e.key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) return;
 
-      const key = e.key.toLowerCase();
-      const state = stateRef.current;
-      const currentSeg = segments[state.segmentIndex];
+      const ws = wordsRef.current;
+      const s = stateRef.current;
+      if (ws.length === 0 || s.wordIndex >= ws.length) return;
+
+      const currentWord = ws[s.wordIndex];
+      const currentSeg = currentWord?.segments[s.segmentIndex];
       if (!currentSeg) return;
 
-      if (startedAt === null) {
-        setStartedAt(Date.now());
-        onFirstKey?.();
+      if (startedAtRef.current === null) {
+        const now = Date.now();
+        setStartedAt(now);
+        startedAtRef.current = now;
+        onFirstKeyRef.current?.();
       }
 
-      const allowedPatterns = getAllowedPatterns(currentSeg);
-      const result = processTypingKey(state, key, allowedPatterns, segments.length, totalWords);
+      const key = e.key.toLowerCase();
+      const allowedPatterns = getAllowedPatternsRef.current(currentSeg);
+      const result = processTypingKey(s, key, allowedPatterns, currentWord.segments.length, ws.length);
 
       setTypingState(result.state);
+      stateRef.current = result.state;
 
       if (result.isMiss) {
-        onMissKey?.(key, result.expectedKey);
-        setIsWiggling(true);
-        setTimeout(() => setIsWiggling(false), 300);
+        onMissKeyRef.current?.(key, result.expectedKey);
+        if (wiggleOnMissRef.current) {
+          setIsWiggling(true);
+          setTimeout(() => setIsWiggling(false), 300);
+        }
       } else {
-        onCorrectKey?.(key, result.expectedKey);
+        onCorrectKeyRef.current?.(key, result.expectedKey);
         if (result.allCompleted) {
-          onAllComplete?.();
+          onAllCompleteRef.current?.(result.state);
         } else if (result.wordCompleted) {
-          onWordComplete?.(result.state.wordIndex - 1);
+          onWordCompleteRef.current?.(result.state.wordIndex - 1);
         } else if (result.segmentCompleted) {
-          onSegmentComplete?.();
+          onSegmentCompleteRef.current?.();
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [segments, getAllowedPatterns, totalWords, disabled, startedAt, onFirstKey, onSegmentComplete, onWordComplete, onAllComplete, onCorrectKey, onMissKey]);
+  }, []);
 
   return {
     ...typingState,
