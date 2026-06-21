@@ -8,8 +8,6 @@
  * Env vars: OGIG_URL
  */
 
-import resultComments from "../public/data/result_comments.json";
-
 interface Env {
   OGIG_URL?: string;
 }
@@ -34,7 +32,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const acc      = searchParams.get('acc')      || '';
   const azik     = searchParams.get('azik')     || '';
   const rank     = searchParams.get('rank')     || '';
-  const comment  = searchParams.get('comment')  || '';
   const training = searchParams.get('training') || '';
 
   const ogigBase = context.env.OGIG_URL || 'https://ogig.solunita.net';
@@ -45,7 +42,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (acc)      ogImageUrl.searchParams.set('acc',      acc);
   if (azik)     ogImageUrl.searchParams.set('azik',     azik);
   if (rank)     ogImageUrl.searchParams.set('rank',     rank);
-  if (comment)  ogImageUrl.searchParams.set('comment',  comment);
   if (training) ogImageUrl.searchParams.set('training', training);
 
   const userAgent = context.request.headers.get('User-Agent') || '';
@@ -59,25 +55,21 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const isTraining = training === 'true';
 
   const pageTitle = isTraining
-    ? 'AZIK FAIRY | TRAINING'
+    ? 'AZIKトレーニング中 | AZIK-Fairy'
     : safeTitle
-    ? `${safeTitle} クリア！ | AZIK FAIRY`
-    : 'AZIK FAIRY';
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const resolvedComment = (resultComments as any)[comment] || "";
+    ? `${safeTitle} チャレンジ！ | AZIK-Fairy`
+    : 'AZIK-Fairy | AZIKタイピング養成妖精';
 
   const description = isTraining
     ? 'AZIKタイピング特訓中！'
     : [
-        resolvedComment && `「${escapeHtml(resolvedComment)}」`,
-        wpm  && `WPM: ${escapeHtml(wpm)}`,
-        acc  && `Accuracy: ${escapeHtml(acc)}%`,
-        azik && `AZIK: ${escapeHtml(azik)}%`,
         rank && `Rank: ${escapeHtml(rank)}`,
+        wpm  && `WPM: ${escapeHtml(wpm)}`,
+        acc  && `Acc: ${escapeHtml(acc)}%`,
+        azik && `AZIK: ${escapeHtml(azik)}%`,
       ]
         .filter(Boolean)
-        .join(' | ') || 'AZIK タイピングゲームのスコアをシェア！';
+        .join(' | ') || 'AZIK入力をゲーム感覚で楽しく、強制モードでスパルタに養成してくれるタイピングゲーム';
 
   const ogImage  = escapeHtml(ogImageUrl.toString());
   const pageUrl  = escapeHtml(url.toString());
