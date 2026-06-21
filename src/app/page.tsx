@@ -360,6 +360,9 @@ export default function Home() {
           <AzikKeyVisualizer
             stage={stageMeta}
             onStart={handleStartFromIntro}
+            onBackToStageSelect={() => setGameState("STAGE_SELECT")}
+            soundEnabled={settings.soundEnabled}
+            onToggleSound={() => handleUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
             layout={settings.keyboardLayout}
           />
         );

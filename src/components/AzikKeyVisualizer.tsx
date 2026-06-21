@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import KeyboardDiagram from "./KeyboardDiagram";
 import GameButton from "./GameButton";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -9,6 +10,9 @@ import { StageMeta } from "@/data/stages";
 interface AzikKeyVisualizerProps {
   stage: StageMeta;
   onStart: (markAsSeen: boolean) => void;
+  onBackToStageSelect: () => void;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
   layout: "US" | "JIS";
 }
 
@@ -436,7 +440,7 @@ export function getIntroConfig(stageId: string): IntroConfig | null {
 // メインコンポーネント
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVisualizerProps) {
+export default function AzikKeyVisualizer({ stage, onStart, onBackToStageSelect, soundEnabled, onToggleSound, layout }: AzikKeyVisualizerProps) {
   const config = getIntroConfig(stage.id);
   const [frameIdx, setFrameIdx] = useState(0);
   const [dontShowAgain, setDontShowAgain] = useState(true);
@@ -460,6 +464,16 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
           <h2 className="text-2xl font-bold font-pixel text-green-400">{stage.name}</h2>
           <p className="text-sm text-zinc-300">{stage.description}</p>
           <GameButton variant="primary" size="lg" onClick={() => onStart(dontShowAgain)}>PLAY</GameButton>
+          <div className="flex items-center justify-between w-full mt-1">
+            <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>STAGE SELECT</GameButton>
+            <button
+              onClick={onToggleSound}
+              title={soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
+              className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
+            >
+              {soundEnabled ? <SpeakerHigh size={18} weight="bold" /> : <SpeakerSlash size={18} weight="bold" />}
+            </button>
+          </div>
         </div>
       </FairyScreenLayout>
     );
@@ -527,6 +541,16 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
           <GameButton variant="primary" size="lg" onClick={() => onStart(dontShowAgain)} className="w-full">
             PLAY
           </GameButton>
+          <div className="flex items-center justify-between mt-1">
+            <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>STAGE SELECT</GameButton>
+            <button
+              onClick={onToggleSound}
+              title={soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
+              className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
+            >
+              {soundEnabled ? <SpeakerHigh size={18} weight="bold" /> : <SpeakerSlash size={18} weight="bold" />}
+            </button>
+          </div>
         </div>
       </div>
     </FairyScreenLayout>
