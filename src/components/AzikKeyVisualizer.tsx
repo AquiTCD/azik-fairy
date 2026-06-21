@@ -468,7 +468,7 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
 
         {/* キーボードアニメーション */}
         <div className="border border-green-800 bg-zinc-950/80 rounded p-3 flex flex-col items-center gap-2">
-          <div className="text-xs font-pixel text-green-400 h-5 transition-all duration-300 tracking-wider">
+          <div className="text-xs font-sans text-green-400 h-5 transition-all duration-300 tracking-wide">
             {currentFrame.label}
           </div>
           <KeyboardDiagram
