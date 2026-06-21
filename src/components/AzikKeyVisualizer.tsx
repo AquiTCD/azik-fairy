@@ -44,15 +44,15 @@ const DOUBLE_VOWEL_KEYS_US: Record<string, string> = {
 
 function getLev2aFrames(): AnimFrame[] {
   const pairs = [
-    { vowel: "a", ext: "z", label: "あ → 1段下 = Z → ～あん" },
-    { vowel: "i", ext: "k", label: "い → 1段下 = K → ～いん" },
-    { vowel: "u", ext: "j", label: "う → 1段下 = J → ～うん" },
-    { vowel: "e", ext: "d", label: "え → 1段下 = D → ～えん" },
-    { vowel: "o", ext: "l", label: "お → 1段下 = L → ～おん" },
+    { vowel: "a", ext: "z", label: "A の1段下 = Z → ～あん" },
+    { vowel: "i", ext: "k", label: "I の1段下 = K → ～いん" },
+    { vowel: "u", ext: "j", label: "U の1段下 = J → ～うん" },
+    { vowel: "e", ext: "d", label: "E の1段下 = D → ～えん" },
+    { vowel: "o", ext: "l", label: "O の1段下 = L → ～おん" },
   ];
   const frames: AnimFrame[] = [];
   for (const { vowel, ext, label } of pairs) {
-    frames.push({ activeKeys: [vowel], normalKeys: [], label: `母音キー [${vowel.toUpperCase()}]` });
+    frames.push({ activeKeys: [], normalKeys: [vowel], label: `母音キー [${vowel.toUpperCase()}] を基準に…` });
     frames.push({ activeKeys: [ext], normalKeys: [vowel], label, sublabel: "1段下のキー = 撥音拡張" });
   }
   return frames;
@@ -60,14 +60,14 @@ function getLev2aFrames(): AnimFrame[] {
 
 function getLev2bFrames(): AnimFrame[] {
   const pairs = [
-    { vowel: "a", ext: "q", label: "a の左上 = Q → ～あい" },
-    { vowel: "u", ext: "h", label: "u の右 = H → ～うう" },
-    { vowel: "e", ext: "w", label: "e の左 = W → ～えい" },
-    { vowel: "o", ext: "p", label: "o の右 = P → ～おう" },
+    { vowel: "a", ext: "q", label: "A の左上 = Q → ～あい" },
+    { vowel: "u", ext: "h", label: "U の右隣 = H → ～うう" },
+    { vowel: "e", ext: "w", label: "E の左上 = W → ～えい" },
+    { vowel: "o", ext: "p", label: "O の右隣 = P → ～おう" },
   ];
   const frames: AnimFrame[] = [];
   for (const { vowel, ext, label } of pairs) {
-    frames.push({ activeKeys: [vowel], normalKeys: [], label: `母音キー [${vowel.toUpperCase()}]` });
+    frames.push({ activeKeys: [], normalKeys: [vowel], label: `母音キー [${vowel.toUpperCase()}] を基準に…` });
     frames.push({ activeKeys: [ext], normalKeys: [vowel], label, sublabel: "隣接キー = 二重母音短縮" });
   }
   return frames;
@@ -83,7 +83,8 @@ const INTRO_CONFIGS: Record<string, IntroConfig> = {
       { from: "tt(u)", to: ";(u)", label: "った" },
     ],
     frames: [
-      { activeKeys: [";"], normalKeys: ["t", "l"], label: "[;] 1打 = っ", sublabel: "tsu / ltu は使わない" },
+      { activeKeys: [], normalKeys: ["t", "s", "u"], label: "従来: t-s-u (3打)", sublabel: "" },
+      { activeKeys: [";"], normalKeys: [], label: "[;] 1打 = っ", sublabel: "3打 → 1打！" },
     ],
   },
   "lev1-hatsuon-q": {
@@ -94,7 +95,8 @@ const INTRO_CONFIGS: Record<string, IntroConfig> = {
       { from: "hon", to: "hoq", label: "ほん" },
     ],
     frames: [
-      { activeKeys: ["q"], normalKeys: ["n"], label: "[q] 1打 = ん", sublabel: "nn は使わない" },
+      { activeKeys: [], normalKeys: ["n"], label: "従来: n (+ n か子音)", sublabel: "" },
+      { activeKeys: ["q"], normalKeys: [], label: "[q] 1打 = ん", sublabel: "nn → q！" },
     ],
   },
   "lev1-sha": {
@@ -106,7 +108,8 @@ const INTRO_CONFIGS: Record<string, IntroConfig> = {
       { from: "sho", to: "xo", label: "しょ" },
     ],
     frames: [
-      { activeKeys: ["x"], normalKeys: ["s", "h", "y"], label: "[x] + 母音 = シャ行", sublabel: "SHA/SYA は使わない" },
+      { activeKeys: [], normalKeys: ["s", "h", "y"], label: "従来: s-h-a / s-y-a (3打)", sublabel: "" },
+      { activeKeys: ["x"], normalKeys: [], label: "[x] + 母音 = シャ行 (2打)", sublabel: "3打 → 2打！" },
     ],
   },
   "lev1-cha": {
@@ -118,20 +121,22 @@ const INTRO_CONFIGS: Record<string, IntroConfig> = {
       { from: "cho", to: "co", label: "ちょ" },
     ],
     frames: [
-      { activeKeys: ["c"], normalKeys: ["t", "h", "y"], label: "[c] + 母音 = チャ行", sublabel: "CHA/CYA は使わない" },
+      { activeKeys: [], normalKeys: ["t", "h", "y"], label: "従来: c-h-a / t-y-a (3打)", sublabel: "" },
+      { activeKeys: ["c"], normalKeys: [], label: "[c] + 母音 = チャ行 (2打)", sublabel: "3打 → 2打！" },
     ],
   },
   "lev1-summary": {
     title: "Lev1 総まとめ",
     description: "っ[;]・ん[q]・シャ行[x]・チャ行[c] をすべて使う文章練習。",
     examples: [
-      { from: ";", to: ";", label: "っ" },
-      { from: "q", to: "q", label: "ん" },
-      { from: "x+母音", to: "x+母音", label: "シャ行" },
-      { from: "c+母音", to: "c+母音", label: "チャ行" },
+      { from: "tsu", to: ";", label: "っ" },
+      { from: "nn", to: "q", label: "ん" },
+      { from: "sha", to: "xa", label: "しゃ" },
+      { from: "cha", to: "ca", label: "ちゃ" },
     ],
     frames: [
-      { activeKeys: [";", "q", "x", "c"], normalKeys: [], label: "Lev1 全ショートカット", sublabel: "4つを組み合わせて打とう" },
+      { activeKeys: [], normalKeys: [";", "q", "x", "c"], label: "Lev1 の4キーを確認…", sublabel: "" },
+      { activeKeys: [";", "q", "x", "c"], normalKeys: [], label: "この4キーがLev1のAZIK", sublabel: "組み合わせて打とう" },
     ],
   },
 };
@@ -272,7 +277,8 @@ const LEV3A_STAGES: Record<string, IntroConfig> = {
       { from: "ko-hi-", to: "ko:hi:", label: "コーヒー" },
     ],
     frames: [
-      { activeKeys: [":"], normalKeys: ["-"], label: "[-] の隣 = [:]", sublabel: "どちらでも長音になる" },
+      { activeKeys: [], normalKeys: ["-"], label: "従来: [-] 長音キー (遠い)", sublabel: "" },
+      { activeKeys: [":"], normalKeys: ["-"], label: "[:] は [-] の隣 = 近い！", sublabel: "どちらでも長音になる" },
     ],
   },
   "lev3a-g-youon": {
@@ -284,7 +290,8 @@ const LEV3A_STAGES: Record<string, IntroConfig> = {
       { from: "rya", to: "rga", label: "りゃ" },
     ],
     frames: [
-      { activeKeys: ["g"], normalKeys: ["y"], label: "[g] が [y] の代わりに", sublabel: "左手で拗音が完結する" },
+      { activeKeys: [], normalKeys: ["y"], label: "従来: Y (右手に移動)", sublabel: "" },
+      { activeKeys: ["g"], normalKeys: ["y"], label: "[G] が [Y] の代わりに", sublabel: "左手だけで拗音が完結する" },
     ],
   },
   "lev3a-compat-f": {
@@ -297,7 +304,8 @@ const LEV3A_STAGES: Record<string, IntroConfig> = {
       { from: "yu", to: "yf", label: "ゆ" },
     ],
     frames: [
-      { activeKeys: ["f"], normalKeys: ["i", "u"], label: "[f] = 末尾 i/u の省略", sublabel: "子音+f で語尾短縮" },
+      { activeKeys: [], normalKeys: ["i", "u"], label: "従来: 末尾に i / u を打つ", sublabel: "" },
+      { activeKeys: ["f"], normalKeys: [], label: "[F] で末尾 i/u を省略", sublabel: "子音+f で語尾短縮" },
     ],
   },
   "lev3a-summary": {
@@ -309,7 +317,8 @@ const LEV3A_STAGES: Record<string, IntroConfig> = {
       { from: "ki", to: "kf", label: "き" },
     ],
     frames: [
-      { activeKeys: [":", "g", "f"], normalKeys: ["-", "y", "i", "u"], label: "Lev3a 互換キー3種", sublabel: "自然な文章の中で使いこなそう" },
+      { activeKeys: [], normalKeys: [":", "g", "f"], label: "Lev3a の3キーを確認…", sublabel: "" },
+      { activeKeys: [":", "g", "f"], normalKeys: [], label: "この3キーがLev3a のAZIK", sublabel: "文章の中で使いこなそう" },
     ],
   },
 };
@@ -324,9 +333,8 @@ const LEV3B_STAGES: Record<string, IntroConfig> = {
       { from: "toxu", to: "tgu", label: "とぅ" },
     ],
     frames: [
-      { activeKeys: ["t", "g", "i"], normalKeys: [], label: "てぃ = TGI" },
-      { activeKeys: ["d", "c", "i"], normalKeys: [], label: "でぃ = DCI" },
-      { activeKeys: ["t", "g", "u"], normalKeys: [], label: "とぅ = TGU" },
+      { activeKeys: [], normalKeys: ["t", "e", "x", "i"], label: "従来: t-e-x-i など (複雑)", sublabel: "" },
+      { activeKeys: ["t", "g", "i"], normalKeys: [], label: "てぃ = TGI", sublabel: "でぃ=DCI / とぅ=TGU" },
     ],
   },
   "lev3b-zc-zf-za-ze": {
@@ -337,8 +345,8 @@ const LEV3B_STAGES: Record<string, IntroConfig> = {
       { from: "ze", to: "zf", label: "ぜ" },
     ],
     frames: [
-      { activeKeys: ["z", "c"], normalKeys: ["a"], label: "ざ: za → ZC", sublabel: "指の交差を避ける" },
-      { activeKeys: ["z", "f"], normalKeys: ["e"], label: "ぜ: ze → ZF", sublabel: "同じく左手内で完結" },
+      { activeKeys: [], normalKeys: ["z", "a"], label: "ざ: ZA → 指が交差して辛い", sublabel: "" },
+      { activeKeys: ["z", "c"], normalKeys: [], label: "ざ: ZC → 左手内で完結！", sublabel: "ぜ: ze → ZF も同様" },
     ],
   },
   "lev3b-zv-zx-zai-zei": {
@@ -349,8 +357,8 @@ const LEV3B_STAGES: Record<string, IntroConfig> = {
       { from: "zw", to: "zx", label: "ぜい" },
     ],
     frames: [
-      { activeKeys: ["z", "v"], normalKeys: ["q"], label: "ざい: zq → ZV" },
-      { activeKeys: ["z", "x"], normalKeys: ["w"], label: "ぜい: zw → ZX" },
+      { activeKeys: [], normalKeys: ["z", "q"], label: "ざい: ZQ → 遠くて打ちにくい", sublabel: "" },
+      { activeKeys: ["z", "v"], normalKeys: [], label: "ざい: ZV → 近い！", sublabel: "ぜい: zw → ZX も同様" },
     ],
   },
   "lev3b-sf-ss-sai-sei": {
@@ -361,8 +369,8 @@ const LEV3B_STAGES: Record<string, IntroConfig> = {
       { from: "sw", to: "ss", label: "せい" },
     ],
     frames: [
-      { activeKeys: ["s", "f"], normalKeys: ["q"], label: "さい: sq → SF" },
-      { activeKeys: ["s", "s"], normalKeys: ["w"], label: "せい: sw → SS" },
+      { activeKeys: [], normalKeys: ["s", "q"], label: "さい: SQ → 遠い", sublabel: "" },
+      { activeKeys: ["s", "f"], normalKeys: [], label: "さい: SF → 近い！", sublabel: "せい: sw → SS も同様" },
     ],
   },
   "lev3b-summary": {
@@ -375,7 +383,8 @@ const LEV3B_STAGES: Record<string, IntroConfig> = {
       { from: "sw→ss", to: "ss", label: "せい" },
     ],
     frames: [
-      { activeKeys: ["z", "c", "f", "v", "x"], normalKeys: ["a", "e", "q", "w"], label: "Lev3b 互換キー", sublabel: "打ちにくい → 打ちやすいキーへ" },
+      { activeKeys: [], normalKeys: ["a", "e", "q", "w"], label: "従来: 遠いキーへ指が伸びる…", sublabel: "" },
+      { activeKeys: ["z", "c", "f", "v", "x", "s"], normalKeys: [], label: "AZIK: 左手内で完結！", sublabel: "打ちにくい → 打ちやすいキーへ" },
     ],
   },
 };
@@ -391,10 +400,8 @@ const LEV4_STAGES: Record<string, IntroConfig> = {
       { from: "masu", to: "ms", label: "ます" },
     ],
     frames: [
-      { activeKeys: ["k", "t"], normalKeys: [], label: "kt = こと (4打→2打)" },
-      { activeKeys: ["m", "n"], normalKeys: [], label: "mn = もの (4打→2打)" },
-      { activeKeys: ["s", "r"], normalKeys: [], label: "sr = する (4打→2打)" },
-      { activeKeys: ["m", "s"], normalKeys: [], label: "ms = ます (4打→2打)" },
+      { activeKeys: [], normalKeys: ["k", "o", "t"], label: "従来: k-o-t-o (4打)…", sublabel: "" },
+      { activeKeys: ["k", "t"], normalKeys: [], label: "kt = こと (2打！)", sublabel: "mn=もの / sr=する / ms=ます" },
     ],
   },
   "lev4-summary": {
@@ -406,7 +413,8 @@ const LEV4_STAGES: Record<string, IntroConfig> = {
       { from: "masu", to: "ms", label: "ます" },
     ],
     frames: [
-      { activeKeys: ["k", "t", "m", "n", "s", "r", "m", "s"], normalKeys: [], label: "Lev4 語短縮キー", sublabel: "頻出語を2打で" },
+      { activeKeys: [], normalKeys: ["k", "t", "m", "n", "s", "r"], label: "Lev4 の語短縮キーを確認…", sublabel: "" },
+      { activeKeys: ["k", "t", "m", "n", "s", "r"], normalKeys: [], label: "この組み合わせが語短縮AZIK", sublabel: "頻出語を2打で" },
     ],
   },
 };

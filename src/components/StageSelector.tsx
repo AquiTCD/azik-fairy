@@ -160,7 +160,7 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
         {!["Practice", "Challenge"].includes(stage.category) && (() => {
           const intro = getIntroConfig(stage.id);
           if (!intro) return null;
-          const frame = intro.frames[0];
+          const frame = intro.frames[intro.frames.length - 1];
           return (
             <div className="hidden group-hover:flex pointer-events-none flex-col gap-1.5 border-t border-black/20 pt-2 mt-1 w-full">
               <div className="text-[9px] font-pixel text-black/70 font-bold">{intro.title}</div>
