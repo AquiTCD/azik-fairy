@@ -4,16 +4,94 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment, STAGE_KEY_PREDS } from "@/data/stages/wordValidator";
-import { GameSettings } from "@/app/page";
+import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
 import { GameStats } from "@/types/game";
-import { getRank } from "@/utils/gameLogic";
+import { getRank, calcOptimalProgress } from "@/utils/gameLogic";
 import KeyboardDiagram from "./KeyboardDiagram";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
 import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
 import resultComments from "../../public/data/result_comments.json";
+
+const FAIRY_QUOTES = {
+  start: [
+    "準備おっけー？爆速でタイピングしちゃお！マジ期待してるよ！✨",
+    "AZIKで打つよ～！指にガッツリ覚え込ませてこー！💅",
+    "今日も指がブッ飛ぶくらい速くなるよ！気合い入れてこ～！🔥",
+    "さあ始めよー！AZIKの魔法で指を超進化させちゃお！💫",
+    "えいえいおー！アタシが全力サポートするからワンチャン大丈夫！💪",
+    "キーボードは武器だよね～！AZIKで爆速タイパーになろ！⚡",
+    "この練習、のちのち絶対効いてくるやつ！気合い入れてこ！💎",
+    "はじめるよ～！集中力みが深くなってきたら最強だよね！🎯",
+  ],
+  correctWord: [
+    "いい感じ！超ヤバいんだけど！💖",
+    "やるじゃん！指の動きが超滑らかになっててウケる～！✨",
+    "さすが！マジで天才みが深いんだけど！💎",
+    "完璧！AZIKの感覚完全に掴めてるじゃん！😼",
+    "うぉっ！速くなってる！アタシも鳥肌立ってんだけど！🌟",
+    "その調子！もう指が勝手に動いてる感じじゃん！えぐい！⭐",
+    "ギャル泣きしそうなくらい上手い！マジで！🥹",
+    "えっそんなに上手かったっけ！？ウケるくらい成長してるじゃん！💥",
+    "神！！それって天才系の指の動きじゃん！👑",
+    "最高すぎ！このまま無双しちゃって！🎯",
+    "めっちゃリズム感いいじゃん！タイピングの才能エグくない！？💗",
+    "バチ上手い！もうプロ系じゃん！アタシ感動してんだけど！🙄💖",
+  ],
+  wrongStrict: [
+    "あー！そこはAZIK入力じゃなきゃダメだよー！💦",
+    "ノーマル入力は禁止！AZIKの短縮キーで打ってね！💅",
+    "そこはAZIK！下のヒント表確認してみて！✨",
+    "ダメダメー！アタシの魔法でブロックしちゃった！🧚‍♀️",
+    "違う違う！AZIKのショートカットを使うんだよ！🎯",
+    "はーい！そこ間違い！ヒント見てもっかいトライ！💪",
+    "AZIKモードだから通常入力は無効なのよん～！💫",
+    "ちょっと待って！そのキーじゃないよ！ヒント確認して！⭐",
+    "そこショートカット系だよ！絶対こっちのほうが速くなるから！🔥",
+    "きゃぱい気持ちわかるけど！AZIKで打てたら超気持ちいいから！💗",
+  ],
+  wrongNormal: [
+    "あちゃ！押し間違えちゃった！ドンマイ！🥺",
+    "ミスだよ！焦らずキーを確認していこー！💅",
+    "落ち着いて！正しいキーを押してね！✨",
+    "ドンマイドンマイ！完璧じゃなくてもぜんっぜんOK！🩷",
+    "あーっ！惜しかった！次！次！！🎮",
+    "まあそういう日もあるよ～！焦らず丁寧にいこ！🌸",
+    "ミスは成長の証！気にしないで次いこ！🌟",
+    "ドンマイ精神で行こ！練習あるのみじゃん！💖",
+    "一回のミスとりまスルーで！気持ち切り替えてこ！🙄",
+    "惜しかった～！でも大丈夫！このペースで続けてこ！💗",
+  ],
+} as const;
+
+function getRandomQuote(category: keyof typeof FAIRY_QUOTES): string {
+  const quotes = FAIRY_QUOTES[category];
+  return quotes[Math.floor(Math.random() * quotes.length)];
+}
+
+function RubyText({ kanji, kana }: { kanji: string; kana: string }) {
+  const startPunctMatch = kanji.match(/^([「『（('"、。！？\s]+)/);
+  const endPunctMatch = kanji.match(/([」』）)'"、。！？\s]+)$/);
+  const startPunct = startPunctMatch ? startPunctMatch[0] : "";
+  const endPunct = endPunctMatch ? endPunctMatch[0] : "";
+  const coreKanji = kanji.substring(startPunct.length, kanji.length - endPunct.length);
+
+  if (coreKanji === kana || !coreKanji) {
+    return <span>{startPunct}{coreKanji}{endPunct}</span>;
+  }
+  return (
+    <span>
+      {startPunct}
+      <ruby>
+        {coreKanji}
+        <rt className="text-xs text-green-300 tracking-normal select-none normal-case">{kana}</rt>
+      </ruby>
+      {endPunct}
+    </span>
+  );
+}
 
 interface TypingGameProps {
   stageId: string;
@@ -30,37 +108,6 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     setStage(null);
     loadStage(stageId).then(setStage);
   }, [stageId]);
-
-  const renderRuby = (kanji: string, kana: string) => {
-    const startPunctMatch = kanji.match(/^([「『（(‘“、。！？\s]+)/);
-    const endPunctMatch = kanji.match(/([」』）)’”、。！？\s]+)$/);
-    
-    const startPunct = startPunctMatch ? startPunctMatch[0] : "";
-    const endPunct = endPunctMatch ? endPunctMatch[0] : "";
-    
-    const coreKanji = kanji.substring(startPunct.length, kanji.length - endPunct.length);
-    
-    if (coreKanji === kana || !coreKanji) {
-      return (
-        <span>
-          {startPunct}
-          {coreKanji}
-          {endPunct}
-        </span>
-      );
-    }
-    
-    return (
-      <span>
-        {startPunct}
-        <ruby>
-          {coreKanji}
-          <rt className="text-xs text-green-300 tracking-normal select-none normal-case">{kana}</rt>
-        </ruby>
-        {endPunct}
-      </span>
-    );
-  };
 
   const [words, setWords] = useState<TypingWord[]>([]);
   const [wordIndex, setWordIndex] = useState(0);
@@ -84,101 +131,16 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fairyQuotes = useRef({
-    start: [
-      "準備おっけー？爆速でタイピングしちゃお！マジ期待してるよ！✨",
-      "AZIKで打つよ～！指にガッツリ覚え込ませてこー！💅",
-      "今日も指がブッ飛ぶくらい速くなるよ！気合い入れてこ～！🔥",
-      "さあ始めよー！AZIKの魔法で指を超進化させちゃお！💫",
-      "えいえいおー！アタシが全力サポートするからワンチャン大丈夫！💪",
-      "キーボードは武器だよね～！AZIKで爆速タイパーになろ！⚡",
-      "この練習、のちのち絶対効いてくるやつ！気合い入れてこ！💎",
-      "はじめるよ～！集中力みが深くなってきたら最強だよね！🎯",
-    ],
-    correctWord: [
-      "いい感じ！超ヤバいんだけど！💖",
-      "やるじゃん！指の動きが超滑らかになっててウケる～！✨",
-      "さすが！マジで天才みが深いんだけど！💎",
-      "完璧！AZIKの感覚完全に掴めてるじゃん！😼",
-      "うぉっ！速くなってる！アタシも鳥肌立ってんだけど！🌟",
-      "その調子！もう指が勝手に動いてる感じじゃん！えぐい！⭐",
-      "ギャル泣きしそうなくらい上手い！マジで！🥹",
-      "えっそんなに上手かったっけ！？ウケるくらい成長してるじゃん！💥",
-      "神！！それって天才系の指の動きじゃん！👑",
-      "最高すぎ！このまま無双しちゃって！🎯",
-      "めっちゃリズム感いいじゃん！タイピングの才能エグくない！？💗",
-      "バチ上手い！もうプロ系じゃん！アタシ感動してんだけど！🙄💖",
-    ],
-    wrongStrict: [
-      "あー！そこはAZIK入力じゃなきゃダメだよー！💦",
-      "ノーマル入力は禁止！AZIKの短縮キーで打ってね！💅",
-      "そこはAZIK！下のヒント表確認してみて！✨",
-      "ダメダメー！アタシの魔法でブロックしちゃった！🧚‍♀️",
-      "違う違う！AZIKのショートカットを使うんだよ！🎯",
-      "はーい！そこ間違い！ヒント見てもっかいトライ！💪",
-      "AZIKモードだから通常入力は無効なのよん～！💫",
-      "ちょっと待って！そのキーじゃないよ！ヒント確認して！⭐",
-      "そこショートカット系だよ！絶対こっちのほうが速くなるから！🔥",
-      "きゃぱい気持ちわかるけど！AZIKで打てたら超気持ちいいから！💗",
-    ],
-    wrongNormal: [
-      "あちゃ！押し間違えちゃった！ドンマイ！🥺",
-      "ミスだよ！焦らずキーを確認していこー！💅",
-      "落ち着いて！正しいキーを押してね！✨",
-      "ドンマイドンマイ！完璧じゃなくてもぜんっぜんOK！🩷",
-      "あーっ！惜しかった！次！次！！🎮",
-      "まあそういう日もあるよ～！焦らず丁寧にいこ！🌸",
-      "ミスは成長の証！気にしないで次いこ！🌟",
-      "ドンマイ精神で行こ！練習あるのみじゃん！💖",
-      "一回のミスとりまスルーで！気持ち切り替えてこ！🙄",
-      "惜しかった～！でも大丈夫！このペースで続けてこ！💗",
-    ],
-  });
-
   const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
 
-  const getRandomQuote = (category: keyof typeof fairyQuotes.current) => {
-    const quotes = fairyQuotes.current[category];
-    return quotes[Math.floor(Math.random() * quotes.length)];
-  };
-
   const getRealtimeSavedKeys = () => {
-    let optimalNormal = 0;
-    for (let i = 0; i < wordIndex; i++) {
-      const w = words[i];
-      w.segments.forEach(seg => {
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-      });
-    }
-    if (wordIndex < words.length) {
-      const currentWord = words[wordIndex];
-      for (let j = 0; j < segmentIndex; j++) {
-        const seg = currentWord.segments[j];
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-      }
-    }
+    const { optimalNormal } = calcOptimalProgress(words, wordIndex, segmentIndex);
     const confirmedCorrectKeys = totalCorrectKeys - inputBuffer.length;
     return Math.max(0, optimalNormal - confirmedCorrectKeys);
   };
 
   const getRealtimeAzikRatio = () => {
-    let optimalNormal = 0;
-    let optimalAzik = 0;
-    for (let i = 0; i < wordIndex; i++) {
-      const w = words[i];
-      w.segments.forEach(seg => {
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-        optimalAzik += Math.min(...seg.azik.map(p => p.length));
-      });
-    }
-    if (wordIndex < words.length) {
-      const currentWord = words[wordIndex];
-      for (let j = 0; j < segmentIndex; j++) {
-        const seg = currentWord.segments[j];
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-        optimalAzik += Math.min(...seg.azik.map(p => p.length));
-      }
-    }
+    const { optimalNormal, optimalAzik } = calcOptimalProgress(words, wordIndex, segmentIndex);
     if (optimalNormal <= optimalAzik) return 100;
     const confirmedCorrectKeys = totalCorrectKeys - inputBuffer.length;
     return Math.max(0, Math.min(100, Math.round(((optimalNormal - confirmedCorrectKeys) / (optimalNormal - optimalAzik)) * 100)));
@@ -512,7 +474,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           {/* 漢字（ルビ付き） — 常に2行分の高さを確保 */}
           <div className="flex items-center justify-center min-h-[4.5rem] md:min-h-[5rem] lg:min-h-[6rem] w-full text-center mb-2">
             <div className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-              {currentWord ? (stage?.category === "Challenge" ? currentWord.kanji : renderRuby(currentWord.kanji, currentWord.kana)) : ""}
+              {currentWord ? (stage?.category === "Challenge" ? currentWord.kanji : <RubyText kanji={currentWord.kanji} kana={currentWord.kana} />) : ""}
             </div>
           </div>
 

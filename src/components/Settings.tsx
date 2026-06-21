@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { GameSettings } from "@/app/page";
+import { GameSettings } from "@/types/game";
 import { SoundThemeName } from "@/hooks/useAzikSound";
 import { parseExternalRomajiTable } from "@/data/azikRules";
 import GameButton from "@/components/GameButton";
@@ -12,6 +12,7 @@ interface SettingsProps {
   onUpdateSettings: (settings: GameSettings) => void;
   onBackToTitle: () => void;
   onClearProgress: () => void;
+  onResetStageIntros: () => void;
 }
 
 // 本当に人によって違う3キーのみUIで設定可能。
@@ -23,8 +24,9 @@ const getCustomizableKeys = (layout: "US" | "JIS") => [
   { label: "長音 ー", key: "ー", defaultVal: layout === "JIS" ? ":" : "-" },
 ] as const;
 
-export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress }: SettingsProps) {
+export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros }: SettingsProps) {
   const [activeSubTab, setActiveSubTab] = useState<"FORM" | "JSON" | "TSV_SKK">("FORM");
+  const [introResetDone, setIntroResetDone] = useState(false);
 
   // JSON入力バッファとエラー管理
   const [jsonInput, setJsonInput] = useState("");
@@ -569,6 +571,27 @@ z,あん`}
               </button>
             </div>
 
+          </div>
+
+          {/* レッスン説明リセット */}
+          <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
+            <h3 className="text-sm font-bold text-green-400 font-pixel">■ LESSON INTRO</h3>
+            <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border border-zinc-700 rounded">
+              <div>
+                <span className="font-bold text-sm tracking-wider text-green-300 font-pixel">RESET INTRO HISTORY:</span>
+                <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">ステージ開始前のAZIK解説画面をすべて再表示します。</p>
+              </div>
+              <button
+                onClick={() => { onResetStageIntros(); setIntroResetDone(true); setTimeout(() => setIntroResetDone(false), 2000); }}
+                className={`px-3 py-2 border rounded text-xs cursor-pointer font-bold font-pixel whitespace-nowrap transition-colors duration-150 ${
+                  introResetDone
+                    ? "bg-green-500 border-green-400 text-black"
+                    : "bg-zinc-900 border-green-700 text-green-400 hover:bg-green-800 hover:text-white active:bg-green-500 active:text-black active:border-green-400"
+                }`}
+              >
+                {introResetDone ? "✓ DONE" : "RESET"}
+              </button>
+            </div>
           </div>
 
           {/* DANGER ZONE */}

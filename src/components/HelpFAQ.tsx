@@ -13,6 +13,14 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.7.0",
+    date: "2026-06-21",
+    items: [
+      "ステージ開始前にAZIKキー確認画面を追加",
+      "タイトル画面にステージ進捗バーを追加",
+    ],
+  },
+  {
     version: "v1.6.0",
     date: "2026-06-19",
     items: [
