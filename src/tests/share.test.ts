@@ -3,7 +3,7 @@ import { onRequest } from "../../functions/share";
 
 describe("share function OGP response", () => {
   it("should return HTML with canonical and extra OGP tags for crawlers", async () => {
-    const url = "https://azik-fairy.solunita.net/share?wpm=120&acc=98&azik=100&title=TestStage&rank=A&comment=A1";
+    const url = "https://azik-fairy.solunita.net/share?wpm=120&acc=98&azik=100&title=TestStage&rank=A";
     const request = new Request(url, {
       headers: {
         "User-Agent": "Twitterbot",
@@ -32,7 +32,8 @@ describe("share function OGP response", () => {
     expect(html).not.toContain('<link rel="canonical"');
     expect(html).toContain('<meta property="og:site_name" content="AZIK-Fairy">');
     expect(html).toContain('<meta property="og:locale" content="ja_JP">');
-    expect(html).toContain("めちゃくちゃいい走りだった！正確さもAZIK率もバチ高くてガチで尊敬する！🌟💗");
+    expect(html).toContain("TestStage チャレンジ！ | AZIK-Fairy");
+    expect(html).toContain("Rank: A | WPM: 120 | Acc: 98% | AZIK: 100%");
   });
 
   it("should redirect human browsers to root", async () => {
