@@ -14,9 +14,93 @@ import AdBanner from "@/components/AdBanner";
 import KeyNavGroup from "@/components/KeyNavGroup";
 import AzikKeyVisualizer from "@/components/AzikKeyVisualizer";
 import { GameStats, GameSettings, StageProgress, UserProgress, GameState } from "@/types/game";
+import { buildTweetUrl } from "@/utils/tweetUtils";
 import resultComments from "../../public/data/result_comments.json";
 
-export type { GameSettings, StageProgress, UserProgress, GameState };
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current flex-shrink-0" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+}
+
+function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
+  if (totalKeysTyped === 0) {
+    const firstMsgs = [
+      "準備おっけー？アタシと一緒にAZIKタイピング、爆速でマスターしちゃお！💅💎✨",
+      "はじめまして～！アタシがAZIKの習得を全力サポートするよ！一緒にやろ！✨💎",
+      "AZIKって知ってる！？指が爆速になる魔法の入力方法！アタシが教えてあげるね！🔥💅",
+    ];
+    return firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
+  }
+  const welcomeMsgs = [
+    "おかえりー！今日もアタシとAZIKの練習しよ！💅💖",
+    "きたきたー！待ってたよ！一緒にAZIK極めちゃお！✨🔥",
+    "おっ！また来てくれたじゃん！アタシ地味に嬉しいんだけど！💗",
+    "お帰り～！指の準備はオッケー？今日も爆走しよ！💎⚡",
+    "今日も練習に来るとか偉すぎじゃん！アタシ感動してる！🌟💖",
+  ];
+  const lines = [welcomeMsgs[Math.floor(Math.random() * welcomeMsgs.length)]];
+  if (streak > 1) {
+    const streakMsgs = [
+      `連続${streak}日目とかマジでリスペクトなんだけど！🔥`,
+      `${streak}日連続練習！その継続力、天才みが深いわ！💅`,
+      `連続${streak}日！AZIKへの本気度えぐすぎ！🏆`,
+    ];
+    lines.push(streakMsgs[Math.floor(Math.random() * streakMsgs.length)]);
+  }
+  if (totalKeysTyped >= 10000) {
+    const bigMsgs = [
+      `累計${totalKeysTyped.toLocaleString()}打鍵突破！もうAZIK中毒系でしょ！⭐👑`,
+      `打鍵数${totalKeysTyped.toLocaleString()}回！指の筋肉が別格になってるよ！💎🔥`,
+    ];
+    lines.push(bigMsgs[Math.floor(Math.random() * bigMsgs.length)]);
+  } else if (totalKeysTyped >= 1000) {
+    const midMsgs = [
+      `累計${totalKeysTyped.toLocaleString()}打鍵突破！いい感じに指が馴染んできたね！💎`,
+      `${totalKeysTyped.toLocaleString()}打鍵！着実に上手くなってるの感じてる！✨`,
+    ];
+    lines.push(midMsgs[Math.floor(Math.random() * midMsgs.length)]);
+  }
+  return lines.join("\n");
+}
+
+const LEV_CATS = new Set(["Lev1", "Lev2a", "Lev2b", "Lev3a", "Lev3b", "Lev4"]);
+const LEV_STAGES = STAGES.filter(s => LEV_CATS.has(s.category));
+const LEV_TOTAL = LEV_STAGES.length;
+
+function TitleProgressBar({ stageProgress, totalKeysTyped, streak }: {
+  stageProgress: UserProgress["stageProgress"];
+  totalKeysTyped: number;
+  streak: number;
+}) {
+  const levCleared = LEV_STAGES.filter(s => (stageProgress[s.id]?.stars ?? 0) >= 2).length;
+  const pct = Math.round((levCleared / LEV_TOTAL) * 100);
+  return (
+    <div className="text-[10px] md:text-xs font-pixel text-green-300 border border-green-800 bg-zinc-950/80 px-4 py-2 rounded w-full flex flex-col gap-2 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.8)]">
+      {totalKeysTyped > 0 && (
+        <div className="flex justify-around">
+          <div>TOTAL KEYS: <span className="font-bold text-yellow-400">{totalKeysTyped.toLocaleString()}</span></div>
+          <div>STREAK: <span className="font-bold text-yellow-400">{streak} DAYS</span></div>
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-2 bg-zinc-800 rounded-sm overflow-hidden border border-zinc-700">
+          <div
+            className="h-full bg-yellow-400 transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <span className="whitespace-nowrap shrink-0">
+          <span className="font-bold text-yellow-400">{levCleared}</span> / {LEV_TOTAL} STAGES
+        </span>
+      </div>
+    </div>
+  );
+}
+
+const SHARE_BTN_CLASS = "w-full font-pixel font-bold tracking-wider rounded transition-all duration-150 bg-sky-950 text-sky-300 border-2 border-sky-500 hover:bg-sky-500 hover:text-white focus:bg-sky-500 focus:text-white focus:outline-none px-6 py-4 flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]";
 
 const STORAGE_KEY = "azik-fairy-settings";
 const PROGRESS_STORAGE_KEY = "azik-fairy-progress";
@@ -208,46 +292,7 @@ export default function Home() {
       
       {/* タイトル画面 - 横長レイアウト */}
       {gameState === "TITLE" && (
-        <FairyScreenLayout fairy={{ emotion: "idle", message: (() => {
-                if (progress.totalKeysTyped === 0) {
-                  const firstMsgs = [
-                    "準備おっけー？アタシと一緒にAZIKタイピング、爆速でマスターしちゃお！💅💎✨",
-                    "はじめまして～！アタシがAZIKの習得を全力サポートするよ！一緒にやろ！✨💎",
-                    "AZIKって知ってる！？指が爆速になる魔法の入力方法！アタシが教えてあげるね！🔥💅",
-                  ];
-                  return firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
-                }
-                const welcomeMsgs = [
-                  "おかえりー！今日もアタシとAZIKの練習しよ！💅💖",
-                  "きたきたー！待ってたよ！一緒にAZIK極めちゃお！✨🔥",
-                  "おっ！また来てくれたじゃん！アタシ地味に嬉しいんだけど！💗",
-                  "お帰り～！指の準備はオッケー？今日も爆走しよ！💎⚡",
-                  "今日も練習に来るとか偉すぎじゃん！アタシ感動してる！🌟💖",
-                ];
-                const lines = [welcomeMsgs[Math.floor(Math.random() * welcomeMsgs.length)]];
-                if (progress.streak > 1) {
-                  const streakMsgs = [
-                    `連続${progress.streak}日目とかマジでリスペクトなんだけど！🔥`,
-                    `${progress.streak}日連続練習！その継続力、天才みが深いわ！💅`,
-                    `連続${progress.streak}日！AZIKへの本気度えぐすぎ！🏆`,
-                  ];
-                  lines.push(streakMsgs[Math.floor(Math.random() * streakMsgs.length)]);
-                }
-                if (progress.totalKeysTyped >= 10000) {
-                  const bigMsgs = [
-                    `累計${progress.totalKeysTyped.toLocaleString()}打鍵突破！もうAZIK中毒系でしょ！⭐👑`,
-                    `打鍵数${progress.totalKeysTyped.toLocaleString()}回！指の筋肉が別格になってるよ！💎🔥`,
-                  ];
-                  lines.push(bigMsgs[Math.floor(Math.random() * bigMsgs.length)]);
-                } else if (progress.totalKeysTyped >= 1000) {
-                  const midMsgs = [
-                    `累計${progress.totalKeysTyped.toLocaleString()}打鍵突破！いい感じに指が馴染んできたね！💎`,
-                    `${progress.totalKeysTyped.toLocaleString()}打鍵！着実に上手くなってるの感じてる！✨`,
-                  ];
-                  lines.push(midMsgs[Math.floor(Math.random() * midMsgs.length)]);
-                }
-                return lines.join("\n");
-              })() }}>
+        <FairyScreenLayout fairy={{ emotion: "idle", message: getTitleFairyMessage(progress.totalKeysTyped, progress.streak) }}>
           <div className="flex-1 flex flex-col items-center gap-4 text-center">
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-widest font-pixel"
@@ -260,34 +305,11 @@ export default function Home() {
             </p>
 
             {/* 統計ステータス */}
-            {(() => {
-              const LEV_CATS = new Set(["Lev1", "Lev2a", "Lev2b", "Lev3a", "Lev3b", "Lev4"]);
-              const levStages = STAGES.filter(s => LEV_CATS.has(s.category));
-              const levTotal = levStages.length;
-              const levCleared = levStages.filter(s => (progress.stageProgress[s.id]?.stars ?? 0) >= 2).length;
-              const pct = Math.round((levCleared / levTotal) * 100);
-              return (
-                <div className="text-[10px] md:text-xs font-pixel text-green-300 border border-green-800 bg-zinc-950/80 px-4 py-2 rounded w-full flex flex-col gap-2 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.8)]">
-                  {progress.totalKeysTyped > 0 && (
-                    <div className="flex justify-around">
-                      <div>TOTAL KEYS: <span className="font-bold text-yellow-400">{progress.totalKeysTyped.toLocaleString()}</span></div>
-                      <div>STREAK: <span className="font-bold text-yellow-400">{progress.streak} DAYS</span></div>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-zinc-800 rounded-sm overflow-hidden border border-zinc-700">
-                      <div
-                        className="h-full bg-yellow-400 transition-all duration-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="whitespace-nowrap shrink-0">
-                      <span className="font-bold text-yellow-400">{levCleared}</span> / {levTotal} STAGES
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
+            <TitleProgressBar
+              stageProgress={progress.stageProgress}
+              totalKeysTyped={progress.totalKeysTyped}
+              streak={progress.streak}
+            />
 
             <KeyNavGroup className="flex flex-col gap-4 w-full max-w-xs">
               <GameButton variant="primary" size="lg" onClick={() => setGameState("STAGE_SELECT")} className="w-full">
@@ -428,33 +450,11 @@ export default function Home() {
               // Lev1-4 は常に training シェア。Practice/Challenge は settings.isTraining で決まる。
               const isPracticeOrChallengeStage = stageMeta?.category === "Practice" || stageMeta?.category === "Challenge";
               const isTrainingShare = !isPracticeOrChallengeStage || settings.isTraining;
-
-              const shareClass = "w-full font-pixel font-bold tracking-wider rounded transition-all duration-150 bg-sky-950 text-sky-300 border-2 border-sky-500 hover:bg-sky-500 hover:text-white focus:bg-sky-500 focus:text-white focus:outline-none px-6 py-4 flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]";
-              const XIcon = () => (
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current flex-shrink-0" aria-hidden="true">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-              );
-
-              const tweetUrl = (() => {
-                const rank = stats.rank;
-                const rankLabel = rank === "PERFECT" ? "✦PERFECT✦" : `${rank}ランク`;
-                if (isTrainingShare) {
-                  const shareParams = new URLSearchParams({ theme: "af", title: stageTitle, rank, training: "true" });
-                  const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でトレーニング中！\nステージ: 「${stageTitle}」\n【 ${rankLabel} 】`;
-                  return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
-                }
-                const shareParams = new URLSearchParams({
-                  theme: "af", wpm: String(stats.wpm), acc: String(stats.accuracy),
-                  azik: String(stats.azikRatio), title: stageTitle, rank, comment: stats.comment,
-                });
-                const tweetText = `AZIKタイピング養成妖精 #AZIK_Fairy でスコアアタック！\nステージ: 「${stageTitle}」\n【 ${rankLabel} 】\nスピード: ${stats.wpm} WPM | 正確率: ${stats.accuracy}% | AZIK率: ${stats.azikRatio}%`;
-                return `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
-              })();
+              const tweetUrl = buildTweetUrl(stats, stageTitle, isTrainingShare, origin);
 
               return (
                 <KeyNavGroup className="flex flex-col gap-3 w-full">
-                  <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={shareClass}>
+                  <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={SHARE_BTN_CLASS}>
                     <XIcon />
                     <span className="text-sm">{isTrainingShare ? "POST TRAINING" : "POST RESULT"}</span>
                   </a>
