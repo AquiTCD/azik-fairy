@@ -8,7 +8,7 @@ import { StageMeta } from "@/data/stages";
 
 interface AzikKeyVisualizerProps {
   stage: StageMeta;
-  onStart: () => void;
+  onStart: (markAsSeen: boolean) => void;
   layout: "US" | "JIS";
 }
 
@@ -411,7 +411,8 @@ const LEV4_STAGES: Record<string, IntroConfig> = {
   },
 };
 
-function getIntroConfig(stageId: string): IntroConfig | null {
+export type { IntroConfig, AnimFrame };
+export function getIntroConfig(stageId: string): IntroConfig | null {
   return (
     INTRO_CONFIGS[stageId] ??
     LEV2A_STAGES[stageId] ??
@@ -430,6 +431,7 @@ function getIntroConfig(stageId: string): IntroConfig | null {
 export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVisualizerProps) {
   const config = getIntroConfig(stage.id);
   const [frameIdx, setFrameIdx] = useState(0);
+  const [dontShowAgain, setDontShowAgain] = useState(true);
 
   const frames = config?.frames ?? [];
 
@@ -449,7 +451,7 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
         <div className="flex-1 flex flex-col items-center justify-center gap-6">
           <h2 className="text-2xl font-bold font-pixel text-green-400">{stage.name}</h2>
           <p className="text-sm text-zinc-300">{stage.description}</p>
-          <GameButton variant="primary" size="lg" onClick={onStart}>PLAY</GameButton>
+          <GameButton variant="primary" size="lg" onClick={() => onStart(dontShowAgain)}>PLAY</GameButton>
         </div>
       </FairyScreenLayout>
     );
@@ -466,7 +468,7 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
 
         {/* キーボードアニメーション */}
         <div className="border border-green-800 bg-zinc-950/80 rounded p-3 flex flex-col items-center gap-2">
-          <div className="text-xs font-pixel text-green-400 h-5 transition-all duration-300">
+          <div className="text-xs font-pixel text-green-400 h-5 transition-all duration-300 tracking-wider">
             {currentFrame.label}
           </div>
           <KeyboardDiagram
@@ -475,7 +477,7 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
             layout={layout}
           />
           {currentFrame.sublabel && (
-            <div className="text-[10px] text-zinc-500 font-pixel">{currentFrame.sublabel}</div>
+            <div className="text-[10px] text-zinc-500 font-sans">{currentFrame.sublabel}</div>
           )}
           {frames.length > 1 && (
             <div className="flex gap-1 mt-1">
@@ -494,19 +496,30 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
           <div className="text-[10px] font-pixel text-green-500 mb-1">EXAMPLES</div>
           <div className="grid grid-cols-2 gap-1.5">
             {config.examples.map((ex, i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 flex items-center gap-2 font-pixel text-xs">
-                <span className="text-zinc-500 line-through text-[10px]">{ex.from}</span>
+              <div key={i} className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 flex items-center gap-2 text-xs">
+                <span className="text-zinc-500 line-through text-[10px] font-pixel">{ex.from}</span>
                 <span className="text-zinc-500">→</span>
-                <span className="text-yellow-400 font-bold">{ex.to}</span>
-                <span className="text-zinc-400 ml-auto text-[10px]">{ex.label}</span>
+                <span className="text-yellow-400 font-bold font-pixel">{ex.to}</span>
+                <span className="text-zinc-400 ml-auto text-[10px] font-sans">{ex.label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <GameButton variant="primary" size="lg" onClick={onStart} className="w-full mt-auto">
-          PLAY
-        </GameButton>
+        <div className="flex flex-col gap-2 mt-auto">
+          <label className="flex items-center gap-2 text-xs text-zinc-400 font-sans cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={dontShowAgain}
+              onChange={e => setDontShowAgain(e.target.checked)}
+              className="accent-yellow-400 w-3.5 h-3.5"
+            />
+            次回から表示しない
+          </label>
+          <GameButton variant="primary" size="lg" onClick={() => onStart(dontShowAgain)} className="w-full">
+            PLAY
+          </GameButton>
+        </div>
       </div>
     </FairyScreenLayout>
   );

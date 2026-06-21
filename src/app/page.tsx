@@ -155,12 +155,14 @@ export default function Home() {
     }
   };
 
-  const handleStartFromIntro = () => {
+  const handleStartFromIntro = (markAsSeen: boolean) => {
     if (!selectedStageId) return;
-    const newSeen = [...progress.seenStageIntros, selectedStageId];
-    const newProgress = { ...progress, seenStageIntros: newSeen };
-    setProgress(newProgress);
-    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+    if (markAsSeen) {
+      const newSeen = [...progress.seenStageIntros, selectedStageId];
+      const newProgress = { ...progress, seenStageIntros: newSeen };
+      setProgress(newProgress);
+      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+    }
     setGameState("PLAYING");
   };
 
@@ -303,17 +305,16 @@ export default function Home() {
                       <div>STREAK: <span className="font-bold text-yellow-400">{progress.streak} DAYS</span></div>
                     </div>
                   )}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex justify-between">
-                      <span>PROGRESS</span>
-                      <span><span className="font-bold text-yellow-400">{levCleared}</span> / {levTotal} STAGES CLEARED</span>
-                    </div>
-                    <div className="w-full h-2 bg-zinc-800 rounded-sm overflow-hidden border border-zinc-700">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-zinc-800 rounded-sm overflow-hidden border border-zinc-700">
                       <div
                         className="h-full bg-yellow-400 transition-all duration-500"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
+                    <span className="whitespace-nowrap shrink-0">
+                      <span className="font-bold text-yellow-400">{levCleared}</span> / {levTotal} STAGES
+                    </span>
                   </div>
                 </div>
               );
