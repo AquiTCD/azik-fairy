@@ -46,7 +46,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
   const customizableKeys = getCustomizableKeys(settings.keyboardLayout);
 
-  const toggleSetting = (key: keyof Omit<GameSettings, "customRules" | "wordsPerSession" | "keyboardLayout" | "enableSpecial" | "enableForeign" | "nAlternative">) => {
+  const toggleSetting = (key: keyof Omit<GameSettings, "customRules" | "wordsPerSession" | "keyboardLayout" | "enableSpecial" | "enableForeign" | "nAlternative" | "soundTheme">) => {
     onUpdateSettings({
       ...settings,
       [key]: !settings[key],
@@ -184,29 +184,11 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
           <div className="flex flex-col gap-4">
             <h3 className="text-sm font-bold text-green-300 border-b border-green-950 pb-1">■ SYSTEM SETTINGS</h3>
 
-            {/* 実戦・お題ステージのトレーニングモード */}
+            {/* TRAINING MODE設定 */}
             <div className="flex flex-col gap-3 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              <div className="flex justify-between items-center gap-4">
-                <span className="font-bold text-sm md:text-base tracking-wider">挑戦ステージ MODE:</span>
-                <button
-                  onClick={() => onUpdateSettings({ ...settings, isTraining: !settings.isTraining })}
-                  className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.isTraining
-                    ? "bg-green-500 text-black border-green-500"
-                    : "bg-yellow-500 text-black border-yellow-500"
-                    }`}
-                >
-                  {settings.isTraining ? "TRAINING" : "CHALLENGE"}
-                </button>
-              </div>
-              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-                挑戦ステージのデフォルトモードを設定します。<br />
-                CHALLENGE（スコアアタック）時はスコアパラメータ付きでシェアできます。<br />
-                （基礎〜特殊の練習ステージは常にTRAININGモード）
-              </p>
-
-              {/* FOCUS / FULL */}
-              <div className="flex flex-col gap-1.5 border-t border-zinc-700 pt-3">
-                <span className="text-xs font-bold text-zinc-300 tracking-wider">TRAINING SUB-MODE:</span>
+              <span className="text-xs font-pixel font-bold text-green-300 tracking-wider">TRAINING MODE</span>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-zinc-300 tracking-wider">FOCUS / FULL:</span>
                 <div className="flex gap-2">
                   {([
                     { value: false, label: "FOCUS", desc: "ステージ学習範囲のキーのみAZIK必須" },
@@ -226,6 +208,43 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                   ))}
                 </div>
               </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                TRAININGモードでのAZIK入力強制の範囲を設定します。<br />
+                FOCUS: 現在のステージで学習するキーのみAZIK必須。<br />
+                FULL: 全AZIKショートカット（学習済み含む）すべてを強制。
+              </p>
+            </div>
+
+            {/* CHALLENGE MODE設定 */}
+            <div className="flex flex-col gap-3 p-4 bg-zinc-800 border-2 border-yellow-700 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <span className="text-xs font-pixel font-bold text-yellow-300 tracking-wider">CHALLENGE MODE</span>
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm tracking-wider">入力モード デフォルト:</span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onUpdateSettings({ ...settings, isTraining: true })}
+                    className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.isTraining
+                      ? "bg-green-500 text-black border-green-500"
+                      : "bg-zinc-700 text-zinc-400 border-zinc-600 hover:border-green-500"
+                      }`}
+                  >
+                    TRAINING
+                  </button>
+                  <button
+                    onClick={() => onUpdateSettings({ ...settings, isTraining: false })}
+                    className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${!settings.isTraining
+                      ? "bg-yellow-500 text-black border-yellow-500"
+                      : "bg-zinc-700 text-zinc-400 border-zinc-600 hover:border-yellow-500"
+                      }`}
+                  >
+                    CHALLENGE
+                  </button>
+                </div>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                CHALLENGEフローでステージを選んだときの初期モードです。<br />
+                CHALLENGE（スコアアタック）時はスコアパラメータ付きでシェアできます。
+              </p>
             </div>
 
             {/* キーガイド */}
@@ -322,6 +341,25 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
               </div>
               <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
                 効果音のテーマを選択します。OFF / SOFT / 8BIT / TYPE の4種類。ゲーム画面からもON/OFFのみ切り替え可能です。
+              </p>
+            </div>
+
+            {/* ゴーストレース */}
+            <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <div className="flex justify-between items-center gap-4">
+                <span className="font-bold text-sm md:text-base tracking-wider">GHOST RACE:</span>
+                <button
+                  onClick={() => toggleSetting("ghostRaceEnabled")}
+                  className={`px-4 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.ghostRaceEnabled
+                    ? "bg-green-500 text-black border-green-500"
+                    : "bg-zinc-700 text-green-400 border-green-500"
+                    }`}
+                >
+                  {settings.ghostRaceEnabled ? "ON" : "OFF"}
+                </button>
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                ステージプレイ中に自己ベストのペースをゴーストバーで表示します。
               </p>
             </div>
 

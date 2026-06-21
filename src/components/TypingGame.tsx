@@ -93,18 +93,26 @@ function RubyText({ kanji, kana }: { kanji: string; kana: string }) {
   );
 }
 
+const WEAKNESS_STAGE_ID = "__weakness__";
+
 interface TypingGameProps {
   stageId: string;
   settings: GameSettings;
   onFinish: (stats: GameStats) => void;
   onBackToStageSelect: () => void;
   onUpdateSettings: (s: GameSettings) => void;
+  ghostBestWpm?: number;
+  weaknessOverrideWords?: TypingWord[];
 }
 
-export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect, onUpdateSettings }: TypingGameProps) {
+export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect, onUpdateSettings, ghostBestWpm, weaknessOverrideWords }: TypingGameProps) {
   const [stage, setStage] = useState<StageData | null>(null);
 
   useEffect(() => {
+    if (stageId === WEAKNESS_STAGE_ID) {
+      setStage({ id: WEAKNESS_STAGE_ID, name: "弱点練習", category: "Practice", description: "弱点集中練習", words: [] } as unknown as StageData);
+      return;
+    }
     setStage(null);
     loadStage(stageId).then(setStage);
   }, [stageId]);
@@ -128,6 +136,9 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
   // STAGE COMPLETE 中に "PRESS ANY KEY" で渡す統計
   const [pendingStats, setPendingStats] = useState<GameStats | null>(null);
+
+  // ヒートマップ: refで管理（完了時に読み取り）
+  const keyHeatmapRef = useRef<Record<string, { miss: number; attempt: number }>>({});
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -167,22 +178,30 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
   useEffect(() => {
     if (!stage) return;
-    const isDebug = process.env.NEXT_PUBLIC_DEBUG === "true";
-    const limit = isDebug ? 1 : (
-      stage.category === "Challenge" ? 0 :
-      stage.category === "Practice"  ? 50 :
-      settings.wordsPerSession
-    );
-    const sourceWords = limit > 0 && stage.words.length > limit
-      ? [...stage.words].sort(() => Math.random() - 0.5).slice(0, limit)
-      : stage.words;
-    const initializedWords = sourceWords.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
-    setWords(initializedWords);
 
-    // 理論最小キー数を計算
+    let initializedWords: TypingWord[];
+
+    if (stage.id === WEAKNESS_STAGE_ID && weaknessOverrideWords && weaknessOverrideWords.length > 0) {
+      initializedWords = weaknessOverrideWords;
+    } else if (stage.id === WEAKNESS_STAGE_ID) {
+      // weaknessOverrideWordsがまだロード中: 待機
+      return;
+    } else {
+      const isDebug = process.env.NEXT_PUBLIC_DEBUG === "true";
+      const limit = isDebug ? 1 : (
+        stage.category === "Challenge" ? 0 :
+        stage.category === "Practice"  ? 50 :
+        settings.wordsPerSession
+      );
+      const sourceWords = limit > 0 && stage.words.length > limit
+        ? [...stage.words].sort(() => Math.random() - 0.5).slice(0, limit)
+        : stage.words;
+      initializedWords = sourceWords.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
+    }
+
     const counts = calculateOptimalKeyCounts(initializedWords);
+    setWords(initializedWords);
     setOptimalKeys(counts);
-
     setWordIndex(0);
     setSegmentIndex(0);
     setInputBuffer("");
@@ -190,9 +209,15 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     setElapsedTime(0);
     setTotalCorrectKeys(0);
     setTotalMissKeys(0);
-    setFairyMessage(`${stage.name}！AZIKでいくよー！何かキーを押してね！💖`);
+    keyHeatmapRef.current = {};
+
+    const msg = stage.id === WEAKNESS_STAGE_ID
+      ? "弱点集中練習！苦手なキーを克服するよ！💪"
+      : `${stage.name}！AZIKでいくよー！何かキーを押してね！💖`;
+    setFairyMessage(msg);
     setFairyEmotion("idle");
-  }, [stage, customDictionary]);
+    setPendingStats(null);
+  }, [stage, customDictionary, weaknessOverrideWords]);
 
   useEffect(() => {
     if (startTime !== null && !isFinished()) {
@@ -219,14 +244,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         currentStartTime = Date.now();
         setStartTime(currentStartTime);
         setFairyMessage(getRandomQuote("start"));
-        setFairyEmotion("excited"); // 初打鍵 → やる気モード
+        setFairyEmotion("excited");
       }
 
       const key = e.key.toLowerCase();
       const currentWord = words[wordIndex];
       const currentSeg = currentWord.segments[segmentIndex];
 
-      // Lev1-4 は常に training。Practice/Challenge は settings.isTraining で切り替え。
       const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
       const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
 
@@ -241,18 +265,15 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         const isSummaryStage = stageId.includes("summary");
         const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
 
-        // Lev3a/Lev3b 非まとめ: サブステージ専用述語で判定（isTargetSegment をバイパス）
         const stagePred = STAGE_KEY_PREDS[stageId];
         if (!isSummaryStage && stagePred) {
           const targetKeys = currentSeg.azik.filter(k => stagePred(getCore(k)));
           if (targetKeys.length > 0) return targetKeys;
-          // このサブパターンのターゲットキーなし → 非対象セグメント
           return settings.isFullTraining
             ? currentSeg.azik
             : [...currentSeg.normal, ...currentSeg.azik];
         }
 
-        // Lev1/Lev2 / まとめステージ: AzikLevel ベース
         const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
         if (!isTarget) {
           return settings.isFullTraining
@@ -265,8 +286,21 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         }
         return currentSeg.azik;
       })();
+
+      // ヒートマップ: expected key を記録
+      const expectedKey = allowedPatterns
+        .map(p => p[inputBuffer.length])
+        .filter(Boolean)[0];
+
       const nextBuffer = inputBuffer + key;
       const isValidPrefix = allowedPatterns.some(pattern => pattern.startsWith(nextBuffer));
+
+      // attempt は毎回カウント（valid/invalid 問わず）
+      if (expectedKey) {
+        const prev = keyHeatmapRef.current;
+        const entry = prev[expectedKey] ?? { miss: 0, attempt: 0 };
+        keyHeatmapRef.current = { ...prev, [expectedKey]: { ...entry, attempt: entry.attempt + 1 } };
+      }
 
       if (isValidPrefix) {
         setInputBuffer(nextBuffer);
@@ -292,7 +326,6 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
               const accuracy = Math.round((totalKeys / (totalKeys + totalMissKeys)) * 100);
               const wpm = Math.round((totalKeys / totalTime) * 60);
 
-              // AZIK度の計算
               const actualKeys = totalCorrectKeys + 1;
               const totalNormal = optimalKeys.totalNormal;
               const totalAzik = optimalKeys.totalAzik;
@@ -300,7 +333,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
                  ? Math.max(0, Math.min(100, Math.round(((totalNormal - actualKeys) / (totalNormal - totalAzik)) * 100)))
                  : 100;
                const savedKeys = Math.max(0, totalNormal - actualKeys);
- 
+
                const rank = getRank(accuracy, wpm, azikRatio);
                const commentIds = rank === "PERFECT" ? ["P1", "P2", "P3", "P4"]
                  : rank === "A" ? ["A1", "A2", "A3", "A4"]
@@ -309,19 +342,27 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
                const commentId = commentIds[Math.floor(Math.random() * commentIds.length)];
                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                const commentText = (resultComments as any)[commentId] || "";
- 
+
                setFairyMessage(commentText);
                const rankEmotion: FairyEmotion = rank === "PERFECT" ? "perfect" : rank === "A" ? "proud" : "happy";
                setFairyEmotion(rankEmotion);
-               setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId, savedKeys });
+               setPendingStats({ time: totalTime, wpm, accuracy, totalKeys, missCount: totalMissKeys, azikRatio, rank, comment: commentId, savedKeys, keyHeatmap: keyHeatmapRef.current });
             } else {
               playWordComplete();
               setFairyMessage(getRandomQuote("correctWord"));
-              setFairyEmotion("happy"); // 1単語クリア → 喜び
+              setFairyEmotion("happy");
             }
           }
         }
       } else {
+        // ミス: miss もカウント
+        if (expectedKey) {
+          const prev = keyHeatmapRef.current;
+          const entry = prev[expectedKey] ?? { miss: 0, attempt: 0 };
+          // attempt は上でカウント済みなので miss のみ追加
+          keyHeatmapRef.current = { ...prev, [expectedKey]: { ...entry, miss: entry.miss + 1 } };
+        }
+
         playMiss();
         setTotalMissKeys(prev => prev + 1);
         if (settings.isTraining) {
@@ -429,6 +470,19 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       }))].filter(k => !azikNextKeys.includes(k))
     : [];
 
+  // ゴースト位置計算（経過時間ベース）
+  const ghostProgress = (() => {
+    if (!ghostBestWpm || !settings.ghostRaceEnabled || !startTime) return null;
+    const elapsed = (Date.now() - startTime) / 1000;
+    const ghostChars = (ghostBestWpm / 60) * elapsed;
+    return Math.min(1, ghostChars / Math.max(optimalKeys.totalAzik, 1));
+  })();
+
+  // 自分の進捗（キーベース）
+  const myKeyProgress = optimalKeys.totalAzik > 0
+    ? Math.min(1, totalCorrectKeys / optimalKeys.totalAzik)
+    : wordIndex / Math.max(words.length, 1);
+
   return (
     <FairyScreenLayout
       wide
@@ -458,7 +512,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       {/* ===== ゲーム本体 ===== */}
       <div className={`flex-1 flex flex-col gap-4 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
 
-        {/* 進捗ゲージ */}
+        {/* 進捗ゲージ（単語ベース） */}
         <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
           <div
             className="bg-green-500 h-full transition-all duration-300"
@@ -469,16 +523,37 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </span>
         </div>
 
+        {/* ゴーストレースバー */}
+        {ghostBestWpm && settings.ghostRaceEnabled && (
+          <div className="relative w-full h-2 bg-zinc-800 rounded overflow-hidden border border-zinc-700">
+            {/* 自分の進捗（キーベース） */}
+            <div
+              className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-100"
+              style={{ width: `${Math.min(100, myKeyProgress * 100)}%` }}
+            />
+            {/* ゴーストマーカー */}
+            {ghostProgress !== null && (
+              <div
+                className="absolute top-0 h-full w-1 bg-yellow-400 opacity-80"
+                style={{ left: `${Math.min(99, ghostProgress * 100)}%` }}
+              />
+            )}
+            <div className="absolute right-1 top-0 h-full flex items-center">
+              <span className="text-[8px] text-yellow-400 font-pixel opacity-70">👻{ghostBestWpm}wpm</span>
+            </div>
+          </div>
+        )}
+
         {/* タイピングボード */}
         <div className="w-full flex flex-col items-center p-6 lg:p-8 bg-zinc-950 border-2 border-green-500 rounded-md min-h-[160px] justify-center relative shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]">
-          {/* 漢字（ルビ付き） — 常に2行分の高さを確保 */}
+          {/* 漢字（ルビ付き） */}
           <div className="flex items-center justify-center min-h-[4.5rem] md:min-h-[5rem] lg:min-h-[6rem] w-full text-center mb-2">
             <div className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {currentWord ? (stage?.category === "Challenge" ? currentWord.kanji : <RubyText kanji={currentWord.kanji} kana={currentWord.kana} />) : ""}
             </div>
           </div>
 
-          {/* ひらがなセグメント — 常に2行分の高さを確保 */}
+          {/* ひらがなセグメント */}
           <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem] w-full mb-2">
           <div className="flex flex-wrap items-center justify-center gap-x-2 text-xl md:text-2xl lg:text-3xl tracking-widest font-sans">
             {currentWord?.segments.map((seg, idx) => {
@@ -500,7 +575,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
               );
             })}
           </div>
-          </div>{/* カナ wrapper end */}
+          </div>
 
           {/* キーガイド */}
           {settings.showGuide && currentSeg && (
@@ -527,7 +602,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           )}
         </div>
 
-        {/* モバイル用メトリクス (lg未満で表示) */}
+        {/* モバイル用メトリクス */}
         <div className="grid grid-cols-4 lg:hidden gap-x-2 gap-y-1 w-full text-xs border-t border-green-900 pt-3 px-1 font-pixel text-green-300">
           <div>TIME: <span className="font-bold text-green-200">{elapsedTime}s</span></div>
           <div>KEYS: <span className="font-bold text-zinc-100">{totalCorrectKeys}</span></div>
@@ -559,7 +634,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
                 ? "💡 「っ」単体は [;] で一発入力できます！"
                 : ["しゃ","しゅ","しょ","ちゃ","ちゅ","ちょ","じゃ","じゅ","じょ"].includes(currentSeg.kana)
                 ? "💡 拗音短縮: シャ行 [x]、チャ行 [c]、ジャ行 [j] で2打鍵！"
-                : " "}
+                : " "}
             </p>
           </div>
         )}

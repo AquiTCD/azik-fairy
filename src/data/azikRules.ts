@@ -341,22 +341,22 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "しゅ": { normal: ["syu", "shu"], azik: ["xu"] },
   "しぇ": { normal: ["sye", "she"], azik: ["xe"] },
   "しょ": { normal: ["syo", "sho"], azik: ["xo"] },
-  "しゃん": { normal: ["syan", "shan"], azik: ["xz"] },
-  "しゅん": { normal: ["syun", "shun"], azik: ["xj"] },
-  "しょん": { normal: ["syon", "shon"], azik: ["xl"] },
-  "しゅう": { normal: ["syuu", "shuu"], azik: ["xh"] },
-  "しょう": { normal: ["syou", "shou"], azik: ["xp"] },
+  "しゃん": { normal: ["syan", "shan", "xan"], azik: ["xz"] },
+  "しゅん": { normal: ["syun", "shun", "xun"], azik: ["xj"] },
+  "しょん": { normal: ["syon", "shon", "xon"], azik: ["xl"] },
+  "しゅう": { normal: ["syuu", "shuu", "xuu"], azik: ["xh"] },
+  "しょう": { normal: ["syou", "shou", "xou"], azik: ["xp"] },
 
   "ちゃ": { normal: ["tya", "cha", "cya"], azik: ["ca"] },
   "ちぃ": { normal: ["tyi"], azik: ["ci"] },
   "ちゅ": { normal: ["tyu", "chu", "cyu"], azik: ["cu"] },
   "ちぇ": { normal: ["tye", "che"], azik: ["ce", "cf"] },
   "ちょ": { normal: ["tyo", "cho", "cyo"], azik: ["co"] },
-  "ちゃん": { normal: ["tyan", "chan"], azik: ["cz"] },
-  "ちゅん": { normal: ["tyun", "chun"], azik: ["cj"] },
-  "ちょん": { normal: ["tyon", "chon"], azik: ["cl"] },
-  "ちゅう": { normal: ["tyuu", "chuu"], azik: ["ch"] },
-  "ちょう": { normal: ["tyou", "chou"], azik: ["cp"] },
+  "ちゃん": { normal: ["tyan", "chan", "can"], azik: ["cz"] },
+  "ちゅん": { normal: ["tyun", "chun", "cun"], azik: ["cj"] },
+  "ちょん": { normal: ["tyon", "chon", "con"], azik: ["cl"] },
+  "ちゅう": { normal: ["tyuu", "chuu", "cuu"], azik: ["ch"] },
+  "ちょう": { normal: ["tyou", "chou", "cou"], azik: ["cp"] },
 
   "じゃ": { normal: ["zya", "ja", "jya"], azik: ["ja"] },
   "じゅ": { normal: ["zyu", "ju", "jyu"], azik: ["ju", "jf"] },
@@ -476,14 +476,14 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "きぇい": { normal: ["kyei"], azik: ["kgw", "kyw"] },
 
   // --- し系欠落拡張 ---
-  "しゃい": { normal: ["syai", "shai"], azik: ["xq", "syq"] },
-  "しぇん": { normal: ["syen", "shen"], azik: ["xd", "syd"] },
-  "しぇい": { normal: ["syei", "shei"], azik: ["xw", "syw"] },
+  "しゃい": { normal: ["syai", "shai", "xai"], azik: ["xq"] },
+  "しぇん": { normal: ["syen", "shen", "xen"], azik: ["xd"] },
+  "しぇい": { normal: ["syei", "shei", "xei"], azik: ["xw"] },
 
   // --- ち系欠落拡張 ---
-  "ちゃい": { normal: ["tyai", "chai"], azik: ["cq", "tyq"] },
-  "ちぇん": { normal: ["tyen", "chen"], azik: ["cd", "tyd"] },
-  "ちぇい": { normal: ["tyei", "chei"], azik: ["cw", "tyw"] },
+  "ちゃい": { normal: ["tyai", "chai", "cai"], azik: ["cq"] },
+  "ちぇん": { normal: ["tyen", "chen", "cen"], azik: ["cd"] },
+  "ちぇい": { normal: ["tyei", "chei", "cei"], azik: ["cw"] },
 
   // --- じ系欠落拡張 ---
   "じゃい": { normal: ["zyai", "jai"], azik: ["jq"] },

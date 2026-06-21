@@ -12,6 +12,7 @@ export interface GameStats {
   rank: RankType;
   comment: string;
   savedKeys: number;
+  keyHeatmap: Record<string, { miss: number; attempt: number }>;
 }
 
 export interface GameSettings {
@@ -27,6 +28,7 @@ export interface GameSettings {
   enableSpecial: boolean;
   enableForeign: boolean;
   nAlternative: "off" | "left" | "all";
+  ghostRaceEnabled: boolean;
 }
 
 export interface StageProgress {
@@ -36,12 +38,49 @@ export interface StageProgress {
   bestTime: number;
 }
 
+export interface WeaknessStat {
+  missCount: number;
+  attemptCount: number;
+  missType: {
+    strict: number;
+    typo: number;
+    slow: number;
+  };
+  lastMissDate: string;
+}
+
+export interface DailySession {
+  date: string;
+  bestWpm: number;
+  avgAccuracy: number;
+  avgAzikRatio: number;
+}
+
+export interface TimeAttackBest {
+  wpm: number;
+  accuracy: number;
+  date: string;
+}
+
 export interface UserProgress {
   stageProgress: Record<string, StageProgress>;
   totalKeysTyped: number;
   lastPlayDate: string;
   streak: number;
   seenStageIntros: string[];
+  weaknessStats: Record<string, WeaknessStat>;
+  sessionHistory: DailySession[];
+  timeAttackBest: TimeAttackBest | null;
 }
 
-export type GameState = "TITLE" | "STAGE_SELECT" | "STAGE_INTRO" | "PLAYING" | "RESULT" | "SETTINGS" | "HELP";
+export type GameState =
+  | "TITLE"
+  | "MODE_SELECT"
+  | "STAGE_SELECT"
+  | "STAGE_INTRO"
+  | "PLAYING"
+  | "RESULT"
+  | "SETTINGS"
+  | "HELP"
+  | "STATS"
+  | "TIME_ATTACK";

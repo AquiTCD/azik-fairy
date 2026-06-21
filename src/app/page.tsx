@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { getRandomAds } from "@/data/adData";
-import { calcStars, calcStreak, getNextStageId } from "@/utils/gameLogic";
+import { calcStars, calcStreak, getNextStageId, getWeaknessRanking, mergeWeaknessStats, mergeSessionHistory } from "@/utils/gameLogic";
 import { STAGES } from "@/data/stages";
+import { loadStage } from "@/data/stages";
+import { mergeCustomAzikRules, createTypingWord, TypingWord } from "@/data/azikRules";
 import StageSelector from "@/components/StageSelector";
 import Settings from "@/components/Settings";
 import TypingGame from "@/components/TypingGame";
@@ -13,7 +15,10 @@ import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AdBanner from "@/components/AdBanner";
 import KeyNavGroup from "@/components/KeyNavGroup";
 import AzikKeyVisualizer from "@/components/AzikKeyVisualizer";
-import { GameStats, GameSettings, StageProgress, UserProgress, GameState } from "@/types/game";
+import KeyboardDiagram from "@/components/KeyboardDiagram";
+import StatsScreen from "@/components/StatsScreen";
+import TimeAttackGame from "@/components/TimeAttackGame";
+import { GameStats, GameSettings, StageProgress, UserProgress, GameState, TimeAttackBest } from "@/types/game";
 import { buildTweetUrl } from "@/utils/tweetUtils";
 import resultComments from "../../public/data/result_comments.json";
 
@@ -104,6 +109,7 @@ const SHARE_BTN_CLASS = "w-full font-pixel font-bold tracking-wider rounded tran
 
 const STORAGE_KEY = "azik-fairy-settings";
 const PROGRESS_STORAGE_KEY = "azik-fairy-progress";
+const WEAKNESS_PRACTICE_STAGE_ID = "__weakness__";
 
 const DEFAULT_SETTINGS: GameSettings = {
   isTraining: true,
@@ -118,6 +124,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   enableSpecial: true,
   enableForeign: true,
   nAlternative: "left",
+  ghostRaceEnabled: true,
 };
 
 const DEFAULT_PROGRESS: UserProgress = {
@@ -126,25 +133,33 @@ const DEFAULT_PROGRESS: UserProgress = {
   lastPlayDate: "",
   streak: 0,
   seenStageIntros: [],
+  weaknessStats: {},
+  sessionHistory: [],
+  timeAttackBest: null,
 };
 
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>("TITLE");
+  const [flowMode, setFlowMode] = useState<"training" | "challenge">("training");
   const [selectedStageId, setSelectedStageId] = useState<string | null>(null);
-  
-  // 設定ステート (初期値はデフォルト)
+
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
-
-  // 進捗・統計ステート
   const [progress, setProgress] = useState<UserProgress>(DEFAULT_PROGRESS);
-
-  // マウント状態管理 (ハイドレーション不一致エラーの対策)
   const [isMounted, setIsMounted] = useState(false);
-
   const [stats, setStats] = useState<GameStats | null>(null);
 
   const [titleAds] = useState(() => getRandomAds(2));
   const [resultAds] = useState(() => getRandomAds(2));
+
+  // 弱点練習用の単語（非同期ロード）
+  const [weaknessWords, setWeaknessWords] = useState<TypingWord[] | null>(null);
+
+  // カスタム辞書（page.tsx 内で弱点単語フィルタに使用）
+  const customDictionary = useMemo(() => mergeCustomAzikRules(settings.customRules, {
+    enableSpecial: settings.enableSpecial,
+    enableForeign: settings.enableForeign,
+    nAlternative: settings.nAlternative,
+  }), [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative]);
 
   // 1. マウント時に LocalStorage から設定と進捗を復元
   useEffect(() => {
@@ -153,7 +168,6 @@ export default function Home() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        // Migrate customRules: old format was Record<string, string>, new is Record<string, string[]>
         if (parsed.customRules) {
           const migrated: Record<string, string[]> = {};
           for (const [k, v] of Object.entries(parsed.customRules)) {
@@ -162,7 +176,6 @@ export default function Home() {
           }
           parsed.customRules = migrated;
         }
-        // Migrate old soundTheme:"off"/"default" → soundEnabled + soundTheme split
         if (parsed.soundTheme === "off") {
           parsed.soundEnabled = false;
           parsed.soundTheme = "soft";
@@ -180,15 +193,33 @@ export default function Home() {
     if (storedProgress) {
       try {
         const parsed = JSON.parse(storedProgress);
-        setProgress({
-          ...DEFAULT_PROGRESS,
-          ...parsed,
-        });
+        setProgress({ ...DEFAULT_PROGRESS, ...parsed });
       } catch (e) {
         console.error("Failed to load progress from localStorage:", e);
       }
     }
   }, []);
+
+  // 弱点単語のロード（弱点練習ステージ選択時）
+  useEffect(() => {
+    if (selectedStageId !== WEAKNESS_PRACTICE_STAGE_ID) return;
+    setWeaknessWords(null);
+    const weaknessKeys = getWeaknessRanking(progress.weaknessStats);
+    loadStage("practice-words-1").then(stage => {
+      const filtered = stage.words
+        .filter(w => {
+          const word = createTypingWord(w.kanji, w.kana, customDictionary);
+          return word.segments.some(seg =>
+            seg.azik.some(pattern =>
+              weaknessKeys.some(wk => pattern.includes(wk))
+            )
+          );
+        })
+        .slice(0, 30);
+      const words = filtered.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
+      setWeaknessWords(words.length > 0 ? words : null);
+    });
+  }, [selectedStageId]);
 
   // 2. 設定変更時に LocalStorage に自動保存
   const handleUpdateSettings = (newSettings: GameSettings) => {
@@ -206,6 +237,11 @@ export default function Home() {
     } else {
       setGameState("PLAYING");
     }
+  };
+
+  const handleStartWeaknessPractice = () => {
+    setSelectedStageId(WEAKNESS_PRACTICE_STAGE_ID);
+    setGameState("PLAYING");
   };
 
   const handleStartFromIntro = (markAsSeen: boolean) => {
@@ -238,33 +274,51 @@ export default function Home() {
 
     if (!selectedStageId) return;
 
-    const stars = calcStars(gameStats.accuracy, gameStats.wpm);
-
-    const currentStageProgress = progress.stageProgress[selectedStageId] || {
-      stars: 0,
-      bestWpm: 0,
-      bestAccuracy: 0,
-      bestTime: Infinity,
-    };
-
-    // 自己ベストの更新
-    const newStars = Math.max(currentStageProgress.stars, stars);
-    const newWpm = Math.max(currentStageProgress.bestWpm, gameStats.wpm);
-    const newAccuracy = Math.max(currentStageProgress.bestAccuracy, gameStats.accuracy);
-    const newTime = Math.min(currentStageProgress.bestTime, gameStats.time);
-
-    const updatedStageProgress = {
-      ...progress.stageProgress,
-      [selectedStageId]: {
-         stars: newStars,
-         bestWpm: newWpm,
-         bestAccuracy: newAccuracy,
-         bestTime: newTime,
-      },
-    };
-
-    const todayStr = new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD 形式
+    const todayStr = new Date().toLocaleDateString("sv-SE");
     const newStreak = calcStreak(progress.lastPlayDate, todayStr, progress.streak);
+
+    // 弱点ステージはstageProgressに記録しない
+    const isWeaknessStage = selectedStageId === WEAKNESS_PRACTICE_STAGE_ID;
+    const stage = isWeaknessStage ? null : STAGES.find(s => s.id === selectedStageId);
+
+    const updatedStageProgress = isWeaknessStage
+      ? progress.stageProgress
+      : (() => {
+          const stars = calcStars(gameStats.accuracy, gameStats.wpm);
+          const current = progress.stageProgress[selectedStageId] || { stars: 0, bestWpm: 0, bestAccuracy: 0, bestTime: Infinity };
+          return {
+            ...progress.stageProgress,
+            [selectedStageId]: {
+              stars: Math.max(current.stars, stars),
+              bestWpm: Math.max(current.bestWpm, gameStats.wpm),
+              bestAccuracy: Math.max(current.bestAccuracy, gameStats.accuracy),
+              bestTime: Math.min(current.bestTime, gameStats.time),
+            },
+          };
+        })();
+
+    // ① 弱点統計の更新（Practice + 弱点練習）
+    let updatedWeaknessStats = progress.weaknessStats;
+    if ((stage?.category === "Practice" || isWeaknessStage) && gameStats.keyHeatmap && Object.keys(gameStats.keyHeatmap).length > 0) {
+      updatedWeaknessStats = mergeWeaknessStats(
+        progress.weaknessStats,
+        gameStats.keyHeatmap,
+        settings.isTraining ? "strict" : "typo",
+        todayStr
+      );
+    }
+
+    // ④ sessionHistory の更新（チャレンジモード × Practice / Challenge のみ）
+    let updatedSessionHistory = progress.sessionHistory;
+    if (!settings.isTraining && (stage?.category === "Practice" || stage?.category === "Challenge")) {
+      updatedSessionHistory = mergeSessionHistory(
+        progress.sessionHistory,
+        todayStr,
+        gameStats.wpm,
+        gameStats.accuracy,
+        gameStats.azikRatio,
+      );
+    }
 
     const newProgress: UserProgress = {
       ...progress,
@@ -272,13 +326,28 @@ export default function Home() {
       totalKeysTyped: progress.totalKeysTyped + gameStats.totalKeys,
       lastPlayDate: todayStr,
       streak: newStreak,
+      weaknessStats: updatedWeaknessStats,
+      sessionHistory: updatedSessionHistory,
     };
 
     setProgress(newProgress);
     localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
   };
 
-  // マウントされるまではハイドレーション崩れを防ぐためにローディングまたは空表示にする
+  // ⑤ タイムアタック終了ハンドラ
+  const handleTimeAttackFinish = (result: { wpm: number; accuracy: number }) => {
+    const todayStr = new Date().toLocaleDateString("sv-SE");
+    const newBest: TimeAttackBest = progress.timeAttackBest
+      ? (result.wpm > progress.timeAttackBest.wpm
+          ? { wpm: result.wpm, accuracy: result.accuracy, date: todayStr }
+          : progress.timeAttackBest)
+      : { wpm: result.wpm, accuracy: result.accuracy, date: todayStr };
+
+    const newProgress = { ...progress, timeAttackBest: newBest };
+    setProgress(newProgress);
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+  };
+
   if (!isMounted) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 font-pixel text-green-500">
@@ -289,8 +358,8 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8 bg-zinc-950 font-sans">
-      
-      {/* タイトル画面 - 横長レイアウト */}
+
+      {/* タイトル画面 */}
       {gameState === "TITLE" && (
         <FairyScreenLayout fairy={{ emotion: "idle", message: getTitleFairyMessage(progress.totalKeysTyped, progress.streak) }}>
           <div className="flex-1 flex flex-col items-center gap-4 text-center">
@@ -304,7 +373,6 @@ export default function Home() {
               AZIKタイピング養成妖精
             </p>
 
-            {/* 統計ステータス */}
             <TitleProgressBar
               stageProgress={progress.stageProgress}
               totalKeysTyped={progress.totalKeysTyped}
@@ -312,18 +380,22 @@ export default function Home() {
             />
 
             <KeyNavGroup className="flex flex-col gap-4 w-full max-w-xs">
-              <GameButton variant="primary" size="lg" onClick={() => setGameState("STAGE_SELECT")} className="w-full">
+              <GameButton variant="primary" size="lg" onClick={() => setGameState("MODE_SELECT")} className="w-full">
                 GAME START
               </GameButton>
               <GameButton variant="secondary" size="md" onClick={() => setGameState("SETTINGS")} className="w-full">
                 OPTIONS
               </GameButton>
-              <GameButton variant="ghost" size="sm" onClick={() => setGameState("HELP")} className="w-full py-2">
-                HOW TO PLAY / FAQ
-              </GameButton>
+              <div className="flex gap-2 w-full">
+                <GameButton variant="ghost" size="sm" onClick={() => setGameState("STATS")} className="flex-1 py-2">
+                  STATS
+                </GameButton>
+                <GameButton variant="ghost" size="sm" onClick={() => setGameState("HELP")} className="flex-1 py-2">
+                  HOW TO PLAY
+                </GameButton>
+              </div>
             </KeyNavGroup>
 
-            {/* AMAZON ASSOC AD BANNERS */}
             <AdBanner ads={titleAds} />
 
             <a
@@ -337,8 +409,45 @@ export default function Home() {
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.7.2 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.8.0 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
             </div>
+          </div>
+        </FairyScreenLayout>
+      )}
+
+      {/* モード選択 */}
+      {gameState === "MODE_SELECT" && (
+        <FairyScreenLayout fairy={{ emotion: "idle", message: "どのモードで遊ぶ？TRAININGはAZIKを練習するモード、CHALLENGEはスコアを記録するモードだよ！⚡" }}>
+          <div className="flex-1 flex flex-col items-center gap-6">
+            <h2 className="text-2xl font-bold tracking-widest border-b-2 border-green-500 pb-2 w-full font-pixel text-center">
+              = SELECT MODE =
+            </h2>
+            <KeyNavGroup className="flex flex-col gap-4 w-full">
+              <button
+                onClick={() => { setFlowMode("training"); handleUpdateSettings({ ...settings, isTraining: true }); setGameState("STAGE_SELECT"); }}
+                className="w-full flex flex-col items-center gap-1 font-pixel font-bold tracking-wider bg-zinc-900 text-green-300 border-4 border-green-500 hover:bg-green-950 focus:bg-green-950 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-zinc-900 px-6 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 cursor-pointer"
+              >
+                <span className="text-xl">TRAINING</span>
+                <span className="text-[10px] text-green-500 font-sans font-normal">AZIKの練習・レッスン</span>
+              </button>
+              <button
+                onClick={() => { setFlowMode("challenge"); handleUpdateSettings({ ...settings, isTraining: false }); setGameState("STAGE_SELECT"); }}
+                className="w-full flex flex-col items-center gap-1 font-pixel font-bold tracking-wider bg-zinc-900 text-yellow-300 border-4 border-yellow-500 hover:bg-yellow-950 focus:bg-yellow-950 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-zinc-900 px-6 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 cursor-pointer"
+              >
+                <span className="text-xl">CHALLENGE</span>
+                <span className="text-[10px] text-yellow-500 font-sans font-normal">スコア計測・STATS記録</span>
+              </button>
+              <button
+                onClick={() => setGameState("TIME_ATTACK")}
+                className="w-full flex flex-col items-center gap-1 font-pixel font-bold tracking-wider bg-zinc-900 text-sky-300 border-4 border-sky-500 hover:bg-sky-950 focus:bg-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-zinc-900 px-6 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 cursor-pointer"
+              >
+                <span className="text-xl">TIME ATTACK</span>
+                <span className="text-[10px] text-sky-500 font-sans font-normal">1分間AZIK速度測定</span>
+              </button>
+              <GameButton variant="danger" size="sm" onClick={() => setGameState("TITLE")} className="w-full">
+                BACK TO TITLE
+              </GameButton>
+            </KeyNavGroup>
           </div>
         </FairyScreenLayout>
       )}
@@ -363,10 +472,13 @@ export default function Home() {
       {gameState === "STAGE_SELECT" && (
         <StageSelector
           onSelectStage={startStage}
-          onBackToTitle={() => setGameState("TITLE")}
+          onBackToTitle={() => setGameState("MODE_SELECT")}
+          flowMode={flowMode}
           progress={progress.stageProgress}
           settings={settings}
           onUpdateSettings={handleUpdateSettings}
+          weaknessStats={progress.weaknessStats}
+          onStartWeaknessPractice={handleStartWeaknessPractice}
         />
       )}
 
@@ -378,6 +490,16 @@ export default function Home() {
           onFinish={handleFinishGame}
           onBackToStageSelect={() => setGameState("STAGE_SELECT")}
           onUpdateSettings={handleUpdateSettings}
+          ghostBestWpm={
+            selectedStageId !== WEAKNESS_PRACTICE_STAGE_ID
+              ? progress.stageProgress[selectedStageId]?.bestWpm
+              : undefined
+          }
+          weaknessOverrideWords={
+            selectedStageId === WEAKNESS_PRACTICE_STAGE_ID
+              ? (weaknessWords ?? undefined)
+              : undefined
+          }
         />
       )}
 
@@ -397,13 +519,51 @@ export default function Home() {
         <HelpFAQ onBackToTitle={() => setGameState("TITLE")} />
       )}
 
-      {/* リザルト画面 - 横長レイアウト */}
+      {/* ④ 成長グラフ */}
+      {gameState === "STATS" && (
+        <StatsScreen
+          sessionHistory={progress.sessionHistory}
+          onBackToTitle={() => setGameState("TITLE")}
+        />
+      )}
+
+      {/* ⑤ タイムアタック */}
+      {gameState === "TIME_ATTACK" && (
+        <TimeAttackGame
+          settings={settings}
+          onFinish={handleTimeAttackFinish}
+          onBack={() => setGameState("TITLE")}
+          prevBest={progress.timeAttackBest}
+        />
+      )}
+
+      {/* リザルト画面 */}
       {gameState === "RESULT" && stats && (
         <FairyScreenLayout
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           fairy={{ message: (resultComments as any)[stats.comment] || stats.comment, emotion: stats.rank === "PERFECT" ? "perfect" : stats.rank === "A" ? "proud" : "happy" }}
           fairyColClassName="animate-in fade-in zoom-in-95 duration-500 flex flex-col gap-4"
-          fairySlot={<AdBanner ads={resultAds} layout="vertical" />}
+          fairySlot={
+            <>
+              {/* ③ キーヒートマップ（フェアリーの下） */}
+              {stats.keyHeatmap && (() => {
+                const hasHeat = Object.values(stats.keyHeatmap).some(e => e.attempt >= 3 && e.miss / e.attempt >= 0.2);
+                return hasHeat ? (
+                  <div className="w-full">
+                    <p className="text-[10px] font-pixel text-zinc-400 mb-1 text-center">= KEY HEATMAP =</p>
+                    <KeyboardDiagram
+                      activeKeys={[]}
+                      layout={settings.keyboardLayout}
+                      showLegend={true}
+                      heatmap={stats.keyHeatmap}
+                      compact={true}
+                    />
+                  </div>
+                ) : null;
+              })()}
+              <AdBanner ads={resultAds} layout="vertical" />
+            </>
+          }
         >
           {/* 左カラム: スコアとボタン */}
           <div className="flex-1 flex flex-col gap-4">
@@ -444,10 +604,10 @@ export default function Home() {
 
             {/* ボタン群 */}
             {(() => {
-              const stageMeta = selectedStageId ? STAGES.find(s => s.id === selectedStageId) : null;
-              const stageTitle = stageMeta?.name ?? selectedStageId ?? "";
+              const isWeaknessResult = selectedStageId === WEAKNESS_PRACTICE_STAGE_ID;
+              const stageMeta = selectedStageId && !isWeaknessResult ? STAGES.find(s => s.id === selectedStageId) : null;
+              const stageTitle = stageMeta?.name ?? (isWeaknessResult ? "弱点練習" : selectedStageId ?? "");
               const origin = typeof window !== "undefined" ? window.location.origin : "";
-              // Lev1-4 は常に training シェア。Practice/Challenge は settings.isTraining で決まる。
               const isPracticeOrChallengeStage = stageMeta?.category === "Practice" || stageMeta?.category === "Challenge";
               const isTrainingShare = !isPracticeOrChallengeStage || settings.isTraining;
               const tweetUrl = buildTweetUrl(stats, stageTitle, isTrainingShare, origin);
@@ -458,13 +618,19 @@ export default function Home() {
                     <XIcon />
                     <span className="text-sm">{isTrainingShare ? "POST TRAINING" : "POST RESULT"}</span>
                   </a>
-                  {selectedStageId && getNextStageId(selectedStageId) && (
+                  {!isWeaknessResult && selectedStageId && getNextStageId(selectedStageId) && (
                     <GameButton variant="primary" size="md" onClick={() => startStage(getNextStageId(selectedStageId)!)} className="w-full">
                       NEXT STAGE &gt;
                     </GameButton>
                   )}
                   {selectedStageId && (
-                    <GameButton variant="secondary" size="md" onClick={() => startStage(selectedStageId)} className="w-full">
+                    <GameButton variant="secondary" size="md" onClick={() => {
+                      if (isWeaknessResult) {
+                        handleStartWeaknessPractice();
+                      } else {
+                        startStage(selectedStageId);
+                      }
+                    }} className="w-full">
                       RETRY STAGE
                     </GameButton>
                   )}
