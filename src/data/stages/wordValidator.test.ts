@@ -295,12 +295,22 @@ describe("wordValidator", () => {
       expect(containsTargetLevel("ka", AzikLevel.Lev2a)).toBe(false);
     });
 
-    it("strips leading ; from sokuon compound before classifying core", () => {
+    it("strips leading ; from sokuon compound before classifying core (non-Lev1a)", () => {
       // ;kz = っかん → core kz is Lev2a
       expect(containsTargetLevel(";kz", AzikLevel.Lev2a)).toBe(true);
-      expect(containsTargetLevel(";kz", AzikLevel.Lev1a)).toBe(false);
       // ;ta = った → core ta is Lev0
       expect(containsTargetLevel(";ta", AzikLevel.Lev0)).toBe(true);
+    });
+
+    it("any ;-starting pattern is Lev1a target (っ shortcut IS the Lev1a element)", () => {
+      // ;kz contains っ→; even though core kz is Lev2a
+      expect(containsTargetLevel(";kz", AzikLevel.Lev1a)).toBe(true);
+      // ;kq = っかい → also contains っ→;
+      expect(containsTargetLevel(";kq", AzikLevel.Lev1a)).toBe(true);
+      // ;ta = った → contains っ→;
+      expect(containsTargetLevel(";ta", AzikLevel.Lev1a)).toBe(true);
+      // kz alone does NOT contain っ→;
+      expect(containsTargetLevel("kz", AzikLevel.Lev1a)).toBe(false);
     });
 
     it("bare ; (sokuon shortcut alone) classifies as Lev1a", () => {
@@ -336,9 +346,14 @@ describe("wordValidator", () => {
       });
 
       it("handles sokuon compound patterns correctly", () => {
-        // ;kz = っかん — core kz is Lev2a
+        // ;kz = っかん — core kz is Lev2a → target at Lev2a
         expect(isTargetSegment(seg([";kz"]), AzikLevel.Lev2a, false)).toBe(true);
-        expect(isTargetSegment(seg([";kz"]), AzikLevel.Lev1a, false)).toBe(false);
+        // ;kz also contains っ→; (Lev1a) → target at Lev1a too
+        expect(isTargetSegment(seg([";kz"]), AzikLevel.Lev1a, false)).toBe(true);
+        // ;kq = っかい — core kq is Lev2b → target at Lev2b
+        expect(isTargetSegment(seg([";kq"]), AzikLevel.Lev2b, false)).toBe(true);
+        // ;kq also contains っ→; → target at Lev1a
+        expect(isTargetSegment(seg([";kq"]), AzikLevel.Lev1a, false)).toBe(true);
       });
     });
 

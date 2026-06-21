@@ -228,6 +228,9 @@ export function filterStageWords(stage: StageData): StageData {
  * これにより っかん(;kz) が Lev2a ステージで「対象あり」と正しく判定される。
  */
 export function containsTargetLevel(pattern: string, target: AzikLevel): boolean {
+  // Lev1a (っ→;): パターンが ; で始まる時点で促音ショートカットを含む。
+  // ;kq や ;kz のように後続が別レベルでも、; 自体が Lev1a ターゲット。
+  if (target === AzikLevel.Lev1a && pattern.startsWith(";")) return true;
   const core = (pattern.startsWith(";") && pattern.length > 1) ? pattern.slice(1) : pattern;
   return classifyAzikKey(core) === target;
 }

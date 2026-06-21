@@ -674,7 +674,12 @@ export function splitIntoAzikSegments(
         if (normalConsonants.length > 0 && azikConsonants.length > 0) {
           const combinedNormal = nextSeg.normal.map(n => n[0] + n);
           const sokuonKey = dictionary["っ"]?.azik[0] || ";";
-          const combinedAzik = nextSeg.azik.map(a => sokuonKey + a);
+          // AZIKショートカット（;kq 等）に加えて、っ→; + 通常入力のハイブリッドも生成する。
+          // 例: っかい → [";kq", ";kai"] により、Lev1aフォーカスモードで ;kai が有効になる。
+          const combinedAzik = [
+            ...nextSeg.azik.map(a => sokuonKey + a),
+            ...nextSeg.normal.map(n => sokuonKey + n),
+          ];
 
           result.push({
             kana: "っ" + nextSeg.kana,
