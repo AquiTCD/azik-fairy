@@ -93,7 +93,7 @@ const INTRO_CONFIGS: Record<string, IntroConfig> = {
   },
   "lev1-hatsuon-q": {
     title: "ん は [Q] 一打！",
-    description: "「nn」や「n」+子音の入力は捨てて、[q] 1打で「ん」。Lev2 で更に速くなる。",
+    description: "「nn」や「n」+子音の入力は捨てて、[q] 1打で「ん」。次のレッスンで更に速くなる。",
     examples: [
       { from: "nn", to: "q", label: "ん" },
       { from: "hon", to: "hoq", label: "ほん" },
@@ -130,7 +130,7 @@ const INTRO_CONFIGS: Record<string, IntroConfig> = {
     ],
   },
   "lev1-summary": {
-    title: "Lev1 総まとめ",
+    title: "単打 総まとめ",
     description: "っ[;]・ん[q]・シャ行[x]・チャ行[c] をすべて使う文章練習。",
     examples: [
       { from: "tsu", to: ";", label: "っ" },
@@ -139,8 +139,8 @@ const INTRO_CONFIGS: Record<string, IntroConfig> = {
       { from: "cha", to: "ca", label: "ちゃ" },
     ],
     frames: [
-      { activeKeys: [], normalKeys: [";", "q", "x", "c"], label: "Lev1 の4キーを確認…", sublabel: "" },
-      { activeKeys: [";", "q", "x", "c"], normalKeys: [], label: "この4キーがLev1のAZIK", sublabel: "組み合わせて打とう" },
+      { activeKeys: [], normalKeys: [";", "q", "x", "c"], label: "単打の4キーを確認…", sublabel: "" },
+      { activeKeys: [";", "q", "x", "c"], normalKeys: [], label: "この4キーがAZIK単打のコア", sublabel: "組み合わせて打とう" },
     ],
   },
 };
@@ -321,8 +321,8 @@ const LEV3A_STAGES: Record<string, IntroConfig> = {
       { from: "ki", to: "kf", label: "き" },
     ],
     frames: [
-      { activeKeys: [], normalKeys: [":", "g", "f"], label: "Lev3a の3キーを確認…", sublabel: "" },
-      { activeKeys: [":", "g", "f"], normalKeys: [], label: "この3キーがLev3a のAZIK", sublabel: "文章の中で使いこなそう" },
+      { activeKeys: [], normalKeys: [":", "g", "f"], label: "互換キー I の3キーを確認…", sublabel: "" },
+      { activeKeys: [":", "g", "f"], normalKeys: [], label: "この3キーが互換キー I", sublabel: "文章の中で使いこなそう" },
     ],
   },
 };
@@ -417,7 +417,7 @@ const LEV4_STAGES: Record<string, IntroConfig> = {
       { from: "masu", to: "ms", label: "ます" },
     ],
     frames: [
-      { activeKeys: [], normalKeys: ["k", "t", "m", "n", "s", "r"], label: "Lev4 の語短縮キーを確認…", sublabel: "" },
+      { activeKeys: [], normalKeys: ["k", "t", "m", "n", "s", "r"], label: "語短縮キーを確認…", sublabel: "" },
       { activeKeys: ["k", "t", "m", "n", "s", "r"], normalKeys: [], label: "この組み合わせが語短縮AZIK", sublabel: "頻出語を2打で" },
     ],
   },
