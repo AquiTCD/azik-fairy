@@ -13,6 +13,7 @@ import GameButton from "@/components/GameButton";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AdBanner from "@/components/AdBanner";
 import KeyNavGroup from "@/components/KeyNavGroup";
+import AzikKeyVisualizer from "@/components/AzikKeyVisualizer";
 import { GameStats } from "@/types/game";
 import resultComments from "../../public/data/result_comments.json";
 
@@ -43,9 +44,10 @@ export interface UserProgress {
   totalKeysTyped: number;
   lastPlayDate: string; // YYYY-MM-DD
   streak: number;
+  seenStageIntros: string[]; // stageIds where intro has been shown
 }
 
-export type GameState = "TITLE" | "STAGE_SELECT" | "PLAYING" | "RESULT" | "SETTINGS" | "HELP";
+export type GameState = "TITLE" | "STAGE_SELECT" | "STAGE_INTRO" | "PLAYING" | "RESULT" | "SETTINGS" | "HELP";
 
 const STORAGE_KEY = "azik-fairy-settings";
 const PROGRESS_STORAGE_KEY = "azik-fairy-progress";
@@ -70,6 +72,7 @@ const DEFAULT_PROGRESS: UserProgress = {
   totalKeysTyped: 0,
   lastPlayDate: "",
   streak: 0,
+  seenStageIntros: [],
 };
 
 export default function Home() {
@@ -142,6 +145,22 @@ export default function Home() {
 
   const startStage = (stageId: string) => {
     setSelectedStageId(stageId);
+    const stage = STAGES.find(s => s.id === stageId);
+    const isLevStage = stage && !["Practice", "Challenge"].includes(stage.category);
+    const hasSeen = progress.seenStageIntros.includes(stageId);
+    if (isLevStage && !hasSeen) {
+      setGameState("STAGE_INTRO");
+    } else {
+      setGameState("PLAYING");
+    }
+  };
+
+  const handleStartFromIntro = () => {
+    if (!selectedStageId) return;
+    const newSeen = [...progress.seenStageIntros, selectedStageId];
+    const newProgress = { ...progress, seenStageIntros: newSeen };
+    setProgress(newProgress);
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
     setGameState("PLAYING");
   };
 
@@ -325,6 +344,19 @@ export default function Home() {
           </div>
         </FairyScreenLayout>
       )}
+
+      {/* ステージイントロ */}
+      {gameState === "STAGE_INTRO" && selectedStageId && (() => {
+        const stageMeta = STAGES.find(s => s.id === selectedStageId);
+        if (!stageMeta) return null;
+        return (
+          <AzikKeyVisualizer
+            stage={stageMeta}
+            onStart={handleStartFromIntro}
+            layout={settings.keyboardLayout}
+          />
+        );
+      })()}
 
       {/* ステージ選択 */}
       {gameState === "STAGE_SELECT" && (
