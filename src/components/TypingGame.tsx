@@ -657,13 +657,6 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         </div>
       </div>
 
-      <style jsx global>{`
-        @keyframes wiggle {
-          0%, 100% { transform: translateX(0) rotate(0); }
-          25%       { transform: translateX(-1px) rotate(-0.5deg); }
-          75%       { transform: translateX(1px) rotate(0.5deg); }
-        }
-      `}</style>
     </FairyScreenLayout>
   );
 }

@@ -18,17 +18,11 @@ import AzikKeyVisualizer from "@/components/AzikKeyVisualizer";
 import KeyboardDiagram from "@/components/KeyboardDiagram";
 import StatsScreen from "@/components/StatsScreen";
 import TimeAttackGame from "@/components/TimeAttackGame";
+import XIcon from "@/components/XIcon";
+import ModeButton from "@/components/ModeButton";
 import { GameStats, GameSettings, StageProgress, UserProgress, GameState, TimeAttackBest } from "@/types/game";
 import { buildTweetUrl } from "@/utils/tweetUtils";
 import resultComments from "../../public/data/result_comments.json";
-
-function XIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current flex-shrink-0" aria-hidden="true">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  );
-}
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -423,27 +417,12 @@ export default function Home() {
               = SELECT MODE =
             </h2>
             <KeyNavGroup className="flex flex-col gap-4 w-full">
-              <button
-                onClick={() => { setFlowMode("training"); handleUpdateSettings({ ...settings, isTraining: true }); setGameState("STAGE_SELECT"); }}
-                className="w-full flex flex-col items-center gap-1 font-pixel font-bold tracking-wider bg-zinc-900 text-green-300 border-4 border-green-500 hover:bg-green-950 focus:bg-green-950 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-zinc-900 px-6 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 cursor-pointer"
-              >
-                <span className="text-xl">TRAINING</span>
-                <span className="text-[10px] text-green-500 font-sans font-normal">AZIKの練習・レッスン</span>
-              </button>
-              <button
-                onClick={() => { setFlowMode("challenge"); handleUpdateSettings({ ...settings, isTraining: false }); setGameState("STAGE_SELECT"); }}
-                className="w-full flex flex-col items-center gap-1 font-pixel font-bold tracking-wider bg-zinc-900 text-yellow-300 border-4 border-yellow-500 hover:bg-yellow-950 focus:bg-yellow-950 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-zinc-900 px-6 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 cursor-pointer"
-              >
-                <span className="text-xl">CHALLENGE</span>
-                <span className="text-[10px] text-yellow-500 font-sans font-normal">スコア計測・STATS記録</span>
-              </button>
-              <button
-                onClick={() => setGameState("TIME_ATTACK")}
-                className="w-full flex flex-col items-center gap-1 font-pixel font-bold tracking-wider bg-zinc-900 text-sky-300 border-4 border-sky-500 hover:bg-sky-950 focus:bg-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-zinc-900 px-6 py-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all duration-150 cursor-pointer"
-              >
-                <span className="text-xl">TIME ATTACK</span>
-                <span className="text-[10px] text-sky-500 font-sans font-normal">1分間AZIK速度測定</span>
-              </button>
+              <ModeButton color="green" title="TRAINING" subtitle="AZIKの練習・レッスン"
+                onClick={() => { setFlowMode("training"); handleUpdateSettings({ ...settings, isTraining: true }); setGameState("STAGE_SELECT"); }} />
+              <ModeButton color="yellow" title="CHALLENGE" subtitle="スコア計測・STATS記録"
+                onClick={() => { setFlowMode("challenge"); handleUpdateSettings({ ...settings, isTraining: false }); setGameState("STAGE_SELECT"); }} />
+              <ModeButton color="sky" title="TIME ATTACK" subtitle="1分間AZIK速度測定"
+                onClick={() => setGameState("TIME_ATTACK")} />
               <GameButton variant="danger" size="sm" onClick={() => setGameState("TITLE")} className="w-full">
                 BACK TO TITLE
               </GameButton>
@@ -615,7 +594,7 @@ export default function Home() {
               return (
                 <KeyNavGroup className="flex flex-col gap-3 w-full">
                   <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={SHARE_BTN_CLASS}>
-                    <XIcon />
+                    <XIcon className="w-5 h-5" />
                     <span className="text-sm">{isTrainingShare ? "POST TRAINING" : "POST RESULT"}</span>
                   </a>
                   {!isWeaknessResult && selectedStageId && getNextStageId(selectedStageId) && (

@@ -6,8 +6,8 @@ import { loadStage } from "@/data/stages";
 import { GameSettings, TimeAttackBest } from "@/types/game";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import GameButton from "@/components/GameButton";
-import { buildTweetUrl } from "@/utils/tweetUtils";
-import { GameStats } from "@/types/game";
+import { buildTimeAttackTweetUrl } from "@/utils/tweetUtils";
+import XIcon from "@/components/XIcon";
 
 const TIME_LIMIT = 60;
 const WORDS_BUFFER = 60;
@@ -17,14 +17,6 @@ interface TimeAttackGameProps {
   onFinish: (result: { wpm: number; accuracy: number }) => void;
   onBack: () => void;
   prevBest: TimeAttackBest | null;
-}
-
-function XIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current flex-shrink-0" aria-hidden="true">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-    </svg>
-  );
 }
 
 export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }: TimeAttackGameProps) {
@@ -55,6 +47,23 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
     const stage = await loadStage("practice-words-1");
     const shuffled = [...stage.words].sort(() => Math.random() - 0.5).slice(0, WORDS_BUFFER);
     return shuffled.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
+  };
+
+  const resetGame = () => {
+    setIsFinished(false);
+    setResult(null);
+    setStartTime(null);
+    setRemaining(TIME_LIMIT);
+    setWordIndex(0);
+    setSegmentIndex(0);
+    setInputBuffer("");
+    setTotalCorrectKeys(0);
+    setMissCount(0);
+    setCompletedWordCount(0);
+    totalKeysRef.current = 0;
+    missCountRef.current = 0;
+    completedCharsRef.current = 0;
+    loadWords().then(setWords);
   };
 
   useEffect(() => {
@@ -143,8 +152,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
 
   // リザルト表示
   if (isFinished && result) {
-    const shareText = `【AZIK-FAIRY タイムアタック】\nWPM: ${result.wpm} / ACC: ${result.accuracy}%${prevBest ? `\n自己ベスト: ${prevBest.wpm} WPM` : ""}\n#AZIK #タイピング`;
-    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent("https://azik-fairy.vercel.app")}`;
+    const shareUrl = buildTimeAttackTweetUrl(result.wpm, result.accuracy, typeof window !== "undefined" ? window.location.origin : "https://azik-fairy.solunita.net");
 
     return (
       <FairyScreenLayout fairy={{ message: isNewBest ? "新記録おめでとう！マジで最強タイパーじゃん！🏆💎" : "お疲れ様！次はもっと速くなれるよ！💪✨", emotion: isNewBest ? "perfect" : "happy" }}>
@@ -185,7 +193,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
               <XIcon />
               <span className="text-sm">シェアする</span>
             </a>
-            <GameButton variant="primary" size="md" onClick={() => { setIsFinished(false); setResult(null); setStartTime(null); setRemaining(TIME_LIMIT); setWordIndex(0); setSegmentIndex(0); setInputBuffer(""); setTotalCorrectKeys(0); setMissCount(0); setCompletedWordCount(0); totalKeysRef.current = 0; missCountRef.current = 0; completedCharsRef.current = 0; loadWords().then(setWords); }} className="w-full">
+            <GameButton variant="primary" size="md" onClick={resetGame} className="w-full">
               RETRY
             </GameButton>
             <GameButton variant="danger" size="sm" onClick={onBack} className="w-full">BACK TO TITLE</GameButton>
@@ -286,13 +294,6 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
         <GameButton variant="danger" size="sm" onClick={onBack}>QUIT</GameButton>
       </div>
 
-      <style jsx global>{`
-        @keyframes wiggle {
-          0%, 100% { transform: translateX(0); }
-          25%       { transform: translateX(-2px); }
-          75%       { transform: translateX(2px); }
-        }
-      `}</style>
     </FairyScreenLayout>
   );
 }
