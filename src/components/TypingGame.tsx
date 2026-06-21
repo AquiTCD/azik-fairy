@@ -570,32 +570,21 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </div>
         )}
 
-        {/* 戻るボタン + クイックトグル群 */}
+        {/* 戻るボタン + 音声ON/OFFトグル */}
         <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             STAGE SELECT
           </GameButton>
-          <div className="flex gap-1">
-            {ghostBestWpm && (
-              <button
-                onClick={() => onUpdateSettings({ ...settings, ghostRaceEnabled: !settings.ghostRaceEnabled })}
-                title={settings.ghostRaceEnabled ? "ゴーストレース ON（クリックでOFF）" : "ゴーストレース OFF（クリックでON）"}
-                className={`p-2 border rounded transition-colors duration-150 text-base leading-none ${settings.ghostRaceEnabled ? "border-yellow-600 text-yellow-400 hover:border-yellow-400" : "border-zinc-700 text-zinc-600 hover:text-yellow-600 hover:border-yellow-700"}`}
-              >
-                👻
-              </button>
-            )}
-            <button
-              onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
-              title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
-              className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
-            >
-              {settings.soundEnabled
-                ? <SpeakerHigh size={18} weight="bold" />
-                : <SpeakerSlash size={18} weight="bold" />
-              }
-            </button>
-          </div>
+          <button
+            onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+            title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
+            className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
+          >
+            {settings.soundEnabled
+              ? <SpeakerHigh size={18} weight="bold" />
+              : <SpeakerSlash size={18} weight="bold" />
+            }
+          </button>
         </div>
       </div>
 
