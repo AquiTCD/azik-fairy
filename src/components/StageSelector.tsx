@@ -162,10 +162,10 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
           if (!intro) return null;
           const frame = intro.frames[intro.frames.length - 1];
           return (
-            <div className="hidden group-hover:flex pointer-events-none flex-col gap-1.5 border-t border-black/20 pt-2 mt-1 w-full">
+            <div className="hidden group-hover:flex group-focus:flex pointer-events-none flex-col gap-1.5 border-t border-black/20 pt-2 mt-1 w-full">
               <div className="text-[9px] font-pixel text-black/70 font-bold">{intro.title}</div>
-              <div className="bg-zinc-900 rounded p-1.5 w-full">
-                <div className="scale-[0.7] origin-top-left" style={{ height: "70px" }}>
+              <div className="bg-zinc-900 rounded p-1.5 w-full overflow-hidden" style={{ height: "84px" }}>
+                <div style={{ transform: "scale(0.62)", transformOrigin: "top left" }}>
                   <KeyboardDiagram
                     activeKeys={frame.activeKeys}
                     normalKeys={frame.normalKeys}

@@ -538,7 +538,7 @@ export default function AzikKeyVisualizer({ stage, onStart, onBackToStageSelect,
             />
             次回から表示しない
           </label>
-          <GameButton variant="primary" size="lg" onClick={() => onStart(dontShowAgain)} className="w-full">
+          <GameButton variant="primary" size="lg" onClick={() => onStart(dontShowAgain)} className="w-full" autoFocus>
             PLAY
           </GameButton>
           <div className="flex items-center justify-between mt-1">

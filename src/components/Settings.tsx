@@ -26,6 +26,7 @@ const getCustomizableKeys = (layout: "US" | "JIS") => [
 
 export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros }: SettingsProps) {
   const [activeSubTab, setActiveSubTab] = useState<"FORM" | "JSON" | "TSV_SKK">("FORM");
+  const [introResetDone, setIntroResetDone] = useState(false);
 
   // JSON入力バッファとエラー管理
   const [jsonInput, setJsonInput] = useState("");
@@ -581,10 +582,14 @@ z,あん`}
                 <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">ステージ開始前のAZIK解説画面をすべて再表示します。</p>
               </div>
               <button
-                onClick={onResetStageIntros}
-                className="px-3 py-2 bg-zinc-900 border border-green-700 text-green-400 hover:bg-green-800 hover:text-white transition-colors duration-150 rounded text-xs cursor-pointer font-bold font-pixel whitespace-nowrap"
+                onClick={() => { onResetStageIntros(); setIntroResetDone(true); setTimeout(() => setIntroResetDone(false), 2000); }}
+                className={`px-3 py-2 border rounded text-xs cursor-pointer font-bold font-pixel whitespace-nowrap transition-colors duration-150 ${
+                  introResetDone
+                    ? "bg-green-500 border-green-400 text-black"
+                    : "bg-zinc-900 border-green-700 text-green-400 hover:bg-green-800 hover:text-white active:bg-green-500 active:text-black active:border-green-400"
+                }`}
               >
-                RESET
+                {introResetDone ? "✓ DONE" : "RESET"}
               </button>
             </div>
           </div>
