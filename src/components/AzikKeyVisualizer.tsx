@@ -444,6 +444,9 @@ export default function AzikKeyVisualizer({ stage, onStart, onBackToStageSelect,
   const config = getIntroConfig(stage.id);
   const [frameIdx, setFrameIdx] = useState(0);
   const [dontShowAgain, setDontShowAgain] = useState(true);
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+  const dontShowRef = React.useRef(dontShowAgain);
+  dontShowRef.current = dontShowAgain;
 
   const frames = config?.frames ?? [];
 
@@ -454,6 +457,25 @@ export default function AzikKeyVisualizer({ stage, onStart, onBackToStageSelect,
     }, 1200);
     return () => clearInterval(timer);
   }, [frames.length]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onBackToStageSelect();
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        const btns = bottomRef.current?.querySelectorAll<HTMLButtonElement>("button");
+        btns?.[1]?.focus(); // STAGE SELECT
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        const btns = bottomRef.current?.querySelectorAll<HTMLButtonElement>("button");
+        btns?.[0]?.focus(); // PLAY
+      }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onBackToStageSelect]);
 
   const currentFrame = frames[frameIdx] ?? { activeKeys: [], normalKeys: [], label: "" };
 
@@ -528,7 +550,7 @@ export default function AzikKeyVisualizer({ stage, onStart, onBackToStageSelect,
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 mt-auto">
+        <div ref={bottomRef} className="flex flex-col gap-2 mt-auto">
           <label className="flex items-center gap-2 text-xs text-green-400 font-sans cursor-pointer select-none">
             <input
               type="checkbox"
