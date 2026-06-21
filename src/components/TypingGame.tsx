@@ -1,16 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
+import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
+import { useCustomDictionary } from "@/hooks/useCustomDictionary";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
 import { GameStats } from "@/types/game";
 import { getRank, calcOptimalProgress } from "@/utils/gameLogic";
 import KeyboardDiagram from "./KeyboardDiagram";
+import KanaSegmentDisplay from "./KanaSegmentDisplay";
+import KeyPatternButtons from "./KeyPatternButtons";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
 import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
@@ -288,13 +291,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     return () => window.removeEventListener("keydown", handler);
   }, [pendingStats, onFinish]);
 
-  const customDictionary = React.useMemo(() => {
-    return mergeCustomAzikRules(settings.customRules, {
-      enableSpecial: settings.enableSpecial,
-      enableForeign: settings.enableForeign,
-      nAlternative: settings.nAlternative,
-    });
-  }, [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative]);
+  const customDictionary = useCustomDictionary(settings);
 
   useEffect(() => {
     if (!stage) return;
@@ -512,43 +509,20 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
           {/* ひらがなセグメント */}
           <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem] w-full mb-2">
-          <div className="flex flex-wrap items-center justify-center gap-x-2 text-xl md:text-2xl lg:text-3xl tracking-widest font-sans">
-            {currentWord?.segments.map((seg, idx) => {
-              const isTyped = idx < segmentIndex;
-              const isCurrent = idx === segmentIndex;
-              return (
-                <span
-                  key={idx}
-                  className={`px-1 py-0.5 rounded transition-all duration-150 ${
-                    isTyped
-                      ? "text-zinc-600 line-through"
-                      : isCurrent
-                      ? "bg-green-900/50 text-green-300 font-bold border-b-4 border-green-400"
-                      : "text-green-500"
-                  }`}
-                >
-                  {seg.kana}
-                </span>
-              );
-            })}
-          </div>
+            {currentWord && (
+              <KanaSegmentDisplay
+                segments={currentWord.segments}
+                currentIndex={segmentIndex}
+                sizeClass="text-xl md:text-2xl lg:text-3xl"
+              />
+            )}
           </div>
 
           {/* キーガイド */}
           {settings.showGuide && currentSeg && (
             <div className="mt-5 flex flex-col items-center text-sm opacity-80 w-full">
               <span className="text-green-300 font-bold text-xs font-pixel">NEXT KEY:</span>
-              <div className="flex gap-3 mt-2 font-pixel text-sm">
-                {currentSeg.azik.map(pattern => {
-                  const remaining = pattern.slice(inputBuffer.length);
-                  return (
-                    <div key={pattern} className="bg-zinc-800 px-3 py-1.5 border border-zinc-700 rounded text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                      <span className="text-zinc-500">{inputBuffer}</span>
-                      <span className="text-green-400 font-bold animate-pulse uppercase">{remaining}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <KeyPatternButtons patterns={currentSeg.azik} inputBuffer={inputBuffer} />
               <KeyboardDiagram
                 activeKeys={azikNextKeys}
                 normalKeys={normalNextKeys}

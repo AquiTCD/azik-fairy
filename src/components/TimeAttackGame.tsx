@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { TypingWord, AzikSegment, createTypingWord, mergeCustomAzikRules } from "@/data/azikRules";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { TypingWord, AzikSegment, createTypingWord } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { GameSettings, TimeAttackBest } from "@/types/game";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import GameButton from "@/components/GameButton";
+import KanaSegmentDisplay from "@/components/KanaSegmentDisplay";
+import KeyPatternButtons from "@/components/KeyPatternButtons";
 import { buildTimeAttackTweetUrl } from "@/utils/tweetUtils";
 import XIcon from "@/components/XIcon";
 import { useTypingInput } from "@/hooks/useTypingInput";
+import { useCustomDictionary } from "@/hooks/useCustomDictionary";
 
 const TIME_LIMIT = 60;
 const WORDS_BUFFER = 60;
@@ -32,11 +35,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
   const missCountRef = useRef(0);
   const completedCharsRef = useRef(0);
 
-  const customDictionary = useMemo(() => mergeCustomAzikRules(settings.customRules, {
-    enableSpecial: settings.enableSpecial,
-    enableForeign: settings.enableForeign,
-    nAlternative: settings.nAlternative,
-  }), [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative]);
+  const customDictionary = useCustomDictionary(settings);
 
   const loadWords = useCallback(async (): Promise<TypingWord[]> => {
     const stage = await loadStage("practice-words-1");
@@ -229,37 +228,17 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
               <div className="text-3xl md:text-4xl font-extrabold tracking-widest text-zinc-100 font-sans mb-4">
                 {currentWord?.kanji ?? ""}
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-x-2 text-xl tracking-widest font-sans">
-                {currentWord?.segments.map((seg, idx) => {
-                  const isTyped = idx < segmentIndex;
-                  const isCurrent = idx === segmentIndex;
-                  return (
-                    <span
-                      key={idx}
-                      className={`px-1 py-0.5 rounded transition-all duration-100 ${
-                        isTyped ? "text-zinc-600 line-through" :
-                        isCurrent ? "bg-green-900/50 text-green-300 font-bold border-b-4 border-green-400" :
-                        "text-green-500"
-                      }`}
-                    >
-                      {seg.kana}
-                    </span>
-                  );
-                })}
-              </div>
+              {currentWord && (
+                <KanaSegmentDisplay
+                  segments={currentWord.segments}
+                  currentIndex={segmentIndex}
+                />
+              )}
 
               {/* キーガイド */}
               {currentSeg && settings.showGuide && (
-                <div className="mt-4 flex gap-2 font-pixel text-sm">
-                  {currentSeg.azik.map(pattern => {
-                    const rem = pattern.slice(inputBuffer.length);
-                    return (
-                      <div key={pattern} className="bg-zinc-800 px-3 py-1.5 border border-zinc-700 rounded text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                        <span className="text-zinc-500">{inputBuffer}</span>
-                        <span className="text-green-400 font-bold animate-pulse uppercase">{rem}</span>
-                      </div>
-                    );
-                  })}
+                <div className="mt-4">
+                  <KeyPatternButtons patterns={currentSeg.azik} inputBuffer={inputBuffer} />
                 </div>
               )}
             </>
