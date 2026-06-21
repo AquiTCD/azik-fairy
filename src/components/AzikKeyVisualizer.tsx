@@ -460,7 +460,7 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
   return (
     <FairyScreenLayout fairy={{ message: `「${stage.name}」のルールを確認しよう！`, emotion: "idle" }}>
       <div className="flex-1 flex flex-col gap-4 w-full">
-        <h2 className="text-xl md:text-2xl font-bold font-pixel text-yellow-400 text-center animate-pulse tracking-widest border-b-2 border-green-500 pb-2">
+        <h2 className="text-xl md:text-2xl font-bold font-sans text-yellow-400 text-center tracking-wide border-b-2 border-green-500 pb-2">
           {config.title}
         </h2>
 
@@ -476,9 +476,9 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
             normalKeys={currentFrame.normalKeys}
             layout={layout}
           />
-          {currentFrame.sublabel && (
-            <div className="text-[10px] text-zinc-500 font-sans">{currentFrame.sublabel}</div>
-          )}
+          <div className="text-[10px] text-zinc-500 font-sans h-4">
+            {currentFrame.sublabel ?? ''}
+          </div>
           {frames.length > 1 && (
             <div className="flex gap-1 mt-1">
               {frames.map((_, i) => (
@@ -507,12 +507,12 @@ export default function AzikKeyVisualizer({ stage, onStart, layout }: AzikKeyVis
         </div>
 
         <div className="flex flex-col gap-2 mt-auto">
-          <label className="flex items-center gap-2 text-xs text-zinc-400 font-sans cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-xs text-green-400 font-sans cursor-pointer select-none">
             <input
               type="checkbox"
               checked={dontShowAgain}
               onChange={e => setDontShowAgain(e.target.checked)}
-              className="accent-yellow-400 w-3.5 h-3.5"
+              className="accent-green-400 w-3.5 h-3.5"
             />
             次回から表示しない
           </label>
