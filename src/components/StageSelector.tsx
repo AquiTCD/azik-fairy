@@ -6,6 +6,8 @@ import { STAGES, StageMeta } from "@/data/stages";
 import { GameSettings, StageProgress } from "@/app/page";
 import GameButton from "@/components/GameButton";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
+import KeyboardDiagram from "@/components/KeyboardDiagram";
+import { getIntroConfig } from "@/components/AzikKeyVisualizer";
 
 interface StageSelectorProps {
   onSelectStage: (stageId: string) => void;
@@ -153,6 +155,25 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
             <span>TIME: <span className="font-bold">{stageProg.bestTime.toFixed(1)}s</span></span>
           </div>
         )}
+
+        {/* B案: デスクトップホバー展開（Levカテゴリのみ） */}
+        {!["Practice", "Challenge"].includes(stage.category) && (() => {
+          const intro = getIntroConfig(stage.id);
+          if (!intro) return null;
+          const frame = intro.frames[0];
+          return (
+            <div className="hidden group-hover:flex pointer-events-none flex-col gap-1 border-t border-zinc-900/40 pt-2 mt-1 w-full">
+              <div className="text-[9px] font-pixel text-zinc-800 font-bold">{intro.title}</div>
+              <div className="scale-75 origin-top-left -mb-6">
+                <KeyboardDiagram
+                  activeKeys={frame.activeKeys}
+                  normalKeys={frame.normalKeys}
+                  layout={settings.keyboardLayout}
+                />
+              </div>
+            </div>
+          );
+        })()}
       </button>
     );
   };

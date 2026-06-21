@@ -12,6 +12,7 @@ interface SettingsProps {
   onUpdateSettings: (settings: GameSettings) => void;
   onBackToTitle: () => void;
   onClearProgress: () => void;
+  onResetStageIntros: () => void;
 }
 
 // 本当に人によって違う3キーのみUIで設定可能。
@@ -23,7 +24,7 @@ const getCustomizableKeys = (layout: "US" | "JIS") => [
   { label: "長音 ー", key: "ー", defaultVal: layout === "JIS" ? ":" : "-" },
 ] as const;
 
-export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress }: SettingsProps) {
+export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros }: SettingsProps) {
   const [activeSubTab, setActiveSubTab] = useState<"FORM" | "JSON" | "TSV_SKK">("FORM");
 
   // JSON入力バッファとエラー管理
@@ -569,6 +570,23 @@ z,あん`}
               </button>
             </div>
 
+          </div>
+
+          {/* レッスン説明リセット */}
+          <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
+            <h3 className="text-sm font-bold text-green-400 font-pixel">■ LESSON INTRO</h3>
+            <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border border-zinc-700 rounded">
+              <div>
+                <span className="font-bold text-sm tracking-wider text-green-300 font-pixel">RESET INTRO HISTORY:</span>
+                <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">ステージ開始前のAZIK解説画面をすべて再表示します。</p>
+              </div>
+              <button
+                onClick={onResetStageIntros}
+                className="px-3 py-2 bg-zinc-900 border border-green-700 text-green-400 hover:bg-green-800 hover:text-white transition-colors duration-150 rounded text-xs cursor-pointer font-bold font-pixel whitespace-nowrap"
+              >
+                RESET
+              </button>
+            </div>
           </div>
 
           {/* DANGER ZONE */}

@@ -171,6 +171,12 @@ export default function Home() {
     }
   };
 
+  const handleResetStageIntros = () => {
+    const newProgress = { ...progress, seenStageIntros: [] };
+    setProgress(newProgress);
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+  };
+
   const handleFinishGame = (gameStats: GameStats) => {
     setStats(gameStats);
     setGameState("RESULT");
@@ -387,6 +393,7 @@ export default function Home() {
           onUpdateSettings={handleUpdateSettings}
           onBackToTitle={() => setGameState("TITLE")}
           onClearProgress={handleClearProgress}
+          onResetStageIntros={handleResetStageIntros}
         />
       )}
 
