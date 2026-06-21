@@ -118,6 +118,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   enableSpecial: true,
   enableForeign: true,
   nAlternative: "left",
+  smallKanaPrefix: "l",
   ghostRaceEnabled: true,
 };
 
@@ -153,7 +154,8 @@ export default function Home() {
     enableSpecial: settings.enableSpecial,
     enableForeign: settings.enableForeign,
     nAlternative: settings.nAlternative,
-  }), [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative]);
+    smallKanaPrefix: settings.smallKanaPrefix,
+  }), [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative, settings.smallKanaPrefix]);
 
   // 1. マウント時に LocalStorage から設定と進捗を復元
   useEffect(() => {

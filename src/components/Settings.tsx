@@ -470,6 +470,38 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                 </p>
               </div>
 
+              {/* 小書き仮名プレフィックス */}
+              <div className="border-t border-zinc-700 pt-2.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-sm font-extrabold font-sans text-green-300">小書き仮名</span>
+                    <span className="text-xs text-zinc-300 ml-2 font-sans">ぁぃぅぇぉ / ゃゅょ の入力</span>
+                  </div>
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    {([
+                      { val: "l",    label: "L",    title: "la/li/lu/le/lo (標準)" },
+                      { val: "xx",   label: "XX",   title: "xxa/xxi/xxu/xxe/xxo (SKK用)" },
+                      { val: "both", label: "BOTH", title: "L系・XX系の両方を有効" },
+                    ] as const).map(({ val, label, title }) => (
+                      <button
+                        key={val}
+                        title={title}
+                        onClick={() => onUpdateSettings({ ...settings, smallKanaPrefix: val })}
+                        className={`px-2.5 py-0.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.smallKanaPrefix === val
+                          ? "bg-green-500 text-black border-green-500"
+                          : "bg-zinc-700 text-green-400 border-zinc-600 hover:border-green-500"
+                          }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-400 font-sans leading-relaxed mt-1.5">
+                  AZIKでは x は し行専用のため la/li 系が標準。SKKで L をIME切替に使っている場合は XX を選択してください。
+                </p>
+              </div>
+
               <p className="text-xs text-zinc-400 font-sans leading-relaxed">
                 OFFにした機能は該当ショートカットが無効になり、対応練習ステージも非表示になります。
               </p>

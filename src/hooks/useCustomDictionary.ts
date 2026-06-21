@@ -11,7 +11,8 @@ export function useCustomDictionary(settings: GameSettings): Record<string, Azik
         enableSpecial: settings.enableSpecial,
         enableForeign: settings.enableForeign,
         nAlternative: settings.nAlternative,
+        smallKanaPrefix: settings.smallKanaPrefix,
       }),
-    [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative],
+    [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative, settings.smallKanaPrefix],
   );
 }

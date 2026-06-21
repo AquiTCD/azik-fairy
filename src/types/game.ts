@@ -28,6 +28,7 @@ export interface GameSettings {
   enableSpecial: boolean;
   enableForeign: boolean;
   nAlternative: "off" | "left" | "all";
+  smallKanaPrefix: "l" | "xx" | "both";
   ghostRaceEnabled: boolean;
 }
 
