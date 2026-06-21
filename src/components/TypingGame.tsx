@@ -479,22 +479,22 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
         {/* ゴーストレースバー */}
         {ghostBestWpm && settings.ghostRaceEnabled && (
-          <div className="relative w-full h-2 bg-zinc-800 rounded overflow-hidden border border-zinc-700">
-            {/* 自分の進捗（キーベース） */}
-            <div
-              className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-100"
-              style={{ width: `${Math.min(100, myKeyProgress * 100)}%` }}
-            />
-            {/* ゴーストマーカー */}
-            {ghostProgress !== null && (
+          <div className="flex items-center gap-2 w-full">
+            <div className="relative flex-1 h-2 bg-zinc-800 rounded overflow-hidden border border-zinc-700">
+              {/* 自分の進捗（キーベース） */}
               <div
-                className="absolute top-0 h-full w-1 bg-yellow-400 opacity-80"
-                style={{ left: `${Math.min(99, ghostProgress * 100)}%` }}
+                className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-100"
+                style={{ width: `${Math.min(100, myKeyProgress * 100)}%` }}
               />
-            )}
-            <div className="absolute right-1 top-0 h-full flex items-center">
-              <span className="text-[8px] text-yellow-400 font-pixel opacity-70">👻{ghostBestWpm}wpm</span>
+              {/* ゴーストマーカー */}
+              {ghostProgress !== null && (
+                <div
+                  className="absolute top-0 h-full w-1 bg-yellow-400 opacity-80"
+                  style={{ left: `${Math.min(99, ghostProgress * 100)}%` }}
+                />
+              )}
             </div>
+            <span className="text-[8px] text-yellow-400 font-pixel opacity-70 shrink-0">👻{ghostBestWpm}wpm</span>
           </div>
         )}
 
@@ -570,21 +570,32 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </div>
         )}
 
-        {/* 戻るボタン + 音声ON/OFFトグル */}
+        {/* 戻るボタン + クイックトグル群 */}
         <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             STAGE SELECT
           </GameButton>
-          <button
-            onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
-            title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
-            className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
-          >
-            {settings.soundEnabled
-              ? <SpeakerHigh size={18} weight="bold" />
-              : <SpeakerSlash size={18} weight="bold" />
-            }
-          </button>
+          <div className="flex gap-1">
+            {ghostBestWpm && (
+              <button
+                onClick={() => onUpdateSettings({ ...settings, ghostRaceEnabled: !settings.ghostRaceEnabled })}
+                title={settings.ghostRaceEnabled ? "ゴーストレース ON（クリックでOFF）" : "ゴーストレース OFF（クリックでON）"}
+                className={`p-2 border rounded transition-colors duration-150 text-base leading-none ${settings.ghostRaceEnabled ? "border-yellow-600 text-yellow-400 hover:border-yellow-400" : "border-zinc-700 text-zinc-600 hover:text-yellow-600 hover:border-yellow-700"}`}
+              >
+                👻
+              </button>
+            )}
+            <button
+              onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+              title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
+              className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
+            >
+              {settings.soundEnabled
+                ? <SpeakerHigh size={18} weight="bold" />
+                : <SpeakerSlash size={18} weight="bold" />
+              }
+            </button>
+          </div>
         </div>
       </div>
 
