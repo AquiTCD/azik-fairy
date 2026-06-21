@@ -13,6 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.7.2",
+    date: "2026-06-21",
+    items: [
+      "OGPの軽微な修正",
+    ],
+  },
+  {
     version: "v1.7.1",
     date: "2026-06-21",
     items: [
