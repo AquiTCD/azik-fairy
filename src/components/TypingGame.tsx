@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment, STAGE_KEY_PREDS } from "@/data/stages/wordValidator";
+import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -260,7 +260,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
             : [...currentSeg.normal, ...currentSeg.azik];
         }
         if (!isSummaryStage) {
-          const targetKeys = currentSeg.azik.filter(k => classifyAzikKey(getCore(k)) === stageLevel);
+          const targetKeys = currentSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
           if (targetKeys.length > 0) return targetKeys;
         }
         return currentSeg.azik;
