@@ -170,6 +170,7 @@ export default function StageSelector({ onSelectStage, onBackToTitle, progress, 
                     activeKeys={frame.activeKeys}
                     normalKeys={frame.normalKeys}
                     layout={settings.keyboardLayout}
+                    showLegend={false}
                   />
                 </div>
               </div>

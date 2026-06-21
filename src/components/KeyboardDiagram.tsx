@@ -5,6 +5,7 @@ interface KeyboardDiagramProps {
   typedKeys?: string[];
   normalKeys?: string[];
   layout: "US" | "JIS";
+  showLegend?: boolean;
 }
 
 const US_ROWS: string[][] = [
@@ -19,7 +20,7 @@ const JIS_ROWS: string[][] = [
   ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
 ];
 
-export default function KeyboardDiagram({ activeKeys, typedKeys = [], normalKeys = [], layout }: KeyboardDiagramProps) {
+export default function KeyboardDiagram({ activeKeys, typedKeys = [], normalKeys = [], layout, showLegend = true }: KeyboardDiagramProps) {
   const rows = layout === "JIS" ? JIS_ROWS : US_ROWS;
 
   const getKeyStyle = (key: string) => {
@@ -49,7 +50,7 @@ export default function KeyboardDiagram({ activeKeys, typedKeys = [], normalKeys
           ))}
         </div>
       ))}
-      {(activeKeys.length > 0 || normalKeys.length > 0) && (
+      {showLegend && (activeKeys.length > 0 || normalKeys.length > 0) && (
         <div className="flex gap-3 mt-1 text-[9px] text-zinc-500">
           {activeKeys.length > 0 && <span className="flex items-center gap-1"><span className="w-2 h-2 bg-yellow-400 rounded-sm inline-block" />AZIK</span>}
           {normalKeys.length > 0 && <span className="flex items-center gap-1"><span className="w-2 h-2 bg-zinc-600 rounded-sm inline-block" />通常ローマ字</span>}
