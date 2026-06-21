@@ -4,11 +4,11 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, mergeCustomAzikRules, calculateOptimalKeyCounts } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { STAGE_MAX_LEVELS, AzikLevel, classifyAzikKey, isTargetSegment, STAGE_KEY_PREDS } from "@/data/stages/wordValidator";
-import { GameSettings } from "@/app/page";
+import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
 import { GameStats } from "@/types/game";
-import { getRank } from "@/utils/gameLogic";
+import { getRank, calcOptimalProgress } from "@/utils/gameLogic";
 import KeyboardDiagram from "./KeyboardDiagram";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
@@ -143,42 +143,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   };
 
   const getRealtimeSavedKeys = () => {
-    let optimalNormal = 0;
-    for (let i = 0; i < wordIndex; i++) {
-      const w = words[i];
-      w.segments.forEach(seg => {
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-      });
-    }
-    if (wordIndex < words.length) {
-      const currentWord = words[wordIndex];
-      for (let j = 0; j < segmentIndex; j++) {
-        const seg = currentWord.segments[j];
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-      }
-    }
+    const { optimalNormal } = calcOptimalProgress(words, wordIndex, segmentIndex);
     const confirmedCorrectKeys = totalCorrectKeys - inputBuffer.length;
     return Math.max(0, optimalNormal - confirmedCorrectKeys);
   };
 
   const getRealtimeAzikRatio = () => {
-    let optimalNormal = 0;
-    let optimalAzik = 0;
-    for (let i = 0; i < wordIndex; i++) {
-      const w = words[i];
-      w.segments.forEach(seg => {
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-        optimalAzik += Math.min(...seg.azik.map(p => p.length));
-      });
-    }
-    if (wordIndex < words.length) {
-      const currentWord = words[wordIndex];
-      for (let j = 0; j < segmentIndex; j++) {
-        const seg = currentWord.segments[j];
-        optimalNormal += Math.min(...seg.normal.map(p => p.length));
-        optimalAzik += Math.min(...seg.azik.map(p => p.length));
-      }
-    }
+    const { optimalNormal, optimalAzik } = calcOptimalProgress(words, wordIndex, segmentIndex);
     if (optimalNormal <= optimalAzik) return 100;
     const confirmedCorrectKeys = totalCorrectKeys - inputBuffer.length;
     return Math.max(0, Math.min(100, Math.round(((optimalNormal - confirmedCorrectKeys) / (optimalNormal - optimalAzik)) * 100)));

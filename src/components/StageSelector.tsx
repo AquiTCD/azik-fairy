@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { StageData } from "@/data/azikRules";
 import { STAGES, StageMeta } from "@/data/stages";
-import { GameSettings, StageProgress } from "@/app/page";
+import { GameSettings, StageProgress } from "@/types/game";
 import GameButton from "@/components/GameButton";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import KeyboardDiagram from "@/components/KeyboardDiagram";

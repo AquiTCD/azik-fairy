@@ -445,8 +445,6 @@ export default function AzikKeyVisualizer({ stage, onStart, onBackToStageSelect,
   const [frameIdx, setFrameIdx] = useState(0);
   const [dontShowAgain, setDontShowAgain] = useState(true);
   const bottomRef = React.useRef<HTMLDivElement>(null);
-  const dontShowRef = React.useRef(dontShowAgain);
-  dontShowRef.current = dontShowAgain;
 
   const frames = config?.frames ?? [];
 

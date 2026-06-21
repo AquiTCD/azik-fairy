@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { calcStars, calcStreak, getNextStageId, getRank } from "./gameLogic";
+import { calcStars, calcStreak, getNextStageId, getRank, calcOptimalProgress } from "./gameLogic";
+import type { TypingWord } from "@/data/azikRules";
 import { STAGES } from "../data/stages";
 
 describe("gameLogic utilities", () => {
@@ -87,6 +88,40 @@ describe("gameLogic utilities", () => {
       expect(getRank(80,  119, 60)).toBe("C"); // wpm <120
       expect(getRank(80,  120, 59)).toBe("C"); // azikRatio <60
       expect(getRank(0,   0,   0)).toBe("C");
+    });
+  });
+
+  describe("calcOptimalProgress", () => {
+    const seg = (normal: string[], azik: string[]) => ({ kana: "x", normal, azik });
+    const word = (segs: ReturnType<typeof seg>[]): TypingWord =>
+      ({ kanji: "", kana: "", segments: segs });
+
+    it("returns zeros for empty completed word list", () => {
+      expect(calcOptimalProgress([], 0, 0)).toEqual({ optimalNormal: 0, optimalAzik: 0 });
+    });
+
+    it("sums optimal keys for all fully-completed words", () => {
+      // word0: normal=2("ab"), azik=1("c") | word1: normal=3("abc"), azik=2("de")
+      const words = [word([seg(["ab"], ["c"])]), word([seg(["abc"], ["de"])])];
+      const result = calcOptimalProgress(words, 2, 0);
+      expect(result.optimalNormal).toBe(5);
+      expect(result.optimalAzik).toBe(3);
+    });
+
+    it("includes only completed segments of current word up to segmentIndex", () => {
+      // word0: seg0 normal=2/azik=1, seg1 normal=3/azik=2
+      const words = [word([seg(["ab"], ["c"]), seg(["abc"], ["de"])])];
+      const result = calcOptimalProgress(words, 0, 1); // seg0 done, seg1 not yet
+      expect(result.optimalNormal).toBe(2);
+      expect(result.optimalAzik).toBe(1);
+    });
+
+    it("picks shortest pattern when multiple alternatives exist", () => {
+      // normal has "ab"(2) and "abc"(3) → min=2; azik has "c"(1) and "de"(2) → min=1
+      const words = [word([seg(["ab", "abc"], ["c", "de"])])];
+      const result = calcOptimalProgress(words, 1, 0);
+      expect(result.optimalNormal).toBe(2);
+      expect(result.optimalAzik).toBe(1);
     });
   });
 });

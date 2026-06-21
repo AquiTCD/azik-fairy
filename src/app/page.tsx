@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { SoundThemeName } from "@/hooks/useAzikSound";
 import { getRandomAds } from "@/data/adData";
 import { calcStars, calcStreak, getNextStageId } from "@/utils/gameLogic";
 import { STAGES } from "@/data/stages";
@@ -14,40 +13,10 @@ import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AdBanner from "@/components/AdBanner";
 import KeyNavGroup from "@/components/KeyNavGroup";
 import AzikKeyVisualizer from "@/components/AzikKeyVisualizer";
-import { GameStats } from "@/types/game";
+import { GameStats, GameSettings, StageProgress, UserProgress, GameState } from "@/types/game";
 import resultComments from "../../public/data/result_comments.json";
 
-export interface GameSettings {
-  isTraining: boolean;
-  isFullTraining: boolean;
-  showGuide: boolean;
-  showTable: boolean;
-  customRules: Record<string, string[]>; // { "ん": ["q"], "っ": [";", ":"], ... }
-  keyboardLayout: "US" | "JIS";
-  soundEnabled: boolean;
-  soundTheme: SoundThemeName;
-  wordsPerSession: number; // 0 = unlimited
-  enableSpecial: boolean;   // 特殊拡張 (こと/もの/する/です/ます)
-  enableForeign: boolean;   // 外来語拡張 (tgi/dci/tgu/dcu = てぃ/でぃ/とぅ/どぅ)
-  nAlternative: "off" | "left" | "all"; // 撥音ZショートカットへのN代替: off=Zのみ / left=左手子音のみ / all=全子音
-}
-
-export interface StageProgress {
-  stars: number; // 0, 1, 2, 3
-  bestWpm: number;
-  bestAccuracy: number;
-  bestTime: number;
-}
-
-export interface UserProgress {
-  stageProgress: Record<string, StageProgress>; // stageId -> StageProgress
-  totalKeysTyped: number;
-  lastPlayDate: string; // YYYY-MM-DD
-  streak: number;
-  seenStageIntros: string[]; // stageIds where intro has been shown
-}
-
-export type GameState = "TITLE" | "STAGE_SELECT" | "STAGE_INTRO" | "PLAYING" | "RESULT" | "SETTINGS" | "HELP";
+export type { GameSettings, StageProgress, UserProgress, GameState };
 
 const STORAGE_KEY = "azik-fairy-settings";
 const PROGRESS_STORAGE_KEY = "azik-fairy-progress";
@@ -60,7 +29,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   customRules: {},
   keyboardLayout: "JIS",
   soundEnabled: false,
-  soundTheme: "soft" as SoundThemeName,
+  soundTheme: "soft",
   wordsPerSession: 30,
   enableSpecial: true,
   enableForeign: true,

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { GameSettings } from "@/app/page";
+import { GameSettings } from "@/types/game";
 import { SoundThemeName } from "@/hooks/useAzikSound";
 import { parseExternalRomajiTable } from "@/data/azikRules";
 import GameButton from "@/components/GameButton";
