@@ -264,12 +264,35 @@ export default function Home() {
             </p>
 
             {/* 統計ステータス */}
-            {progress.totalKeysTyped > 0 && (
-              <div className="text-[10px] md:text-xs font-pixel text-green-300 border border-green-800 bg-zinc-950/80 px-4 py-2 rounded w-full flex justify-around shadow-[inset_1px_1px_3px_rgba(0,0,0,0.8)]">
-                <div>TOTAL KEYS: <span className="font-bold text-yellow-400">{progress.totalKeysTyped}</span></div>
-                <div>STREAK: <span className="font-bold text-yellow-400">{progress.streak} DAYS</span></div>
-              </div>
-            )}
+            {(() => {
+              const LEV_CATS = new Set(["Lev1", "Lev2a", "Lev2b", "Lev3a", "Lev3b", "Lev4"]);
+              const levStages = STAGES.filter(s => LEV_CATS.has(s.category));
+              const levTotal = levStages.length;
+              const levCleared = levStages.filter(s => (progress.stageProgress[s.id]?.stars ?? 0) >= 2).length;
+              const pct = Math.round((levCleared / levTotal) * 100);
+              return (
+                <div className="text-[10px] md:text-xs font-pixel text-green-300 border border-green-800 bg-zinc-950/80 px-4 py-2 rounded w-full flex flex-col gap-2 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.8)]">
+                  {progress.totalKeysTyped > 0 && (
+                    <div className="flex justify-around">
+                      <div>TOTAL KEYS: <span className="font-bold text-yellow-400">{progress.totalKeysTyped.toLocaleString()}</span></div>
+                      <div>STREAK: <span className="font-bold text-yellow-400">{progress.streak} DAYS</span></div>
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between">
+                      <span>PROGRESS</span>
+                      <span><span className="font-bold text-yellow-400">{levCleared}</span> / {levTotal} STAGES CLEARED</span>
+                    </div>
+                    <div className="w-full h-2 bg-zinc-800 rounded-sm overflow-hidden border border-zinc-700">
+                      <div
+                        className="h-full bg-yellow-400 transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             <KeyNavGroup className="flex flex-col gap-4 w-full max-w-xs">
               <GameButton variant="primary" size="lg" onClick={() => setGameState("STAGE_SELECT")} className="w-full">
