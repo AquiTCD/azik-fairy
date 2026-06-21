@@ -7,11 +7,11 @@ import { GameSettings, TimeAttackBest } from "@/types/game";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import GameButton from "@/components/GameButton";
 import KanaSegmentDisplay from "@/components/KanaSegmentDisplay";
-import KeyPatternButtons from "@/components/KeyPatternButtons";
 import { buildTimeAttackTweetUrl } from "@/utils/tweetUtils";
 import XIcon from "@/components/XIcon";
 import { useTypingInput } from "@/hooks/useTypingInput";
 import { useCustomDictionary } from "@/hooks/useCustomDictionary";
+import { useAzikSound } from "@/hooks/useAzikSound";
 
 const TIME_LIMIT = 60;
 const WORDS_BUFFER = 60;
@@ -29,6 +29,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
   const [remaining, setRemaining] = useState(TIME_LIMIT);
   const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState<{ wpm: number; accuracy: number } | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const totalKeysRef = useRef(0);
@@ -36,6 +37,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
   const completedCharsRef = useRef(0);
 
   const customDictionary = useCustomDictionary(settings);
+  const { playCorrect, playMiss, playWordComplete } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
 
   const loadWords = useCallback(async (): Promise<TypingWord[]> => {
     const stage = await loadStage("practice-words-1");
@@ -54,13 +56,23 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
 
   const getAllowedPatterns = useCallback((seg: AzikSegment) => seg.azik, []);
 
+  const onFirstKey = useCallback(() => {
+    setIsStarting(true);
+    setTimeout(() => setIsStarting(false), 400);
+  }, []);
+
+  const onSegmentComplete = useCallback(() => {
+    playCorrect();
+  }, [playCorrect]);
+
   const onCorrectKey = useCallback(() => {
     totalKeysRef.current += 1;
   }, []);
 
   const onMissKey = useCallback(() => {
     missCountRef.current += 1;
-  }, []);
+    playMiss();
+  }, [playMiss]);
 
   // words を ref で持つことで onWordComplete クロージャが常に最新を参照できる
   const wordsStateRef = useRef(words);
@@ -71,10 +83,11 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
     const completedWord = ws[completedWordIdx];
     completedCharsRef.current += completedWord?.segments.length ?? 0;
     setCompletedWordCount(prev => prev + 1);
+    playWordComplete();
     if (completedWordIdx + 1 >= ws.length) {
       loadWords().then(extra => setWords(prev => [...prev, ...extra]));
     }
-  }, [loadWords]);
+  }, [loadWords, playWordComplete]);
 
   const {
     wordIndex,
@@ -90,6 +103,8 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
     getAllowedPatterns,
     disabled: isFinished,
     wiggleOnMiss: true,
+    onFirstKey,
+    onSegmentComplete,
     onCorrectKey,
     onMissKey,
     onWordComplete,
@@ -189,7 +204,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
 
   return (
     <FairyScreenLayout wide fairy={{ message: startedAt ? "全力で打ちまくれ！AZIKで爆速タイパーになれ！🔥" : "キーを押してスタート！1分間でどれだけ打てる！？⚡", emotion: startedAt ? "excited" : "idle" }}>
-      <div className={`flex-1 flex flex-col gap-4 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_3]" : ""}`}>
+      <div className={`flex-1 flex flex-col gap-4 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_3]" : isStarting ? "animate-[start-bounce_0.4s_ease-out]" : ""}`}>
 
         {/* タイマー表示 */}
         <div className="text-center">
@@ -235,12 +250,14 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
                 />
               )}
 
-              {/* キーガイド */}
-              {currentSeg && settings.showGuide && (
-                <div className="mt-4">
-                  <KeyPatternButtons patterns={currentSeg.azik} inputBuffer={inputBuffer} />
-                </div>
-              )}
+              {/* 入力中バッファ表示 */}
+              <div className="mt-3 h-8 flex items-center justify-center">
+                {inputBuffer && (
+                  <div className="bg-zinc-800 px-4 py-1 border border-green-700 rounded font-pixel text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    <span className="text-green-300 font-bold uppercase tracking-widest">{inputBuffer}</span>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>

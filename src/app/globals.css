@@ -27,6 +27,13 @@ body {
   75%       { transform: translateX(2px) rotate(0.5deg); }
 }
 
+@keyframes start-bounce {
+  0%   { transform: translateY(0) scale(1); }
+  25%  { transform: translateY(-8px) scale(1.015); }
+  65%  { transform: translateY(3px) scale(0.995); }
+  100% { transform: translateY(0) scale(1); }
+}
+
 @keyframes glow-yellow {
   0%, 100% {
     color: #facc15;
