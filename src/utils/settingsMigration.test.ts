@@ -7,36 +7,33 @@ const DEFAULTS: GameSettings = {
   isFullTraining: false,
   showGuide: true,
   showTable: true,
-  customRules: {},
   keyboardLayout: "JIS",
   soundEnabled: false,
   soundTheme: "soft",
   wordsPerSession: 30,
   enableSpecial: true,
   enableForeign: true,
-  nAlternative: "left",
-  smallKanaPrefix: "l",
   ghostRaceEnabled: true,
 };
 
 describe("migrateSettings", () => {
-  describe("customRules のマイグレーション", () => {
-    it("string 値を string[] に変換する", () => {
+  describe("旧フィールドの除去", () => {
+    it("customRules は除去される（クラッシュしない）", () => {
       const raw = { customRules: { あ: "a" } };
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.customRules["あ"]).toEqual(["a"]);
+      expect((result as any).customRules).toBeUndefined();
     });
 
-    it("すでに string[] の場合は変換しない", () => {
-      const raw = { customRules: { あ: ["a", "aa"] } };
+    it("nAlternative は除去される", () => {
+      const raw = { nAlternative: "left" };
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.customRules["あ"]).toEqual(["a", "aa"]);
+      expect((result as any).nAlternative).toBeUndefined();
     });
 
-    it("customRules が空の場合は空のまま", () => {
-      const raw = { customRules: {} };
+    it("smallKanaPrefix は除去される", () => {
+      const raw = { smallKanaPrefix: "l" };
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.customRules).toEqual({});
+      expect((result as any).smallKanaPrefix).toBeUndefined();
     });
   });
 

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { getRandomAds } from "@/data/adData";
 import { calcStars, calcStreak, getWeaknessRanking, mergeWeaknessStats, mergeSessionHistory } from "@/utils/gameLogic";
 import { STAGES } from "@/data/stages";
 import { loadStage } from "@/data/stages";
-import { mergeCustomAzikRules, createTypingWord, TypingWord } from "@/data/azikRules";
+import { createTypingWord, TypingWord } from "@/data/azikRules";
 import StageSelector from "@/components/StageSelector";
 import Settings from "@/components/Settings";
 import TypingGame from "@/components/TypingGame";
@@ -23,7 +23,7 @@ import { GameStats, GameSettings, UserProgress, GameState, TimeAttackBest } from
 import { WEAKNESS_STAGE_ID, SETTINGS_STORAGE_KEY } from "@/constants/game";
 import { useProgressStorage } from "@/hooks/useProgressStorage";
 import { migrateSettings } from "@/utils/settingsMigration";
-import { useUserAzikConfig } from "@/hooks/useUserAzikConfig";
+import { useUserDictConfig } from "@/hooks/useUserDictConfig";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -105,15 +105,12 @@ const DEFAULT_SETTINGS: GameSettings = {
   isFullTraining: false,
   showGuide: true,
   showTable: true,
-  customRules: {},
   keyboardLayout: "JIS",
   soundEnabled: false,
   soundTheme: "soft",
   wordsPerSession: 30,
   enableSpecial: true,
   enableForeign: true,
-  nAlternative: "left",
-  smallKanaPrefix: "l",
   ghostRaceEnabled: true,
 };
 
@@ -124,7 +121,7 @@ export default function Home() {
 
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const { progress, saveProgress, clearProgress, load: loadProgress } = useProgressStorage();
-  const { effectiveDict, config: userAzikConfig, importConf, reset: resetUserAzikConfig } = useUserAzikConfig();
+  const { effectiveDict, config: userDictConfig, importTable, setKanaKeys, reset: resetUserDict, isCustomized } = useUserDictConfig();
   const [isMounted, setIsMounted] = useState(false);
   const [stats, setStats] = useState<GameStats | null>(null);
 
@@ -134,13 +131,6 @@ export default function Home() {
   // 弱点練習用の単語（非同期ロード）
   const [weaknessWords, setWeaknessWords] = useState<TypingWord[] | null>(null);
 
-  // カスタム辞書（page.tsx 内で弱点単語フィルタに使用）
-  const customDictionary = useMemo(() => mergeCustomAzikRules(settings.customRules, {
-    enableSpecial: settings.enableSpecial,
-    enableForeign: settings.enableForeign,
-    nAlternative: settings.nAlternative,
-    smallKanaPrefix: settings.smallKanaPrefix,
-  }), [settings.customRules, settings.enableSpecial, settings.enableForeign, settings.nAlternative, settings.smallKanaPrefix]);
 
   // 1. マウント時に LocalStorage から設定と進捗を復元
   useEffect(() => {
@@ -165,7 +155,7 @@ export default function Home() {
     loadStage("practice-words-1").then(stage => {
       const filtered = stage.words
         .filter(w => {
-          const word = createTypingWord(w.kanji, w.kana, customDictionary);
+          const word = createTypingWord(w.kanji, w.kana, effectiveDict);
           return word.segments.some(seg =>
             seg.azik.some(pattern =>
               weaknessKeys.some(wk => pattern.includes(wk))
@@ -173,7 +163,7 @@ export default function Home() {
           );
         })
         .slice(0, 30);
-      const words = filtered.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
+      const words = filtered.map(w => createTypingWord(w.kanji, w.kana, effectiveDict));
       setWeaknessWords(words.length > 0 ? words : null);
     });
   }, [selectedStageId]);
@@ -445,9 +435,11 @@ export default function Home() {
           onBackToTitle={() => setGameState("TITLE")}
           onClearProgress={handleClearProgress}
           onResetStageIntros={handleResetStageIntros}
-          onImportConf={importConf}
-          onResetUserConfig={resetUserAzikConfig}
-          userAzikConfig={userAzikConfig}
+          onImportTable={importTable}
+          onSetKanaKeys={setKanaKeys}
+          onResetUserDict={resetUserDict}
+          isCustomized={isCustomized}
+          userDictConfig={userDictConfig}
         />
       )}
 

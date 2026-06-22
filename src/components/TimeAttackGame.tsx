@@ -10,7 +10,6 @@ import KanaSegmentDisplay from "@/components/KanaSegmentDisplay";
 import { buildTimeAttackTweetUrl } from "@/utils/tweetUtils";
 import XIcon from "@/components/XIcon";
 import { useTypingInput } from "@/hooks/useTypingInput";
-import { useCustomDictionary } from "@/hooks/useCustomDictionary";
 import { useAzikSound } from "@/hooks/useAzikSound";
 
 const TIME_LIMIT = 60;
@@ -37,14 +36,13 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest, e
   const missCountRef = useRef(0);
   const completedCharsRef = useRef(0);
 
-  const customDictionary = useCustomDictionary(settings);
   const { playCorrect, playMiss, playWordComplete } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
 
   const loadWords = useCallback(async (): Promise<TypingWord[]> => {
     const stage = await loadStage("practice-words-1");
     const shuffled = [...stage.words].sort(() => Math.random() - 0.5).slice(0, WORDS_BUFFER);
-    return shuffled.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
-  }, [customDictionary]);
+    return shuffled.map(w => createTypingWord(w.kanji, w.kana, effectiveDict ?? AZIK_DICTIONARY));
+  }, [effectiveDict]);
 
   const finish = useCallback((keys: number, misses: number, elapsed: number) => {
     const wpm = Math.round((keys / Math.max(elapsed, 1)) * 60);

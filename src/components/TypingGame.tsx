@@ -5,7 +5,6 @@ import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalK
 import { loadStage } from "@/data/stages";
 import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
-import { useCustomDictionary } from "@/hooks/useCustomDictionary";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -310,11 +309,10 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     return () => window.removeEventListener("keydown", handler);
   }, [pendingStats, onFinish]);
 
-  const customDictionary = useCustomDictionary(settings);
-
   useEffect(() => {
     if (!stage) return;
 
+    const dict = effectiveDict ?? AZIK_DICTIONARY;
     let initializedWords: TypingWord[];
 
     if (stage.id === WEAKNESS_STAGE_ID && weaknessOverrideWords && weaknessOverrideWords.length > 0) {
@@ -332,7 +330,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       const sourceWords = limit > 0 && stage.words.length > limit
         ? [...stage.words].sort(() => Math.random() - 0.5).slice(0, limit)
         : stage.words;
-      initializedWords = sourceWords.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
+      initializedWords = sourceWords.map(w => createTypingWord(w.kanji, w.kana, dict));
     }
 
     const counts = calculateOptimalKeyCounts(initializedWords);
@@ -348,7 +346,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     setFairyMessage(msg);
     setFairyEmotion("idle");
     setPendingStats(null);
-  }, [stage, customDictionary, weaknessOverrideWords]);
+  }, [stage, effectiveDict, weaknessOverrideWords]);
 
   useEffect(() => {
     if (startedAt === null || pendingStats) return;
