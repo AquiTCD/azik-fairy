@@ -386,6 +386,7 @@ export default function Home() {
             soundEnabled={settings.soundEnabled}
             onToggleSound={() => handleUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
             layout={settings.keyboardLayout}
+            effectiveDict={effectiveDict}
           />
         );
       })()}
@@ -401,6 +402,7 @@ export default function Home() {
           onUpdateSettings={handleUpdateSettings}
           weaknessStats={progress.weaknessStats}
           onStartWeaknessPractice={handleStartWeaknessPractice}
+          effectiveDict={effectiveDict}
         />
       )}
 

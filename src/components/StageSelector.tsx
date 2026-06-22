@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { StageData } from "@/data/azikRules";
+import { StageData, AzikMapping } from "@/data/azikRules";
 import { STAGES, StageMeta } from "@/data/stages";
 import { GameSettings, StageProgress, WeaknessStat } from "@/types/game";
 import { getWeaknessRanking } from "@/utils/gameLogic";
@@ -18,6 +18,7 @@ interface StageSelectorProps {
   onUpdateSettings: (settings: GameSettings) => void;
   weaknessStats?: Record<string, WeaknessStat>;
   onStartWeaknessPractice?: () => void;
+  effectiveDict?: Record<string, AzikMapping>;
 }
 
 function isCategoryEnabled(categoryId: string, settings: GameSettings): boolean {
@@ -38,7 +39,7 @@ const TRAINING_CATEGORIES = [
 ] as const;
 
 export default function StageSelector({
-  onSelectStage, onBackToTitle, flowMode, progress, settings, onUpdateSettings, weaknessStats, onStartWeaknessPractice,
+  onSelectStage, onBackToTitle, flowMode, progress, settings, onUpdateSettings, weaknessStats, onStartWeaknessPractice, effectiveDict,
 }: StageSelectorProps) {
   const [activeCategory, setActiveCategory] = useState<CategoryType>("Lev1");
 
@@ -328,6 +329,7 @@ export default function StageSelector({
                     })}
                     settings={settings}
                     showIntroPreview={!["Practice", "Challenge"].includes(stage.category)}
+                    effectiveDict={effectiveDict}
                   />
                 ))}
               </div>
