@@ -76,7 +76,35 @@ chore: bump version to vX.Y.Z
 
 このコミットを version bump の機能変更と同じ PR に含める（PR マージ = リリース）。
 
-## 5. PR → タグ → リリース
+## 5. PR の作成
+
+ブランチを push して PR を作成する：
+
+```bash
+git push -u origin <branch>
+
+gh pr create \
+  --title "feat: <概要> (vX.Y.Z)" \
+  --body "$(cat <<'EOF'
+## Summary
+
+- 変更点1
+- 変更点2
+
+## Test plan
+
+- [ ] `npm run build` 成功
+- [ ] `npx vitest run` 全件 green
+- [ ] TypeScript エラーなし（`tsc --noEmit`）
+- [ ] バージョン表記が vX.Y.Z に統一されていることを確認
+- [ ] マージ後に `git tag vX.Y.Z && git push origin vX.Y.Z` → `gh release create` を実行
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+## 6. タグ → リリース（PR マージ後）
 
 PR のマージ後に実行：
 
