@@ -22,9 +22,16 @@ body {
 }
 
 @keyframes wiggle {
-  0%, 100% { transform: translateX(0); }
-  25%       { transform: translateX(-4px); }
-  75%       { transform: translateX(4px); }
+  0%, 100% { transform: translateX(0) rotate(0); }
+  25%       { transform: translateX(-2px) rotate(-0.5deg); }
+  75%       { transform: translateX(2px) rotate(0.5deg); }
+}
+
+@keyframes start-bounce {
+  0%   { transform: translateY(0) scale(1); }
+  25%  { transform: translateY(-8px) scale(1.015); }
+  65%  { transform: translateY(3px) scale(0.995); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 @keyframes glow-yellow {

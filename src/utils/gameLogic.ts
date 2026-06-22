@@ -1,5 +1,5 @@
 import { STAGES } from "../data/stages";
-import { RankType } from "../types/game";
+import { RankType, WeaknessStat, DailySession } from "../types/game";
 import type { TypingWord } from "../data/azikRules";
 
 export function calcStars(accuracy: number, wpm: number): 1 | 2 | 3 {
@@ -58,4 +58,78 @@ export function calcOptimalProgress(
     }
   }
   return { optimalNormal, optimalAzik };
+}
+
+export function getWeaknessRanking(
+  weaknessStats: Record<string, WeaknessStat>,
+  topN = 5
+): string[] {
+  return Object.entries(weaknessStats)
+    .filter(([, stat]) => stat.attemptCount >= 5 && stat.missCount / stat.attemptCount >= 0.3)
+    .sort(([, a], [, b]) => (b.missCount / b.attemptCount) - (a.missCount / a.attemptCount))
+    .slice(0, topN)
+    .map(([key]) => key);
+}
+
+export function mergeWeaknessStats(
+  current: Record<string, WeaknessStat>,
+  sessionHeatmap: Record<string, { miss: number; attempt: number }>,
+  missTypeMode: "typo" | "strict",
+  todayStr: string
+): Record<string, WeaknessStat> {
+  const merged = { ...current };
+  for (const [key, { miss, attempt }] of Object.entries(sessionHeatmap)) {
+    const existing = merged[key] ?? {
+      missCount: 0, attemptCount: 0,
+      missType: { strict: 0, typo: 0, slow: 0 },
+      lastMissDate: "",
+    };
+    merged[key] = {
+      missCount: existing.missCount + miss,
+      attemptCount: existing.attemptCount + attempt,
+      missType: {
+        strict: existing.missType.strict + (missTypeMode === "strict" ? miss : 0),
+        typo: existing.missType.typo + (missTypeMode === "typo" ? miss : 0),
+        slow: existing.missType.slow,
+      },
+      lastMissDate: miss > 0 ? todayStr : existing.lastMissDate,
+    };
+  }
+  return merged;
+}
+
+export function mergeSessionHistory(
+  history: DailySession[],
+  todayStr: string,
+  newWpm: number,
+  newAccuracy: number,
+  newAzikRatio: number,
+): DailySession[] {
+  const existing = history.find(s => s.date === todayStr);
+  let updated: DailySession[];
+
+  if (existing) {
+    updated = history.map(s =>
+      s.date === todayStr
+        ? {
+            date: todayStr,
+            bestWpm: Math.max(s.bestWpm, newWpm),
+            avgAccuracy: Math.round((s.avgAccuracy + newAccuracy) / 2),
+            avgAzikRatio: Math.round((s.avgAzikRatio + newAzikRatio) / 2),
+          }
+        : s
+    );
+  } else {
+    updated = [...history, {
+      date: todayStr,
+      bestWpm: newWpm,
+      avgAccuracy: newAccuracy,
+      avgAzikRatio: newAzikRatio,
+    }];
+  }
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+  const cutoffStr = cutoff.toLocaleDateString("sv-SE");
+  return updated.filter(s => s.date >= cutoffStr);
 }

@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from "react";
+
 let sharedCtx: AudioContext | null = null;
 
 function getCtx(): AudioContext | null {
@@ -131,7 +133,7 @@ const SOUND_THEMES: Record<SoundThemeName, ThemeSounds> = {
 };
 
 export function useAzikSound(theme: SoundThemeName | "off") {
-  const play = (event: SoundEvent) => {
+  const play = useCallback((event: SoundEvent) => {
     if (theme === "off") return;
     const ctx = getCtx();
     if (!ctx) return;
@@ -140,12 +142,12 @@ export function useAzikSound(theme: SoundThemeName | "off") {
     } catch {
       // AudioContext errors are silently ignored
     }
-  };
+  }, [theme]);
 
-  return {
+  return useMemo(() => ({
     playCorrect: () => play("correct"),
     playMiss: () => play("miss"),
     playWordComplete: () => play("wordComplete"),
     playStageClear: () => play("stageClear"),
-  };
+  }), [play]);
 }

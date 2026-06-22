@@ -42,11 +42,14 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ー": { normal: ["-"], azik: ["-", ":"] },
 
   // --- 小書き仮名 (外来語表記用フォールバック) ---
-  "ぁ": { normal: ["xa", "la"], azik: ["xa", "la"] },
-  "ぃ": { normal: ["xi", "li"], azik: ["xi", "li"] },
-  "ぅ": { normal: ["xu", "lu"], azik: ["xu", "lu"] },
-  "ぇ": { normal: ["xe", "le"], azik: ["xe", "le"] },
-  "ぉ": { normal: ["xo", "lo"], azik: ["xo", "lo"] },
+  // ぁぃぅぇぉ: azik では x は し行専用（xa=しゃ等、2文字）と被るため x+単母音を除外。
+  // mergeCustomAzikRules の smallKanaPrefix 設定で l系 / xx系 を切替可能。
+  // ゃゅょ: xya/xyu/xyo は し行 xa/xi/xu/xe/xo と3文字 vs 2文字で別キー。競合なし、そのまま。
+  "ぁ": { normal: ["xa", "la"], azik: ["la"] },
+  "ぃ": { normal: ["xi", "li"], azik: ["li"] },
+  "ぅ": { normal: ["xu", "lu"], azik: ["lu"] },
+  "ぇ": { normal: ["xe", "le"], azik: ["le"] },
+  "ぉ": { normal: ["xo", "lo"], azik: ["lo"] },
   "ゃ": { normal: ["xya", "lya"], azik: ["xya"] },
   "ゅ": { normal: ["xyu", "lyu"], azik: ["xyu"] },
   "ょ": { normal: ["xyo", "lyo"], azik: ["xyo"] },
@@ -341,22 +344,22 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "しゅ": { normal: ["syu", "shu"], azik: ["xu"] },
   "しぇ": { normal: ["sye", "she"], azik: ["xe"] },
   "しょ": { normal: ["syo", "sho"], azik: ["xo"] },
-  "しゃん": { normal: ["syan", "shan"], azik: ["xz"] },
-  "しゅん": { normal: ["syun", "shun"], azik: ["xj"] },
-  "しょん": { normal: ["syon", "shon"], azik: ["xl"] },
-  "しゅう": { normal: ["syuu", "shuu"], azik: ["xh"] },
-  "しょう": { normal: ["syou", "shou"], azik: ["xp"] },
+  "しゃん": { normal: ["syan", "shan", "xan"], azik: ["xz"] },
+  "しゅん": { normal: ["syun", "shun", "xun"], azik: ["xj"] },
+  "しょん": { normal: ["syon", "shon", "xon"], azik: ["xl"] },
+  "しゅう": { normal: ["syuu", "shuu", "xuu"], azik: ["xh"] },
+  "しょう": { normal: ["syou", "shou", "xou"], azik: ["xp"] },
 
   "ちゃ": { normal: ["tya", "cha", "cya"], azik: ["ca"] },
   "ちぃ": { normal: ["tyi"], azik: ["ci"] },
   "ちゅ": { normal: ["tyu", "chu", "cyu"], azik: ["cu"] },
   "ちぇ": { normal: ["tye", "che"], azik: ["ce", "cf"] },
   "ちょ": { normal: ["tyo", "cho", "cyo"], azik: ["co"] },
-  "ちゃん": { normal: ["tyan", "chan"], azik: ["cz"] },
-  "ちゅん": { normal: ["tyun", "chun"], azik: ["cj"] },
-  "ちょん": { normal: ["tyon", "chon"], azik: ["cl"] },
-  "ちゅう": { normal: ["tyuu", "chuu"], azik: ["ch"] },
-  "ちょう": { normal: ["tyou", "chou"], azik: ["cp"] },
+  "ちゃん": { normal: ["tyan", "chan", "can"], azik: ["cz"] },
+  "ちゅん": { normal: ["tyun", "chun", "cun"], azik: ["cj"] },
+  "ちょん": { normal: ["tyon", "chon", "con"], azik: ["cl"] },
+  "ちゅう": { normal: ["tyuu", "chuu", "cuu"], azik: ["ch"] },
+  "ちょう": { normal: ["tyou", "chou", "cou"], azik: ["cp"] },
 
   "じゃ": { normal: ["zya", "ja", "jya"], azik: ["ja"] },
   "じゅ": { normal: ["zyu", "ju", "jyu"], azik: ["ju", "jf"] },
@@ -476,14 +479,14 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "きぇい": { normal: ["kyei"], azik: ["kgw", "kyw"] },
 
   // --- し系欠落拡張 ---
-  "しゃい": { normal: ["syai", "shai"], azik: ["xq", "syq"] },
-  "しぇん": { normal: ["syen", "shen"], azik: ["xd", "syd"] },
-  "しぇい": { normal: ["syei", "shei"], azik: ["xw", "syw"] },
+  "しゃい": { normal: ["syai", "shai", "xai"], azik: ["xq"] },
+  "しぇん": { normal: ["syen", "shen", "xen"], azik: ["xd"] },
+  "しぇい": { normal: ["syei", "shei", "xei"], azik: ["xw"] },
 
   // --- ち系欠落拡張 ---
-  "ちゃい": { normal: ["tyai", "chai"], azik: ["cq", "tyq"] },
-  "ちぇん": { normal: ["tyen", "chen"], azik: ["cd", "tyd"] },
-  "ちぇい": { normal: ["tyei", "chei"], azik: ["cw", "tyw"] },
+  "ちゃい": { normal: ["tyai", "chai", "cai"], azik: ["cq"] },
+  "ちぇん": { normal: ["tyen", "chen", "cen"], azik: ["cd"] },
+  "ちぇい": { normal: ["tyei", "chei", "cei"], azik: ["cw"] },
 
   // --- じ系欠落拡張 ---
   "じゃい": { normal: ["zyai", "jai"], azik: ["jq"] },
@@ -554,6 +557,7 @@ export interface AzikFeatures {
   enableSpecial: boolean;                    // 特殊拡張 (こと/もの/する等)
   enableForeign: boolean;                    // 外来語拡張 (tgi/dci/tgu/dcu)
   nAlternative: "off" | "left" | "all";     // 撥音ZキーへのN代替: off=Zのみ / left=左手子音のみ / all=全子音
+  smallKanaPrefix: "l" | "xx" | "both";     // 小書き仮名入力プレフィックス: l=ltu系 / xx=xx系(SKK用) / both=両方
 }
 
 // QWERTYキーボードで左手で打つ子音 (b/c/d/f/g/r/s/t/v/w/x/z)
@@ -562,9 +566,18 @@ const LEFT_HAND_CONSONANTS = new Set(['b', 'c', 'd', 'f', 'g', 'r', 's', 't', 'v
 const SPECIAL_KANAS = new Set(["こと", "もの", "する", "です", "ます", "という"]);
 const FOREIGN_KANAS = new Set(["てぃ", "でぃ", "とぅ", "どぅ", "てゅ", "でゅ", "ふゅ", "ふょ"]);
 
+// ぁぃぅぇぉ のみ。ゃゅょ は xya/xyu/xyo で し行（xa等）と競合しないため不要。
+const SMALL_KANA_PREFIX_MAP: Record<string, { l: string; xx: string }> = {
+  "ぁ": { l: "la", xx: "xxa" },
+  "ぃ": { l: "li", xx: "xxi" },
+  "ぅ": { l: "lu", xx: "xxu" },
+  "ぇ": { l: "le", xx: "xxe" },
+  "ぉ": { l: "lo", xx: "xxo" },
+};
+
 export function mergeCustomAzikRules(
   customRules: Record<string, string[]>,
-  features: AzikFeatures = { enableSpecial: true, enableForeign: true, nAlternative: "left" }
+  features: AzikFeatures = { enableSpecial: true, enableForeign: true, nAlternative: "left", smallKanaPrefix: "l" }
 ): Record<string, AzikMapping> {
   const merged = JSON.parse(JSON.stringify(AZIK_DICTIONARY)) as Record<string, AzikMapping>;
 
@@ -643,6 +656,16 @@ export function mergeCustomAzikRules(
         map.azik = [...new Set([...map.azik, ...extra])];
       }
     }
+  }
+
+  // 小書き仮名プレフィックス: l/xx/both から azik バリアントを決定
+  const prefix = features.smallKanaPrefix ?? "l";
+  for (const [kana, keys] of Object.entries(SMALL_KANA_PREFIX_MAP)) {
+    if (!merged[kana]) continue;
+    const variants: string[] = [];
+    if (prefix === "l"    || prefix === "both") variants.push(keys.l);
+    if (prefix === "xx"   || prefix === "both") variants.push(keys.xx);
+    merged[kana].azik = variants;
   }
 
   return merged;
