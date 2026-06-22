@@ -280,4 +280,36 @@ describe("buildValidKeys", () => {
     expect(result).toContain(";kz"); // ; + kz
     expect(result).toContain(";kan"); // ; + kan
   });
+
+  describe("longestMatchOnly=true (トレーニングモード)", () => {
+    // FOCUS トレーニングフィルターの再現:
+    // - ターゲットかな(しゃ): AZIK キーのみ ["xa"]
+    // - 非ターゲット(し): allKeys をそのまま返す → shixya という分割パスが生成されうる
+    const focusFilter = (sub: string, keys: string[]) => {
+      if (sub === "しゃ") return keys.filter(k => k === "xa");  // ターゲット: AZIKのみ
+      return keys;  // 非ターゲット: allKeys
+    };
+
+    it("longestMatchOnly=false: しゃ を し+ゃ に分割して shixya を生成してしまう（バグの再現）", () => {
+      const result = buildValidKeys("しゃ", dict, focusFilter, false);
+      // し(shi) + ゃ(xya) = shixya が生成される → s が valid prefix になる詰みバグ
+      expect(result).toContain("shixya");
+    });
+
+    it("longestMatchOnly=true: しゃ の直接エントリ xa のみ返し、shixya を除外する（バグ修正確認）", () => {
+      const result = buildValidKeys("しゃ", dict, focusFilter, true);
+      expect(result).toEqual(["xa"]);
+      expect(result).not.toContain("shixya");
+      expect(result).not.toContain("sixya");
+    });
+
+    it("かん: longestMatchOnly=true で kz と kan を返す（直接エントリ）", () => {
+      const result = buildValidKeys("かん", dict, all, true);
+      expect(result).toContain("kz");
+      expect(result).toContain("kan");
+      // 分割 か+ん のパスは生成しない
+      const splitPaths = result.filter(k => k.startsWith("ka") && k !== "kan");
+      expect(splitPaths.length).toBe(0);
+    });
+  });
 });

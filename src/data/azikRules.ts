@@ -566,6 +566,7 @@ export function buildValidKeys(
   kana: string,
   dictionary: Record<string, AzikMapping> = AZIK_DICTIONARY,
   filter: (sub: string, allKeys: string[]) => string[] = (_s, k) => k,
+  longestMatchOnly: boolean = false,
   pos: number = 0,
   memo: Map<number, string[]> = new Map(),
 ): string[] {
@@ -583,12 +584,14 @@ export function buildValidKeys(
     const allowed = filter(sub, allKeys);
     if (allowed.length === 0) continue;
 
-    const suffixes = buildValidKeys(kana, dictionary, filter, pos + len, memo);
+    const suffixes = buildValidKeys(kana, dictionary, filter, longestMatchOnly, pos + len, memo);
     for (const key of allowed) {
       for (const suf of suffixes) {
         results.add(key + suf);
       }
     }
+
+    if (longestMatchOnly) break;
   }
 
   const arr = Array.from(results);

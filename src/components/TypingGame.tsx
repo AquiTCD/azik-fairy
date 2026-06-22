@@ -153,7 +153,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       return buildValidKeys(currentSeg.kana, dict, (sub, allKeys) => {
         const entry = dict[sub];
         return entry ? entry.azik : allKeys;
-      });
+      }, true);
     }
 
     const isSummaryStage = stageId.includes("summary");
@@ -183,11 +183,11 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       return pseudoSeg.azik;
     };
 
-    const result = buildValidKeys(currentSeg.kana, dict, filter);
+    const result = buildValidKeys(currentSeg.kana, dict, filter, true);
     if (result.length > 0) return result;
     // azik が無効化されているか filter が全パスを除外 → normal キーにフォールバック
     // (base の azik にフォールバックすると disabled 設定を無視してしまうため)
-    return buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.normal ?? []);
+    return buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.normal ?? [], true);
   }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining, effectiveDict]);
 
   const onFirstKey = useCallback(() => {
