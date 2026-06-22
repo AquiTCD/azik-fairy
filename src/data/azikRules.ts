@@ -286,9 +286,9 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ぽう": { normal: ["pou"], azik: ["pp"] },
 
   // --- 拗音 ---
-  "きゃ": { normal: ["kya"], azik: ["kga", "kya"] },
-  "きゅ": { normal: ["kyu"], azik: ["kgu", "kyu"] },
-  "きょ": { normal: ["kyo"], azik: ["kgo", "kyo"] },
+  "きゃ": { normal: ["kya"], azik: ["kga"] },
+  "きゅ": { normal: ["kyu"], azik: ["kgu"] },
+  "きょ": { normal: ["kyo"], azik: ["kgo"] },
   "きゅう": { normal: ["kyuu"], azik: ["kgh", "kyh"] },
   "きょう": { normal: ["kyou"], azik: ["kgp", "kyp"] },
   "きゃん": { normal: ["kyan"], azik: ["kgz", "kyz", "kgn", "kyn"] },
@@ -301,21 +301,21 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ぎゅう": { normal: ["gyuu"], azik: ["gyh"] },
   "ぎょう": { normal: ["gyou"], azik: ["gyp"] },
 
-  "にゃ": { normal: ["nya"], azik: ["nga", "nya"] },
-  "にゅ": { normal: ["nyu"], azik: ["ngu", "nyu"] },
-  "にょ": { normal: ["nyo"], azik: ["ngo", "nyo"] },
+  "にゃ": { normal: ["nya"], azik: ["nga"] },
+  "にゅ": { normal: ["nyu"], azik: ["ngu"] },
+  "にょ": { normal: ["nyo"], azik: ["ngo"] },
   "にゅう": { normal: ["nyuu"], azik: ["ngh", "nyh"] },
   "にょう": { normal: ["nyou"], azik: ["ngp", "nyp"] },
 
-  "ひゃ": { normal: ["hya"], azik: ["hga", "hya"] },
-  "ひゅ": { normal: ["hyu"], azik: ["hgu", "hyu"] },
-  "ひょ": { normal: ["hyo"], azik: ["hgo", "hyo"] },
+  "ひゃ": { normal: ["hya"], azik: ["hga"] },
+  "ひゅ": { normal: ["hyu"], azik: ["hgu"] },
+  "ひょ": { normal: ["hyo"], azik: ["hgo"] },
   "ひゅう": { normal: ["hyuu"], azik: ["hgh", "hyh"] },
   "ひょう": { normal: ["hyou"], azik: ["hgp", "hyp"] },
 
-  "みゃ": { normal: ["mya"], azik: ["mga", "mya"] },
-  "みゅ": { normal: ["myu"], azik: ["mgu", "myu"] },
-  "みょ": { normal: ["myo"], azik: ["mgo", "myo"] },
+  "みゃ": { normal: ["mya"], azik: ["mga"] },
+  "みゅ": { normal: ["myu"], azik: ["mgu"] },
+  "みょ": { normal: ["myo"], azik: ["mgo"] },
   "みゅう": { normal: ["myuu"], azik: ["mgh", "myh"] },
   "みょう": { normal: ["myou"], azik: ["mgp", "myp"] },
 
@@ -325,9 +325,9 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "りゅう": { normal: ["ryuu"], azik: ["ryh"] },
   "りょう": { normal: ["ryou"], azik: ["ryp"] },
 
-  "ぴゃ": { normal: ["pya"], azik: ["pga", "pya"] },
-  "ぴゅ": { normal: ["pyu"], azik: ["pgu", "pyu"] },
-  "ぴょ": { normal: ["pyo"], azik: ["pgo", "pyo"] },
+  "ぴゃ": { normal: ["pya"], azik: ["pga"] },
+  "ぴゅ": { normal: ["pyu"], azik: ["pgu"] },
+  "ぴょ": { normal: ["pyo"], azik: ["pgo"] },
   "ぴゅう": { normal: ["pyuu"], azik: ["pgh", "pyh"] },
   "ぴょう": { normal: ["pyou"], azik: ["pgp", "pyp"] },
 
