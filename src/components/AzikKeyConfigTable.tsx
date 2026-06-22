@@ -79,7 +79,7 @@ function classifyKana(baseAzik: string[]): GroupKey | null {
 
 export default function AzikKeyConfigTable({ config, baseDict, onSetKanaKeys }: AzikKeyConfigTableProps) {
   const [openGroups, setOpenGroups] = useState<Record<GroupKey, boolean>>({
-    Lev1ab: true,
+    Lev1ab: false,
     Lev1c: false,
     Lev1d: false,
     Lev2a: false,

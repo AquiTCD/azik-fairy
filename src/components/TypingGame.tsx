@@ -177,8 +177,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         return settings.isFullTraining ? pseudoSeg.azik : allKeys;
       }
       if (!isSummaryStage) {
-        const targetKeys = pseudoSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
-        if (targetKeys.length > 0) return targetKeys;
+        return pseudoSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
       }
       return pseudoSeg.azik;
     };

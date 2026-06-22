@@ -526,6 +526,8 @@ export function isWordBlockedForStage(
 
   for (const seg of word.segments) {
     const baseEntry = AZIK_DICTIONARY[seg.kana];
+    // っ+次音 複合セグメント（「った」等）は AZIK_DICTIONARY に直接存在しないためスキップされる。
+    // ステージが部分的に有効な場合のみ影響する（全無効なら isStageEnabled が false を返す）。
     if (!baseEntry) continue;
 
     const baseSeg: AzikSegment = { kana: seg.kana, normal: baseEntry.normal, azik: baseEntry.azik };

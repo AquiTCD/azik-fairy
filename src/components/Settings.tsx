@@ -45,7 +45,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* 基本設定セクション */}
           <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-bold text-green-300 border-b border-green-950 pb-1">■ SYSTEM SETTINGS</h3>
+            <h3 className="text-sm font-bold font-pixel text-green-300 border-b border-green-950 pb-1">■ SYSTEM SETTINGS</h3>
 
             {/* TRAINING MODE設定 */}
             <div className="flex flex-col gap-3 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
@@ -253,13 +253,13 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* MY AZIK CONFIG セクション */}
           <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
-            <h3 className="text-sm font-bold text-cyan-400">■ MY AZIK CONFIG</h3>
+            <h3 className="text-sm font-bold font-pixel text-cyan-400">■ AZIK CONFIG</h3>
 
             {/* インポートエリア */}
             {onImportTable && (
               <div className="flex flex-col gap-2 p-4 bg-zinc-800 border border-zinc-700 rounded">
                 <div>
-                  <span className="font-bold text-sm tracking-wider text-cyan-300 font-pixel">IMPORT kana-rule.conf / TSV:</span>
+                  <span className="font-bold text-sm tracking-wider text-cyan-300">IMPORT kana-rule.conf / TSV:</span>
                   <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">
                     kana-rule.conf（カンマ区切り）または TSV（タブ区切り）をペーストすると、azik ショートカットの有効/無効が練習に反映されます。
                   </p>
@@ -271,17 +271,6 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                   onChange={(e) => setImportInput(e.target.value)}
                 />
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      if (importInput.trim()) {
-                        onImportTable(importInput);
-                        setImportInput("");
-                      }
-                    }}
-                    className="px-3 py-1 bg-green-500 text-black font-bold text-xs border border-green-500 rounded shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-green-500 cursor-pointer font-pixel"
-                  >
-                    インポート適用
-                  </button>
                   {isCustomized && onResetUserDict && (
                     <button
                       onClick={onResetUserDict}
@@ -293,6 +282,17 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                   {isCustomized && (
                     <span className="text-[10px] text-cyan-400">✓ カスタム設定適用中</span>
                   )}
+                  <button
+                    onClick={() => {
+                      if (importInput.trim()) {
+                        onImportTable(importInput);
+                        setImportInput("");
+                      }
+                    }}
+                    className="ml-auto px-4 py-1.5 bg-green-500 text-black font-bold text-xs border border-green-500 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-black hover:text-green-500 cursor-pointer font-pixel"
+                  >
+                    APPLY
+                  </button>
                 </div>
               </div>
             )}
@@ -312,7 +312,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* レッスン説明リセット */}
           <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
-            <h3 className="text-sm font-bold text-green-400">■ LESSON INTRO</h3>
+            <h3 className="text-sm font-bold font-pixel text-green-400">■ LESSON INTRO</h3>
             <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border border-zinc-700 rounded">
               <div>
                 <span className="font-bold text-sm tracking-wider text-green-300">RESET INTRO HISTORY:</span>
@@ -333,7 +333,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* DANGER ZONE */}
           <div className="flex flex-col gap-3 mt-2 border-t-2 border-red-900 pt-4">
-            <h3 className="text-sm font-bold text-red-400">■ DANGER ZONE</h3>
+            <h3 className="text-sm font-bold font-pixel text-red-400">■ DANGER ZONE</h3>
             <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border-2 border-red-800 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               <div>
                 <span className="font-bold text-sm tracking-wider text-red-400">CLEAR ALL PROGRESS:</span>

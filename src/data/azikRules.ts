@@ -404,7 +404,6 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "ため": { normal: ["tame"],          azik: ["tm"] },
   "たら": { normal: ["tara"],          azik: ["tr"] },
   "だち": { normal: ["dati", "dachi"], azik: ["dt"] },
-  "である": { normal: ["dearu"],       azik: ["dr"] },
   "です": { normal: ["desu"],          azik: ["ds"] },
   "でも": { normal: ["demo"],          azik: ["dm"] },
   "なる": { normal: ["naru"],          azik: ["nr"] },
@@ -419,7 +418,7 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
   "られ": { normal: ["rare"],          azik: ["rr"] },
   "わた": { normal: ["wata"],          azik: ["wt"] },
   "われ": { normal: ["ware"],          azik: ["wr"] },
-  "という": { normal: ["toiu"],        azik: ["tb"] },
+
 
   // --- 歴史的仮名 ---
   "ゐ": { normal: ["wyi"], azik: ["wyi", "yi"] },
