@@ -183,7 +183,19 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       return pseudoSeg.azik;
     };
 
-    const result = buildValidKeys(currentSeg.kana, dict, filter, true);
+    // ターゲットキーを持つかな分割は許可する (みょ→mgo のようなケース)
+    // 非ターゲットの allKeys 経由分割 (し→shi 等) のみをブロック
+    const subTargetPred = (sub: string): boolean => {
+      const entry = dict[sub];
+      if (!entry) return false;
+      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
+      if (!isSummaryStage && stagePred) {
+        return pseudoSeg.azik.some(k => stagePred(getCore(k)));
+      }
+      return isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
+    };
+
+    const result = buildValidKeys(currentSeg.kana, dict, filter, true, subTargetPred);
     if (result.length > 0) return result;
     // azik が無効化されているか filter が全パスを除外 → normal キーにフォールバック
     // (base の azik にフォールバックすると disabled 設定を無視してしまうため)

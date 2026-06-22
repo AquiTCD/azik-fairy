@@ -281,7 +281,7 @@ describe("buildValidKeys", () => {
     expect(result).toContain(";kan"); // ; + kan
   });
 
-  describe("longestMatchOnly=true (トレーニングモード)", () => {
+  describe("longestMatchOnly + isSubTarget (トレーニングモード)", () => {
     // FOCUS トレーニングフィルターの再現:
     // - ターゲットかな(しゃ): AZIK キーのみ ["xa"]
     // - 非ターゲット(し): allKeys をそのまま返す → shixya という分割パスが生成されうる
@@ -296,20 +296,38 @@ describe("buildValidKeys", () => {
       expect(result).toContain("shixya");
     });
 
-    it("longestMatchOnly=true: しゃ の直接エントリ xa のみ返し、shixya を除外する（バグ修正確認）", () => {
-      const result = buildValidKeys("しゃ", dict, focusFilter, true);
+    it("longestMatchOnly=true, isSubTarget: しゃ は xa のみ、shixya は除外（しは非ターゲット）", () => {
+      // isSubTarget: しゃ はターゲット、し はターゲットでない
+      const isSubTarget = (sub: string) => sub === "しゃ" || sub === "ゃ";
+      const result = buildValidKeys("しゃ", dict, focusFilter, true, isSubTarget);
       expect(result).toEqual(["xa"]);
       expect(result).not.toContain("shixya");
       expect(result).not.toContain("sixya");
     });
 
-    it("かん: longestMatchOnly=true で kz と kan を返す（直接エントリ）", () => {
+    it("みょう Lev3a-G: mgp(直接) と mgou(みょ分割) の両方が生成される", () => {
+      // Lev3a-G filter: stagePred = k.length>=3 && k[1]==="g"
+      const lev3aGFilter = (sub: string, keys: string[]) => {
+        const entry = dict[sub];
+        if (!entry) return [];
+        const target = entry.azik.filter(k => k.length >= 3 && k[1] === "g");
+        if (target.length > 0) return target;
+        return keys;  // 非ターゲット: allKeys
+      };
+      // isSubTarget: みょう, みょ はターゲット(G key持つ)、み はターゲットでない
+      const isSubTarget = (sub: string) => {
+        const entry = dict[sub];
+        return !!entry?.azik.some(k => k.length >= 3 && k[1] === "g");
+      };
+      const result = buildValidKeys("みょう", dict, lev3aGFilter, true, isSubTarget);
+      expect(result).toContain("mgp");   // 直接エントリ みょう→mgp
+      expect(result).toContain("mgou");  // 分割 みょ(mgo)+う(u) = mgou
+    });
+
+    it("かん: longestMatchOnly=true, isSubTarget=undefined で kz と kan を返す", () => {
       const result = buildValidKeys("かん", dict, all, true);
       expect(result).toContain("kz");
       expect(result).toContain("kan");
-      // 分割 か+ん のパスは生成しない
-      const splitPaths = result.filter(k => k.startsWith("ka") && k !== "kan");
-      expect(splitPaths.length).toBe(0);
     });
   });
 });

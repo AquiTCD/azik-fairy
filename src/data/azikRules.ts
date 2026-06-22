@@ -567,13 +567,25 @@ export function buildValidKeys(
   dictionary: Record<string, AzikMapping> = AZIK_DICTIONARY,
   filter: (sub: string, allKeys: string[]) => string[] = (_s, k) => k,
   longestMatchOnly: boolean = false,
-  pos: number = 0,
-  memo: Map<number, string[]> = new Map(),
+  isSubTarget?: (sub: string) => boolean,
+): string[] {
+  return _bvk(kana, dictionary, filter, longestMatchOnly, isSubTarget, 0, new Map());
+}
+
+function _bvk(
+  kana: string,
+  dictionary: Record<string, AzikMapping>,
+  filter: (sub: string, allKeys: string[]) => string[],
+  longestMatchOnly: boolean,
+  isSubTarget: ((sub: string) => boolean) | undefined,
+  pos: number,
+  memo: Map<number, string[]>,
 ): string[] {
   if (pos === kana.length) return [""];
   if (memo.has(pos)) return memo.get(pos)!;
 
   const results = new Set<string>();
+  let foundValidAtThisPos = false;
 
   for (let len = Math.min(4, kana.length - pos); len >= 1; len--) {
     const sub = kana.substring(pos, pos + len);
@@ -584,14 +596,20 @@ export function buildValidKeys(
     const allowed = filter(sub, allKeys);
     if (allowed.length === 0) continue;
 
-    const suffixes = buildValidKeys(kana, dictionary, filter, longestMatchOnly, pos + len, memo);
+    // isSubTarget あり: 既に長い一致が見つかった後は非ターゲット分割をスキップ
+    // (ターゲットキーを持つ短い分割は許可)
+    if (longestMatchOnly && foundValidAtThisPos && isSubTarget && !isSubTarget(sub)) continue;
+
+    const suffixes = _bvk(kana, dictionary, filter, longestMatchOnly, isSubTarget, pos + len, memo);
     for (const key of allowed) {
       for (const suf of suffixes) {
         results.add(key + suf);
       }
     }
+    foundValidAtThisPos = true;
 
-    if (longestMatchOnly) break;
+    // isSubTarget なし: 最初の有効一致で即 break (Practice モード等)
+    if (longestMatchOnly && !isSubTarget) break;
   }
 
   const arr = Array.from(results);
