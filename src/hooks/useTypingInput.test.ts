@@ -121,4 +121,34 @@ describe("processTypingKey", () => {
       expect(result.state.totalCorrectKeys).toBe(6);
     });
   });
+
+  describe("マルチパターン allowedPatterns (buildValidKeys 連携)", () => {
+    it('["cq","cai"] で "c" は valid prefix', () => {
+      const result = processTypingKey(BASE, "c", ["cq", "cai"], 1, 1);
+      expect(result.isMiss).toBe(false);
+      expect(result.segmentCompleted).toBe(false);
+    });
+
+    it('["cq","cai"] で "ca" → "i" で単語完了', () => {
+      let s = processTypingKey(BASE, "c", ["cq", "cai"], 1, 1);
+      s = processTypingKey(s.state, "a", ["cq", "cai"], 1, 1);
+      expect(s.isMiss).toBe(false);
+      s = processTypingKey(s.state, "i", ["cq", "cai"], 1, 1);
+      expect(s.isMiss).toBe(false);
+      expect(s.wordCompleted).toBe(true);
+    });
+
+    it('["cq","cai"] で "cq" で単語完了', () => {
+      let s = processTypingKey(BASE, "c", ["cq", "cai"], 1, 1);
+      s = processTypingKey(s.state, "q", ["cq", "cai"], 1, 1);
+      expect(s.isMiss).toBe(false);
+      expect(s.wordCompleted).toBe(true);
+    });
+
+    it('["cq","cai"] で "cx" は miss', () => {
+      const s = processTypingKey(BASE, "c", ["cq", "cai"], 1, 1);
+      const miss = processTypingKey(s.state, "x", ["cq", "cai"], 1, 1);
+      expect(miss.isMiss).toBe(true);
+    });
+  });
 });

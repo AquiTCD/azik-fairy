@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts } from "@/data/azikRules";
+import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, buildValidKeys, AZIK_DICTIONARY } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
@@ -139,32 +139,51 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
     const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
 
-    if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
+    // 非トレーニングモード: 全分割パターンを許容
+    if (!effectivelyTraining) {
+      return buildValidKeys(currentSeg.kana, AZIK_DICTIONARY, (_sub, keys) => keys);
+    }
 
     const stageLevel = STAGE_MAX_LEVELS[stageId];
+
+    // レベル未定義 / Practice: azik キーのみ（全分割経由で）
     if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
-      return currentSeg.azik;
+      return buildValidKeys(currentSeg.kana, AZIK_DICTIONARY, (sub, allKeys) => {
+        const entry = AZIK_DICTIONARY[sub];
+        return entry ? entry.azik : allKeys;
+      });
     }
 
     const isSummaryStage = stageId.includes("summary");
     const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
-
     const stagePred = STAGE_KEY_PREDS[stageId];
-    if (!isSummaryStage && stagePred) {
-      const targetKeys = currentSeg.azik.filter(k => stagePred(getCore(k)));
-      if (targetKeys.length > 0) return targetKeys;
-      return settings.isFullTraining ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
-    }
 
-    const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
-    if (!isTarget) {
-      return settings.isFullTraining ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
-    }
-    if (!isSummaryStage) {
-      const targetKeys = currentSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
-      if (targetKeys.length > 0) return targetKeys;
-    }
-    return currentSeg.azik;
+    // サブセグメントごとにステージフォーカスを適用するフィルター
+    const filter = (sub: string, allKeys: string[]): string[] => {
+      const entry = AZIK_DICTIONARY[sub];
+      if (!entry) return [];
+      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
+
+      if (!isSummaryStage && stagePred) {
+        const targetKeys = pseudoSeg.azik.filter(k => stagePred(getCore(k)));
+        if (targetKeys.length > 0) return targetKeys;
+        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
+      }
+
+      const isTarget = isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
+      if (!isTarget) {
+        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
+      }
+      if (!isSummaryStage) {
+        const targetKeys = pseudoSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
+        if (targetKeys.length > 0) return targetKeys;
+      }
+      return pseudoSeg.azik;
+    };
+
+    const result = buildValidKeys(currentSeg.kana, AZIK_DICTIONARY, filter);
+    // filter が全パスを除外した場合は azik にフォールバック
+    return result.length > 0 ? result : currentSeg.azik;
   }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining]);
 
   const onFirstKey = useCallback(() => {

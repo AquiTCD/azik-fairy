@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, AzikSegment, createTypingWord } from "@/data/azikRules";
+import { TypingWord, AzikSegment, createTypingWord, buildValidKeys, AZIK_DICTIONARY } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { GameSettings, TimeAttackBest } from "@/types/game";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
@@ -54,7 +54,8 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
     onFinish(r);
   }, [onFinish]);
 
-  const getAllowedPatterns = useCallback((seg: AzikSegment) => seg.azik, []);
+  const getAllowedPatterns = useCallback((seg: AzikSegment) =>
+    buildValidKeys(seg.kana, AZIK_DICTIONARY, (_sub, keys) => keys), []);
 
   const onFirstKey = useCallback(() => {
     setIsStarting(true);
