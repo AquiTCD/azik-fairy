@@ -7,15 +7,15 @@ import { GameSettings } from "@/types/game";
 export function migrateSettings(raw: Record<string, unknown>, defaults: GameSettings): GameSettings {
   const patched = { ...raw };
 
-  // customRules: 旧フォーマット string → string[] に変換
-  if (patched.customRules && typeof patched.customRules === "object" && !Array.isArray(patched.customRules)) {
-    const migrated: Record<string, string[]> = {};
-    for (const [k, v] of Object.entries(patched.customRules as Record<string, unknown>)) {
-      if (typeof v === "string") migrated[k] = [v];
-      else if (Array.isArray(v)) migrated[k] = v as string[];
-    }
-    patched.customRules = migrated;
-  }
+  // customRules: 旧フィールド — 新しい GameSettings には存在しないため除去する
+  // （古い localStorage データを読み込んでもクラッシュしないよう、変換せず削除）
+  delete patched.customRules;
+
+  // 旧フィールドを削除
+  delete patched.nAlternative;
+  delete patched.smallKanaPrefix;
+  delete patched.enableForeign;
+  delete patched.enableSpecial;
 
   // soundTheme: 旧 "off" → soundEnabled: false + theme: "soft"
   if (patched.soundTheme === "off") {

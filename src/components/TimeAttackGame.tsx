@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, AzikSegment, createTypingWord } from "@/data/azikRules";
+import { TypingWord, AzikSegment, createTypingWord, buildValidKeys, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { GameSettings, TimeAttackBest } from "@/types/game";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
@@ -10,7 +10,6 @@ import KanaSegmentDisplay from "@/components/KanaSegmentDisplay";
 import { buildTimeAttackTweetUrl } from "@/utils/tweetUtils";
 import XIcon from "@/components/XIcon";
 import { useTypingInput } from "@/hooks/useTypingInput";
-import { useCustomDictionary } from "@/hooks/useCustomDictionary";
 import { useAzikSound } from "@/hooks/useAzikSound";
 
 const TIME_LIMIT = 60;
@@ -21,9 +20,10 @@ interface TimeAttackGameProps {
   onFinish: (result: { wpm: number; accuracy: number }) => void;
   onBack: () => void;
   prevBest: TimeAttackBest | null;
+  effectiveDict?: Record<string, AzikMapping>;
 }
 
-export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }: TimeAttackGameProps) {
+export default function TimeAttackGame({ settings, onFinish, onBack, prevBest, effectiveDict }: TimeAttackGameProps) {
   const [words, setWords] = useState<TypingWord[]>([]);
   const [completedWordCount, setCompletedWordCount] = useState(0);
   const [remaining, setRemaining] = useState(TIME_LIMIT);
@@ -36,14 +36,13 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
   const missCountRef = useRef(0);
   const completedCharsRef = useRef(0);
 
-  const customDictionary = useCustomDictionary(settings);
   const { playCorrect, playMiss, playWordComplete } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
 
   const loadWords = useCallback(async (): Promise<TypingWord[]> => {
     const stage = await loadStage("practice-words-1");
     const shuffled = [...stage.words].sort(() => Math.random() - 0.5).slice(0, WORDS_BUFFER);
-    return shuffled.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
-  }, [customDictionary]);
+    return shuffled.map(w => createTypingWord(w.kanji, w.kana, effectiveDict ?? AZIK_DICTIONARY));
+  }, [effectiveDict]);
 
   const finish = useCallback((keys: number, misses: number, elapsed: number) => {
     const wpm = Math.round((keys / Math.max(elapsed, 1)) * 60);
@@ -54,7 +53,8 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
     onFinish(r);
   }, [onFinish]);
 
-  const getAllowedPatterns = useCallback((seg: AzikSegment) => seg.azik, []);
+  const getAllowedPatterns = useCallback((seg: AzikSegment) =>
+    buildValidKeys(seg.kana, effectiveDict ?? AZIK_DICTIONARY, (_sub, keys) => keys), [effectiveDict]);
 
   const onFirstKey = useCallback(() => {
     setIsStarting(true);

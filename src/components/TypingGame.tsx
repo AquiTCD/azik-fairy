@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts } from "@/data/azikRules";
+import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, buildValidKeys, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
+import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel, isWordBlockedForStage } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
-import { useCustomDictionary } from "@/hooks/useCustomDictionary";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -106,9 +105,10 @@ interface TypingGameProps {
   onUpdateSettings: (s: GameSettings) => void;
   ghostBestWpm?: number;
   weaknessOverrideWords?: TypingWord[];
+  effectiveDict?: Record<string, AzikMapping>;
 }
 
-export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect, onUpdateSettings, ghostBestWpm, weaknessOverrideWords }: TypingGameProps) {
+export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect, onUpdateSettings, ghostBestWpm, weaknessOverrideWords, effectiveDict }: TypingGameProps) {
   const [stage, setStage] = useState<StageData | null>(null);
 
   useEffect(() => {
@@ -139,33 +139,67 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
     const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
 
-    if (!effectivelyTraining) return [...currentSeg.normal, ...currentSeg.azik];
+    const dict = effectiveDict ?? AZIK_DICTIONARY;
+
+    // 非トレーニングモード: 全分割パターンを許容
+    if (!effectivelyTraining) {
+      return buildValidKeys(currentSeg.kana, dict, (_sub, keys) => keys);
+    }
 
     const stageLevel = STAGE_MAX_LEVELS[stageId];
+
+    // レベル未定義 / Practice: azik キーのみ（全分割経由で）
     if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
-      return currentSeg.azik;
+      return buildValidKeys(currentSeg.kana, dict, (sub, allKeys) => {
+        const entry = dict[sub];
+        return entry ? entry.azik : allKeys;
+      }, true);
     }
 
     const isSummaryStage = stageId.includes("summary");
     const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
-
     const stagePred = STAGE_KEY_PREDS[stageId];
-    if (!isSummaryStage && stagePred) {
-      const targetKeys = currentSeg.azik.filter(k => stagePred(getCore(k)));
-      if (targetKeys.length > 0) return targetKeys;
-      return settings.isFullTraining ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
-    }
 
-    const isTarget = isTargetSegment(currentSeg, stageLevel, isSummaryStage);
-    if (!isTarget) {
-      return settings.isFullTraining ? currentSeg.azik : [...currentSeg.normal, ...currentSeg.azik];
-    }
-    if (!isSummaryStage) {
-      const targetKeys = currentSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
-      if (targetKeys.length > 0) return targetKeys;
-    }
-    return currentSeg.azik;
-  }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining]);
+    // サブセグメントごとにステージフォーカスを適用するフィルター
+    const filter = (sub: string, allKeys: string[]): string[] => {
+      const entry = dict[sub];
+      if (!entry) return [];
+      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
+
+      if (!isSummaryStage && stagePred) {
+        const targetKeys = pseudoSeg.azik.filter(k => stagePred(getCore(k)));
+        if (targetKeys.length > 0) return targetKeys;
+        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
+      }
+
+      const isTarget = isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
+      if (!isTarget) {
+        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
+      }
+      if (!isSummaryStage) {
+        return pseudoSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
+      }
+      return pseudoSeg.azik;
+    };
+
+    // ターゲットキーを持つかな分割は許可する (みょ→mgo のようなケース)
+    // 非ターゲットの allKeys 経由分割 (し→shi 等) のみをブロック
+    const subTargetPred = (sub: string): boolean => {
+      const entry = dict[sub];
+      if (!entry) return false;
+      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
+      if (!isSummaryStage && stagePred) {
+        return pseudoSeg.azik.some(k => stagePred(getCore(k)));
+      }
+      return isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
+    };
+
+    const result = buildValidKeys(currentSeg.kana, dict, filter, true, subTargetPred);
+    if (result.length > 0) return result;
+    // azik が無効化されているか filter が全パスを除外 → normal キーにフォールバック
+    // (base の azik にフォールバックすると disabled 設定を無視してしまうため)
+    return buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.normal ?? [], true);
+  }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining, effectiveDict]);
 
   const onFirstKey = useCallback(() => {
     setFairyMessage(getRandomQuote("start"));
@@ -286,11 +320,10 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     return () => window.removeEventListener("keydown", handler);
   }, [pendingStats, onFinish]);
 
-  const customDictionary = useCustomDictionary(settings);
-
   useEffect(() => {
     if (!stage) return;
 
+    const dict = effectiveDict ?? AZIK_DICTIONARY;
     let initializedWords: TypingWord[];
 
     if (stage.id === WEAKNESS_STAGE_ID && weaknessOverrideWords && weaknessOverrideWords.length > 0) {
@@ -305,10 +338,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         stage.category === "Practice"  ? 50 :
         settings.wordsPerSession
       );
-      const sourceWords = limit > 0 && stage.words.length > limit
-        ? [...stage.words].sort(() => Math.random() - 0.5).slice(0, limit)
-        : stage.words;
-      initializedWords = sourceWords.map(w => createTypingWord(w.kanji, w.kana, customDictionary));
+      // filter blocked words first, then sample — ensures word count is maintained
+      const allMapped = stage.words.map(w => createTypingWord(w.kanji, w.kana, dict));
+      const eligible = allMapped.filter(w => !isWordBlockedForStage(w, stage.id, dict));
+      const pool = eligible.length > 0 ? eligible : allMapped;
+      initializedWords = limit > 0 && pool.length > limit
+        ? [...pool].sort(() => Math.random() - 0.5).slice(0, limit)
+        : pool;
     }
 
     const counts = calculateOptimalKeyCounts(initializedWords);
@@ -324,7 +360,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     setFairyMessage(msg);
     setFairyEmotion("idle");
     setPendingStats(null);
-  }, [stage, customDictionary, weaknessOverrideWords]);
+  }, [stage, effectiveDict, weaknessOverrideWords]);
 
   useEffect(() => {
     if (startedAt === null || pendingStats) return;

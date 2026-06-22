@@ -1,5 +1,6 @@
 import React from "react";
 import { StageMeta } from "@/data/stages";
+import { AzikMapping } from "@/data/azikRules";
 import { GameSettings, StageProgress } from "@/types/game";
 import KeyboardDiagram from "@/components/KeyboardDiagram";
 import { getIntroConfig } from "@/components/AzikKeyVisualizer";
@@ -16,6 +17,7 @@ interface StageCardProps {
   onKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
   settings: GameSettings;
   showIntroPreview: boolean;
+  effectiveDict?: Record<string, AzikMapping>;
 }
 
 export default function StageCard({
@@ -30,8 +32,9 @@ export default function StageCard({
   onKeyDown,
   settings,
   showIntroPreview,
+  effectiveDict,
 }: StageCardProps) {
-  const intro = showIntroPreview ? getIntroConfig(stage.id) : null;
+  const intro = showIntroPreview ? getIntroConfig(stage.id, effectiveDict) : null;
   const frame = intro ? intro.frames[intro.frames.length - 1] : null;
 
   return (

@@ -21,15 +21,10 @@ export interface GameSettings {
   isFullTraining: boolean;
   showGuide: boolean;
   showTable: boolean;
-  customRules: Record<string, string[]>;
   keyboardLayout: "US" | "JIS";
   soundEnabled: boolean;
   soundTheme: SoundThemeName;
   wordsPerSession: number;
-  enableSpecial: boolean;
-  enableForeign: boolean;
-  nAlternative: "off" | "left" | "all";
-  smallKanaPrefix: "l" | "xx" | "both";
   ghostRaceEnabled: boolean;
 }
 

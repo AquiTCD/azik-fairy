@@ -9,9 +9,11 @@ import {
   filterStageWords,
   containsTargetLevel,
   isTargetSegment,
+  isStageEnabled,
+  isWordBlockedForStage,
 } from "./wordValidator";
-import type { StageData, AzikSegment } from "../azikRules";
-import { AZIK_DICTIONARY } from "../azikRules";
+import type { StageData, AzikSegment, AzikMapping } from "../azikRules";
+import { AZIK_DICTIONARY, createTypingWord } from "../azikRules";
 
 describe("wordValidator", () => {
 
@@ -450,6 +452,132 @@ describe("wordValidator", () => {
       expect(result.id).toBe(stage.id);
       expect(result.category).toBe(stage.category);
       expect(result.words).not.toBe(stage.words);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // isStageEnabled
+  // ---------------------------------------------------------------
+  describe("isStageEnabled", () => {
+    const makeDict = (overrides: Record<string, string[]>): Record<string, AzikMapping> => {
+      const result: Record<string, AzikMapping> = {};
+      for (const [kana, azik] of Object.entries(overrides)) {
+        result[kana] = { normal: AZIK_DICTIONARY[kana]?.normal ?? [], azik };
+      }
+      return result;
+    };
+
+    it("Practice カテゴリは常に true", () => {
+      expect(isStageEnabled("practice-words-1", {})).toBe(true);
+      expect(isStageEnabled("practice-words-2", {})).toBe(true);
+      expect(isStageEnabled("practice-sentences", {})).toBe(true);
+    });
+
+    it("STAGE_MAX_LEVELS 未定義の stageId は true を返す", () => {
+      expect(isStageEnabled("unknown-stage", {})).toBe(true);
+    });
+
+    it("lev1-sha: xa が enabled なら true", () => {
+      const dict = makeDict({ "しゃ": ["xa"] });
+      expect(isStageEnabled("lev1-sha", dict)).toBe(true);
+    });
+
+    it("lev1-sha: x 系キーが全て空なら false", () => {
+      const dict = makeDict({ "しゃ": [] });
+      expect(isStageEnabled("lev1-sha", dict)).toBe(false);
+    });
+
+    it("lev2a-an-z: kz が enabled なら true", () => {
+      const dict = makeDict({ "かん": ["kz"] });
+      expect(isStageEnabled("lev2a-an-z", dict)).toBe(true);
+    });
+
+    it("lev2a-an-z: Lev2a キーが全て空なら false", () => {
+      const dict = makeDict({ "かん": [] });
+      expect(isStageEnabled("lev2a-an-z", dict)).toBe(false);
+    });
+
+    it("lev1-sokuon: ; が enabled なら true", () => {
+      const dict = makeDict({ "っ": [";"] });
+      expect(isStageEnabled("lev1-sokuon", dict)).toBe(true);
+    });
+
+    it("lev1-summary: Lev1a–1d のうち 1 つでも有効なら true", () => {
+      // q (Lev1b) だけ有効
+      const dict = makeDict({ "ん": ["q"] });
+      expect(isStageEnabled("lev1-summary", dict)).toBe(true);
+    });
+
+    it("lev3a-g-youon: G 代用キー (kga) が enabled なら true", () => {
+      const dict = makeDict({ "きゃ": ["kga"] });
+      expect(isStageEnabled("lev3a-g-youon", dict)).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // isWordBlockedForStage
+  // ---------------------------------------------------------------
+  describe("isWordBlockedForStage", () => {
+    const makeDict = (overrides: Record<string, string[]>): Record<string, AzikMapping> => {
+      const base = { ...AZIK_DICTIONARY };
+      for (const [kana, azik] of Object.entries(overrides)) {
+        base[kana] = { normal: AZIK_DICTIONARY[kana]?.normal ?? [], azik };
+      }
+      return base;
+    };
+
+    it("Practice ステージは常に false", () => {
+      const word = createTypingWord("犬", "いぬ", AZIK_DICTIONARY);
+      expect(isWordBlockedForStage(word, "practice-words-1", AZIK_DICTIONARY)).toBe(false);
+    });
+
+    it("STAGE_MAX_LEVELS 未定義のステージは常に false", () => {
+      const word = createTypingWord("寒", "かん", AZIK_DICTIONARY);
+      expect(isWordBlockedForStage(word, "unknown-stage", AZIK_DICTIONARY)).toBe(false);
+    });
+
+    it("lev2a-an-z: かん の kz が disabled → ブロック", () => {
+      const word = createTypingWord("寒", "かん", AZIK_DICTIONARY);
+      const dict = makeDict({ "かん": [] }); // kz を無効化
+      expect(isWordBlockedForStage(word, "lev2a-an-z", dict)).toBe(true);
+    });
+
+    it("lev2a-an-z: かん の kz が enabled → ブロックしない", () => {
+      const word = createTypingWord("寒", "かん", AZIK_DICTIONARY);
+      expect(isWordBlockedForStage(word, "lev2a-an-z", AZIK_DICTIONARY)).toBe(false);
+    });
+
+    it("lev1-sha: しゃ の xa が disabled → ブロック", () => {
+      const word = createTypingWord("社会", "しゃかい", AZIK_DICTIONARY);
+      const dict = makeDict({ "しゃ": [] }); // xa を無効化
+      expect(isWordBlockedForStage(word, "lev1-sha", dict)).toBe(true);
+    });
+
+    it("lev1-sha: しゃ の xa が enabled → ブロックしない", () => {
+      const word = createTypingWord("社会", "しゃかい", AZIK_DICTIONARY);
+      expect(isWordBlockedForStage(word, "lev1-sha", AZIK_DICTIONARY)).toBe(false);
+    });
+
+    it("ターゲットセグメントを持たない語はブロックしない (lev2a-an-z でいぬ)", () => {
+      const word = createTypingWord("犬", "いぬ", AZIK_DICTIONARY);
+      const dict = makeDict({ "いぬ": [] });
+      expect(isWordBlockedForStage(word, "lev2a-an-z", dict)).toBe(false);
+    });
+
+    it("lev3a-g-youon: きゃ の kga が disabled → ブロック", () => {
+      const word = createTypingWord("キャリア", "きゃりあ", AZIK_DICTIONARY);
+      const dict = makeDict({ "きゃ": [] }); // kga を無効化
+      expect(isWordBlockedForStage(word, "lev3a-g-youon", dict)).toBe(true);
+    });
+
+    it("っ 複合セグメント限定: っ が disabled でも った セグメントはスキップされる（既知の制約）", () => {
+      // "った" は AZIK_DICTIONARY に直接存在しないため baseEntry が undefined になる
+      // → isWordBlockedForStage は false を返す（ブロックされない）
+      // この挙動は Lev1 サマリーステージで っ を全部 disable した場合に表れる制約
+      const word = createTypingWord("やった", "やった", AZIK_DICTIONARY);
+      const dict = makeDict({ "っ": [] }); // ; を無効化
+      expect(isWordBlockedForStage(word, "lev1-sokuon", dict)).toBe(false);
+      // ↑ 理想的には true だが、複合セグメント（った）が辞書に存在しないため未検出
     });
   });
 });
