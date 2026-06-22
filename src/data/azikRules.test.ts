@@ -3,7 +3,8 @@ import {
   splitIntoAzikSegments,
   AZIK_DICTIONARY,
   mergeCustomAzikRules,
-  parseExternalRomajiTable
+  parseExternalRomajiTable,
+  buildValidKeys,
 } from "./azikRules";
 
 describe("AZIK Rules Engine Tests", () => {
@@ -434,5 +435,65 @@ x,あん
       // azik shortcut reverts to normal (same as dhu) when foreign disabled
       expect(segs[0].azik).toContain("dhu");
     });
+  });
+});
+
+// =============================================================
+// buildValidKeys
+// =============================================================
+describe("buildValidKeys", () => {
+  const dict = AZIK_DICTIONARY;
+  const all = (_sub: string, keys: string[]) => keys;
+
+  it("空文字: [''] を返す", () => {
+    expect(buildValidKeys("", dict, all)).toEqual([""]);
+  });
+
+  it("単一エントリ かん: kz と kan を両方含む", () => {
+    const result = buildValidKeys("かん", dict, all);
+    expect(result).toContain("kz");
+    expect(result).toContain("kan");
+  });
+
+  it("ちゃい: 単体 cq と 分割 cai の両方を含む", () => {
+    const result = buildValidKeys("ちゃい", dict, all);
+    expect(result).toContain("cq");   // ["ちゃい"] → cq
+    expect(result).toContain("cai");  // ["ちゃ","い"] → ca + i
+    expect(result).toContain("tyai"); // ["ちゃ","い"] → tya + i
+  });
+
+  it("q-suffix フィルター: ちゃい → cq のみ残る", () => {
+    const qFilter = (_sub: string, keys: string[]) => keys.filter(k => k.endsWith("q"));
+    // "い" は q で終わるキーがないため ["ちゃ","い"] 分割は除外される
+    const result = buildValidKeys("ちゃい", dict, qFilter);
+    expect(result).toContain("cq");
+    expect(result).not.toContain("cai");
+    expect(result).not.toContain("tyai");
+  });
+
+  it("c-prefix フィルター: ちゃい → cq は含む", () => {
+    const cFilter = (_sub: string, keys: string[]) => keys.filter(k => k.startsWith("c"));
+    const result = buildValidKeys("ちゃい", dict, cFilter);
+    expect(result).toContain("cq");
+    // cai は cFilter で ca(✓) と i(✗) → filter が空を返すパスは除外
+  });
+
+  it("わん: wz と wan を含み、wn は含まない（辞書に存在しない）", () => {
+    const result = buildValidKeys("わん", dict, all);
+    expect(result).toContain("wz");
+    expect(result).toContain("wan");
+    expect(result).not.toContain("wn");
+  });
+
+  it("重複なし: 同じキー列が複数の分割パスで生成されても1件のみ", () => {
+    const result = buildValidKeys("ちゃい", dict, all);
+    const unique = [...new Set(result)];
+    expect(result.length).toBe(unique.length);
+  });
+
+  it("っかん: ;kz を含む（っ + かん の組み合わせ）", () => {
+    const result = buildValidKeys("っかん", dict, all);
+    expect(result).toContain(";kz"); // ; + kz
+    expect(result).toContain(";kan"); // ; + kan
   });
 });

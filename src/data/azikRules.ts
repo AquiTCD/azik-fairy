@@ -672,6 +672,52 @@ export function mergeCustomAzikRules(
 }
 
 // -------------------------------------------------------------
+// かな文字列に対して有効なキー列の全集合を生成する
+// -------------------------------------------------------------
+
+/**
+ * kana文字列を構成する全セグメント分割パターンを再帰列挙し、
+ * 各分割のキー直積を合算して有効なキー列の集合を返す。
+ *
+ * filter(sub, allKeys) でステージ/ユーザー設定によるキー絞り込みを渡せる。
+ * filter が空配列を返したパスは除外される。
+ * memo は再帰呼び出しごとに生成して渡す（呼び出し元は省略可）。
+ */
+export function buildValidKeys(
+  kana: string,
+  dictionary: Record<string, AzikMapping> = AZIK_DICTIONARY,
+  filter: (sub: string, allKeys: string[]) => string[] = (_s, k) => k,
+  pos: number = 0,
+  memo: Map<number, string[]> = new Map(),
+): string[] {
+  if (pos === kana.length) return [""];
+  if (memo.has(pos)) return memo.get(pos)!;
+
+  const results = new Set<string>();
+
+  for (let len = Math.min(4, kana.length - pos); len >= 1; len--) {
+    const sub = kana.substring(pos, pos + len);
+    const entry = dictionary[sub];
+    if (!entry) continue;
+
+    const allKeys = [...entry.normal, ...entry.azik];
+    const allowed = filter(sub, allKeys);
+    if (allowed.length === 0) continue;
+
+    const suffixes = buildValidKeys(kana, dictionary, filter, pos + len, memo);
+    for (const key of allowed) {
+      for (const suf of suffixes) {
+        results.add(key + suf);
+      }
+    }
+  }
+
+  const arr = Array.from(results);
+  memo.set(pos, arr);
+  return arr;
+}
+
+// -------------------------------------------------------------
 // ひらがな文字列をAZIKセグメントに分解する自動解析器
 // -------------------------------------------------------------
 export function splitIntoAzikSegments(
