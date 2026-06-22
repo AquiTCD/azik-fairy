@@ -4,7 +4,25 @@ import React, { useState, useRef, useEffect } from "react";
 import { AzikMapping } from "@/data/azikRules";
 import { AzikLevel, classifyAzikKey } from "@/data/stages/wordValidator";
 
-const isBasicRomaji = (key: string) => classifyAzikKey(key) === AzikLevel.Lev0;
+// Standard x-prefix keys (small kana, standard IME) — NOT AZIK し行 shortcuts
+const STANDARD_X_KEYS = new Set(["xa","xi","xu","xe","xo","xtu","xtsu","xn","xya","xyu","xyo"]);
+
+// A key is "standard romaji" if:
+// - It's Lev0 (basic romaji, covers most kana including sha/shi/shu/tsu etc.)
+// - OR it starts with "ch"/"cy" (ヘボン式 ちゃ行: cha/chi/chu/cya/cyu etc.)
+// - OR it's a known standard x-prefix small kana sequence
+//
+// Excluded (AZIK-derived):
+// - x+single-vowel as し行 shortcut (xa=しゃ etc.) when used in compounds (xai, xan...)
+// - c+single-vowel as AZIK ちゃ行 shortcut (ca, ci, cu...) and their compounds (cai, can...)
+function isStandardRomaji(key: string): boolean {
+  if (!key.startsWith("x") && !key.startsWith("c")) {
+    return classifyAzikKey(key) === AzikLevel.Lev0;
+  }
+  if (key.startsWith("ch") || key.startsWith("cy")) return true;
+  if (key.startsWith("x")) return STANDARD_X_KEYS.has(key);
+  return false;
+}
 import { UserDictConfig } from "@/data/userDictConfig";
 
 interface AzikKeyConfigTableProps {
@@ -133,7 +151,7 @@ export default function AzikKeyConfigTable({ config, baseDict, onSetKanaKeys }: 
 
                       {/* 通常ローマ字（Lev0のみ = 純粋なローマ字入力のみ表示） */}
                       <div className="flex gap-1 flex-wrap shrink-0">
-                        {baseMapping.normal.filter(isBasicRomaji).map(k => (
+                        {baseMapping.normal.filter(isStandardRomaji).map(k => (
                           <span key={k} className="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-800 border border-zinc-600 rounded text-zinc-400">{k}</span>
                         ))}
                       </div>
