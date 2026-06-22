@@ -110,7 +110,6 @@ const DEFAULT_SETTINGS: GameSettings = {
   soundTheme: "soft",
   wordsPerSession: 30,
   enableSpecial: true,
-  enableForeign: true,
   ghostRaceEnabled: true,
 };
 

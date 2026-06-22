@@ -12,7 +12,6 @@ const DEFAULTS: GameSettings = {
   soundTheme: "soft",
   wordsPerSession: 30,
   enableSpecial: true,
-  enableForeign: true,
   ghostRaceEnabled: true,
 };
 
@@ -34,6 +33,12 @@ describe("migrateSettings", () => {
       const raw = { smallKanaPrefix: "l" };
       const result = migrateSettings(raw, DEFAULTS);
       expect((result as any).smallKanaPrefix).toBeUndefined();
+    });
+
+    it("enableForeign は除去される", () => {
+      const raw = { enableForeign: true };
+      const result = migrateSettings(raw, DEFAULTS);
+      expect((result as any).enableForeign).toBeUndefined();
     });
   });
 

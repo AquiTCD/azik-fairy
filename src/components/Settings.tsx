@@ -26,7 +26,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
   const [introResetDone, setIntroResetDone] = useState(false);
   const [importInput, setImportInput] = useState("");
 
-  const toggleSetting = (key: keyof Omit<GameSettings, "wordsPerSession" | "keyboardLayout" | "enableSpecial" | "enableForeign" | "soundTheme">) => {
+  const toggleSetting = (key: keyof Omit<GameSettings, "wordsPerSession" | "keyboardLayout" | "enableSpecial" | "soundTheme">) => {
     onUpdateSettings({
       ...settings,
       [key]: !settings[key],
@@ -259,31 +259,24 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
             <div className="flex flex-col gap-3 p-3 bg-zinc-800 border border-zinc-700 rounded">
               <span className="text-sm font-extrabold font-sans text-zinc-300 tracking-wider">AZIK FEATURES:</span>
 
-              <div className="flex flex-col gap-2">
-                {([
-                  { key: "enableSpecial", label: "特殊拡張", desc: "こと[kt] もの[mn] する[sr] です[ds] ます[ms] など" },
-                  { key: "enableForeign", label: "外来語拡張", desc: "てぃ[tgi] でぃ[dci] とぅ[tgp] どぅ[dcp]" },
-                ] as const).map(({ key, label, desc }) => (
-                  <div key={key} className="flex items-center justify-between gap-3">
-                    <div>
-                      <span className="text-sm font-extrabold font-sans text-green-300">{label}</span>
-                      <span className="text-xs text-zinc-300 ml-2 font-sans">{desc}</span>
-                    </div>
-                    <button
-                      onClick={() => onUpdateSettings({ ...settings, [key]: !settings[key] })}
-                      className={`px-3 py-0.5 text-xs font-pixel font-bold border-2 flex-shrink-0 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings[key]
-                        ? "bg-green-500 text-black border-green-500"
-                        : "bg-zinc-700 text-green-400 border-green-500"
-                        }`}
-                    >
-                      {settings[key] ? "ON" : "OFF"}
-                    </button>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <span className="text-sm font-extrabold font-sans text-green-300">特殊拡張</span>
+                  <span className="text-xs text-zinc-300 ml-2 font-sans">こと[kt] もの[mn] する[sr] など Lev4 ステージ</span>
+                </div>
+                <button
+                  onClick={() => onUpdateSettings({ ...settings, enableSpecial: !settings.enableSpecial })}
+                  className={`px-3 py-0.5 text-xs font-pixel font-bold border-2 flex-shrink-0 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.enableSpecial
+                    ? "bg-green-500 text-black border-green-500"
+                    : "bg-zinc-700 text-green-400 border-green-500"
+                    }`}
+                >
+                  {settings.enableSpecial ? "ON" : "OFF"}
+                </button>
               </div>
 
               <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                OFFにした機能は該当ショートカットが無効になり、対応練習ステージも非表示になります。
+                OFFにすると Lev4（語短縮）の練習ステージが非表示になります。キーショートカットの有効/無効は下の MY AZIK CONFIG で個別に設定してください。
               </p>
             </div>
           </div>
