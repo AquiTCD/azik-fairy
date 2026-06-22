@@ -27,7 +27,7 @@ export function applyUserDictConfig(
 }
 
 /**
- * macSKK conf (CSV) または Google IME ローマ字テーブル (TSV) をパースして UserDictConfig を生成。
+ * kana-rule.conf（CSV）または TSV をパースして UserDictConfig を生成。
  * 「conf に書いてないかな = azik を空にする (disable)」という full-replace セマンティクス。
  * ベースと同一エントリは省略して差分のみ保存する（ストレージ節約）。
  */

@@ -261,13 +261,13 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                 <div>
                   <span className="font-bold text-sm tracking-wider text-cyan-300 font-pixel">IMPORT kana-rule.conf / TSV:</span>
                   <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">
-                    macSKK の kana-rule.conf（カンマ区切り）または Google 日本語入力のローマ字テーブル（タブ区切り TSV）をペーストすると、azik ショートカットの有効/無効が練習に反映されます。
+                    kana-rule.conf（カンマ区切り）または TSV（タブ区切り）をペーストすると、azik ショートカットの有効/無効が練習に反映されます。
                   </p>
                 </div>
                 <textarea
                   value={importInput}
                   className="w-full h-28 bg-zinc-900 border border-zinc-600 text-green-300 text-xs font-mono p-2 rounded resize-y"
-                  placeholder={"# macSKK conf 例\nq,ん\n;,っ\nwz,わん\n\n# Google IME TSV 例\nq\tん\n;\tっ"}
+                  placeholder={"# kana-rule.conf 例\nq,ん\n;,っ\nwz,わん\n\n# TSV 例\nq\tん\n;\tっ"}
                   onChange={(e) => setImportInput(e.target.value)}
                 />
                 <div className="flex items-center gap-2">

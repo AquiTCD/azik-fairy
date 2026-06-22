@@ -263,9 +263,9 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
                 設定用のJSONテキストを直接貼り付けて一括適用できます。複数キー対応（配列形式）です。
               </p>
 
-              <h4 className="font-bold text-green-400 mt-2">3. TSV / SKKインポート</h4>
+              <h4 className="font-bold text-green-400 mt-2">3. kana-rule.conf / TSV インポート</h4>
               <p>
-                Google日本語入力のローマ字表（TSV）や macSKK の <kbd className="bg-zinc-800 px-1 border border-zinc-700">kana-rule.conf</kbd> をそのまま貼り付けてインポートできます。
+                <kbd className="bg-zinc-800 px-1 border border-zinc-700">kana-rule.conf</kbd>（カンマ区切り）や TSV（タブ区切り）をそのまま貼り付けてインポートできます。
                 AZIK関連のキー定義（ん・っ・撥音拡張など）のみを自動で抽出して現在の設定にマージします。
               </p>
 
