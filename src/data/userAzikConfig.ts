@@ -86,18 +86,25 @@ export function parseConfToUserConfig(
     }
 
     const baseAzikSet = new Set(baseMapping.azik);
-    const confKeySet = new Set(confKeys);
+    const baseNormalSet = new Set(baseMapping.normal);
 
-    const isSameAsBase =
-      baseMapping.azik.every(k => confKeySet.has(k)) &&
-      confKeys.every(k => baseAzikSet.has(k));
+    // AZIK ショートカットとして扱うキーだけを抽出する:
+    //   - base.azik にある → 既存ショートカットを保持
+    //   - base.normal にない → ユーザーが追加した新しいショートカット
+    //   - base.normal にのみある → 通常ローマ字なので azik に含めない
+    const azikKeys = confKeys.filter(k => baseAzikSet.has(k) || !baseNormalSet.has(k));
 
-    if (isSameAsBase) {
+    const azikKeySet = new Set(azikKeys);
+    const sameAsBase =
+      baseMapping.azik.length === azikKeys.length &&
+      baseMapping.azik.every(k => azikKeySet.has(k));
+
+    if (sameAsBase) {
       entries[kana] = { mode: "keep" };
+    } else if (azikKeys.length === 0) {
+      entries[kana] = { mode: "disable" };
     } else {
-      // conf に明示的に書かれたキーを全て azik ショートカットとして採用する。
-      // normal 配列に存在するキーも "ユーザーが意図したショートカット" として扱う。
-      entries[kana] = { mode: "replace", replacementKeys: [...confKeys] };
+      entries[kana] = { mode: "replace", replacementKeys: azikKeys };
     }
   }
 

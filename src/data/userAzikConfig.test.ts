@@ -68,21 +68,31 @@ describe("parseConfToUserConfig", () => {
     expect(result.entries["わん"]?.mode).toBe("disable");
   });
 
-  it("後勝ちルール: conf に xn のみ定義 → azik ショートカットが xn に置換", () => {
-    // ん の base azik は ["q"]、conf は xn のみ → q は不要で xn に差し替え
+  it("xn のみ定義: base.normal のキーは azik に入らない → disable", () => {
+    // ん の base: normal=["nn","xn"], azik=["q"]
+    // conf は xn のみ → xn は base.normal なので azikKeys に入らない → disable
     const conf = "xn,ん\n";
     const result = parseConfToUserConfig(conf);
-    expect(result.entries["ん"]?.mode).toBe("replace");
-    expect(result.entries["ん"]?.replacementKeys).toContain("xn");
-    expect(result.entries["ん"]?.replacementKeys).not.toContain("q");
+    expect(result.entries["ん"]?.mode).toBe("disable");
   });
 
-  it("両方定義: q と xn の両方が azik に入る", () => {
+  it("q と xn の両方が conf にある: xn は normal なので azik には q のみ → keep", () => {
+    // q は base.azik → keep、xn は base.normal なので azikKeys から除外
+    // 結果 azikKeys=["q"] = base.azik → keep
     const conf = "q,ん\nxn,ん\n";
     const result = parseConfToUserConfig(conf);
-    expect(result.entries["ん"]?.mode).toBe("replace");
-    expect(result.entries["ん"]?.replacementKeys).toContain("q");
-    expect(result.entries["ん"]?.replacementKeys).toContain("xn");
+    expect(result.entries["ん"]?.mode).toBe("keep");
+  });
+
+  it("base.normal にも azik にも無い新キー → replace として採用", () => {
+    // わん の base: normal=["wan"], azik=["wz"]
+    // conf に wn が入った場合: wn は base.normal/azik にない → azikKeys に入る
+    // wz も conf にあれば keep 候補だが、ここでは wn のみ
+    const conf = "wn,わん\n";
+    const result = parseConfToUserConfig(conf);
+    expect(result.entries["わん"]?.mode).toBe("replace");
+    expect(result.entries["わん"]?.replacementKeys).toContain("wn");
+    expect(result.entries["わん"]?.replacementKeys).not.toContain("wz");
   });
 
   it("<okuri> 行はスキップ", () => {
@@ -123,10 +133,10 @@ describe("parseConfToUserConfig", () => {
     expect(result.entries["かん"]?.mode).toBe("disable");
   });
 
-  it("TSV: xn のみ定義でも replace になる", () => {
+  it("TSV: xn のみ定義は base.normal なので disable になる", () => {
+    // xn は ん の base.normal → azikKeys に入らない → disable
     const tsv = "xn\tん\n";
     const result = parseConfToUserConfig(tsv);
-    expect(result.entries["ん"]?.mode).toBe("replace");
-    expect(result.entries["ん"]?.replacementKeys).toContain("xn");
+    expect(result.entries["ん"]?.mode).toBe("disable");
   });
 });

@@ -185,8 +185,10 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     };
 
     const result = buildValidKeys(currentSeg.kana, dict, filter);
-    // filter が全パスを除外した場合は azik にフォールバック
-    return result.length > 0 ? result : currentSeg.azik;
+    if (result.length > 0) return result;
+    // azik が無効化されているか filter が全パスを除外 → normal キーにフォールバック
+    // (base の azik にフォールバックすると disabled 設定を無視してしまうため)
+    return buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.normal ?? []);
   }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining, effectiveDict]);
 
   const onFirstKey = useCallback(() => {
