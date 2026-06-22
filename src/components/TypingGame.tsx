@@ -327,12 +327,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         stage.category === "Practice"  ? 50 :
         settings.wordsPerSession
       );
-      const allWords = limit > 0 && stage.words.length > limit
-        ? [...stage.words].sort(() => Math.random() - 0.5).slice(0, limit)
-        : stage.words;
-      const mappedWords = allWords.map(w => createTypingWord(w.kanji, w.kana, dict));
-      const sourceWords = mappedWords.filter(w => !isWordBlockedForStage(w, stage.id, dict));
-      initializedWords = sourceWords.length > 0 ? sourceWords : mappedWords;
+      // filter blocked words first, then sample — ensures word count is maintained
+      const allMapped = stage.words.map(w => createTypingWord(w.kanji, w.kana, dict));
+      const eligible = allMapped.filter(w => !isWordBlockedForStage(w, stage.id, dict));
+      const pool = eligible.length > 0 ? eligible : allMapped;
+      initializedWords = limit > 0 && pool.length > limit
+        ? [...pool].sort(() => Math.random() - 0.5).slice(0, limit)
+        : pool;
     }
 
     const counts = calculateOptimalKeyCounts(initializedWords);

@@ -1,8 +1,9 @@
 import type { GameStats } from "@/types/game";
 
 export function buildTimeAttackTweetUrl(wpm: number, accuracy: number, origin: string): string {
+  const shareParams = new URLSearchParams({ theme: "af", title: "TIME ATTACK", wpm: String(wpm), acc: String(accuracy) });
   const shareText = `AZIKタイピング養成妖精 #AZIK_Fairy のタイムアタック！\nWPM: ${wpm} / ACC: ${accuracy}%`;
-  return `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(origin)}`;
+  return `https://x.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(`${origin}/share?${shareParams}`)}`;
 }
 
 export function buildTweetUrl(
