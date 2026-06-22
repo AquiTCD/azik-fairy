@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AzikMapping } from "@/data/azikRules";
 import { AzikLevel, classifyAzikKey } from "@/data/stages/wordValidator";
+
+const isBasicRomaji = (key: string) => classifyAzikKey(key) === AzikLevel.Lev0;
 import { UserDictConfig } from "@/data/userDictConfig";
 
 interface AzikKeyConfigTableProps {
@@ -110,7 +112,7 @@ export default function AzikKeyConfigTable({ config, baseDict, onSetKanaKeys }: 
           <div key={groupKey} className="border border-zinc-700 rounded overflow-hidden">
             <button
               onClick={() => toggleGroup(groupKey)}
-              className="w-full flex justify-between items-center px-3 py-2 bg-zinc-800 text-left text-xs font-pixel font-bold text-green-300 hover:bg-zinc-700 transition-colors cursor-pointer"
+              className="w-full flex justify-between items-center px-3 py-2 bg-zinc-800 text-left text-xs font-bold text-green-300 hover:bg-zinc-700 transition-colors cursor-pointer"
             >
               <span>{GROUP_LABELS[groupKey]}</span>
               <span className="text-zinc-500 text-[10px]">{isOpen ? "▲" : "▼"} ({kanas.length})</span>
@@ -129,9 +131,9 @@ export default function AzikKeyConfigTable({ config, baseDict, onSetKanaKeys }: 
                       {/* かな */}
                       <span className="w-8 text-center text-base font-bold text-zinc-300 shrink-0">{kana}</span>
 
-                      {/* 通常ローマ字 */}
+                      {/* 通常ローマ字（Lev0のみ = 純粋なローマ字入力のみ表示） */}
                       <div className="flex gap-1 flex-wrap shrink-0">
-                        {baseMapping.normal.map(k => (
+                        {baseMapping.normal.filter(isBasicRomaji).map(k => (
                           <span key={k} className="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-800 border border-zinc-600 rounded text-zinc-400">{k}</span>
                         ))}
                       </div>

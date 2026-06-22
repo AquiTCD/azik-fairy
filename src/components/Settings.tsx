@@ -49,7 +49,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
             {/* TRAINING MODE設定 */}
             <div className="flex flex-col gap-3 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              <span className="text-xs font-pixel font-bold text-green-300 tracking-wider">TRAINING MODE</span>
+              <span className="text-xs font-bold text-green-300 tracking-wider">TRAINING MODE</span>
               <div className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-zinc-300 tracking-wider">FOCUS / FULL:</span>
                 <div className="flex gap-2">
@@ -80,7 +80,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
             {/* CHALLENGE MODE設定 */}
             <div className="flex flex-col gap-3 p-4 bg-zinc-800 border-2 border-yellow-700 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
-              <span className="text-xs font-pixel font-bold text-yellow-300 tracking-wider">CHALLENGE MODE</span>
+              <span className="text-xs font-bold text-yellow-300 tracking-wider">CHALLENGE MODE</span>
               <div className="flex justify-between items-center gap-4">
                 <span className="font-bold text-sm tracking-wider">入力モード デフォルト:</span>
                 <div className="flex gap-2">
@@ -283,7 +283,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* MY AZIK CONFIG セクション */}
           <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
-            <h3 className="text-sm font-bold text-cyan-400 font-pixel">■ MY AZIK CONFIG</h3>
+            <h3 className="text-sm font-bold text-cyan-400">■ MY AZIK CONFIG</h3>
 
             {/* インポートエリア */}
             {onImportTable && (
@@ -321,7 +321,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                     </button>
                   )}
                   {isCustomized && (
-                    <span className="text-[10px] text-cyan-400 font-pixel">✓ カスタム設定適用中</span>
+                    <span className="text-[10px] text-cyan-400">✓ カスタム設定適用中</span>
                   )}
                 </div>
               </div>
@@ -330,7 +330,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
             {/* AZIKキー設定テーブル */}
             {onSetKanaKeys && (
               <div className="flex flex-col gap-2">
-                <p className="text-[10px] text-zinc-500 font-sans">各かなの AZIK ショートカットキーを確認・無効化できます。× をクリックで該当キーを無効化。</p>
+                <p className="text-[10px] text-zinc-500 font-sans">各かなの AZIK ショートカットキーを確認・カスタマイズできます。× で無効化 / 取り消し線をクリックで再有効化 / + で追加。</p>
                 <AzikKeyConfigTable
                   config={userDictConfig ?? {}}
                   baseDict={AZIK_DICTIONARY}
@@ -342,10 +342,10 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* レッスン説明リセット */}
           <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
-            <h3 className="text-sm font-bold text-green-400 font-pixel">■ LESSON INTRO</h3>
+            <h3 className="text-sm font-bold text-green-400">■ LESSON INTRO</h3>
             <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border border-zinc-700 rounded">
               <div>
-                <span className="font-bold text-sm tracking-wider text-green-300 font-pixel">RESET INTRO HISTORY:</span>
+                <span className="font-bold text-sm tracking-wider text-green-300">RESET INTRO HISTORY:</span>
                 <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">ステージ開始前のAZIK解説画面をすべて再表示します。</p>
               </div>
               <button
@@ -363,10 +363,10 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
 
           {/* DANGER ZONE */}
           <div className="flex flex-col gap-3 mt-2 border-t-2 border-red-900 pt-4">
-            <h3 className="text-sm font-bold text-red-400 font-pixel">■ DANGER ZONE</h3>
+            <h3 className="text-sm font-bold text-red-400">■ DANGER ZONE</h3>
             <div className="flex items-center justify-between gap-4 p-4 bg-zinc-800 border-2 border-red-800 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               <div>
-                <span className="font-bold text-sm tracking-wider text-red-400 font-pixel">CLEAR ALL PROGRESS:</span>
+                <span className="font-bold text-sm tracking-wider text-red-400">CLEAR ALL PROGRESS:</span>
                 <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">すべてのステージスコア・星・クリア記録を削除します。この操作は元に戻せません。</p>
               </div>
               <button
