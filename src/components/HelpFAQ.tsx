@@ -13,6 +13,19 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.8.0",
+    date: "2026-06-22",
+    items: [
+      "Time Attack モードの追加",
+      "Stats（成長グラフ）画面の追加",
+      "ゴーストレース機能の追加",
+      "ゲームモード選択画面の追加",
+      "弱点練習機能の追加",
+      "小書き仮名入力方法の設定追加（L / XX / BOTH）",
+      "問題データの修正・精査",
+    ],
+  },
+  {
     version: "v1.7.2",
     date: "2026-06-21",
     items: [
