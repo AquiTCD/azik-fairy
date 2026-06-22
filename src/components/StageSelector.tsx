@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { StageData, AzikMapping } from "@/data/azikRules";
+import { StageData, AzikMapping, AZIK_DICTIONARY } from "@/data/azikRules";
 import { STAGES, StageMeta } from "@/data/stages";
+import { isStageEnabled } from "@/data/stages/wordValidator";
 import { GameSettings, StageProgress, WeaknessStat } from "@/types/game";
 import { getWeaknessRanking } from "@/utils/gameLogic";
 import GameButton from "@/components/GameButton";
@@ -21,9 +22,6 @@ interface StageSelectorProps {
   effectiveDict?: Record<string, AzikMapping>;
 }
 
-function isCategoryEnabled(_categoryId: string, _settings: GameSettings): boolean {
-  return true;
-}
 
 type CategoryType = StageData["category"];
 
@@ -57,13 +55,18 @@ export default function StageSelector({
 
   const categories = TRAINING_CATEGORIES;
 
+  const dict = effectiveDict ?? AZIK_DICTIONARY;
+  const isStageOn = (stageId: string) => isStageEnabled(stageId, dict);
+  const isCategoryOn = (catId: string) =>
+    STAGES.filter(s => s.category === catId).some(s => isStageOn(s.id));
+
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const stageRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const backButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const enabledTabIndices = categories
     .map((c, i) => ({ c, i }))
-    .filter(({ c }) => isCategoryEnabled(c.id, settings))
+    .filter(({ c }) => isCategoryOn(c.id))
     .map(({ i }) => i);
 
   useEffect(() => {
@@ -94,7 +97,7 @@ export default function StageSelector({
       tabRefs.current[prev]?.focus();
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      if (isCategoryEnabled(categories[idx].id, settings)) {
+      if (isCategoryOn(categories[idx].id)) {
         setActiveCategory(categories[idx].id);
         setTimeout(() => stageRefs.current[0]?.focus(), 0);
       }
@@ -202,7 +205,7 @@ export default function StageSelector({
             className="flex w-full gap-1 border-b border-green-950 pb-4"
           >
             {categories.map((cat, idx) => {
-              const enabled = isCategoryEnabled(cat.id, settings);
+              const enabled = isCategoryOn(cat.id);
               const isActive = activeCategory === cat.id;
               return (
                 <button
@@ -304,10 +307,10 @@ export default function StageSelector({
           ) : (
             /* TRAINING flow: active category stages */
             <>
-              {!isCategoryEnabled(activeCategory, settings) && (
+              {!isCategoryOn(activeCategory) && (
                 <div className="text-center text-zinc-500 text-sm py-8 font-sans">
-                  このカテゴリの機能はOFFになっています。<br />
-                  <span className="text-xs">設定画面の AZIK FEATURES から有効にできます。</span>
+                  このカテゴリの AZIK キーが全て無効です。<br />
+                  <span className="text-xs">設定の MY AZIK CONFIG でキーを有効にしてください。</span>
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -317,7 +320,7 @@ export default function StageSelector({
                     stage={stage}
                     badgeLabel={categories.find(c => c.id === activeCategory)?.label ?? activeCategory}
                     subIdx={index}
-                    enabled={isCategoryEnabled(activeCategory, settings)}
+                    enabled={isStageOn(stage.id)}
                     stageProg={progress?.[stage.id]}
                     tabIndex={index === 0 ? 0 : -1}
                     innerRef={el => { stageRefs.current[index] = el; }}

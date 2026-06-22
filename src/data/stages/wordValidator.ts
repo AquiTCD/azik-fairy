@@ -1,4 +1,4 @@
-import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping, AzikSegment, StageData } from "../azikRules";
+import { AZIK_DICTIONARY, splitIntoAzikSegments, AzikMapping, AzikSegment, StageData, TypingWord } from "../azikRules";
 
 // -------------------------------------------------------------
 // AZIKレベル定義
@@ -449,3 +449,91 @@ export const STAGE_MAX_LEVELS: Record<string, AzikLevel> = {
   "practice-sentences":    AzikLevel.Practice,
   "practice-long-text":    AzikLevel.Practice,
 };
+
+// -------------------------------------------------------------
+// effectiveDict によるステージ・語フィルター
+// -------------------------------------------------------------
+
+/**
+ * ステージのターゲットキーを判定するクロージャを返す。
+ * Summary ステージは Lev1a〜stageLevel の全レベルを包含する。
+ */
+function makeStageKeyMatcher(
+  stageLevel: AzikLevel,
+  isSummary: boolean,
+  stagePred?: StageKeyPredicate,
+  targetSuffix?: string,
+): (k: string) => boolean {
+  const stageLevelOrd = levelOrdinal(stageLevel);
+  const lev1aOrd = levelOrdinal(AzikLevel.Lev1a);
+  return (k: string) => {
+    const core = k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
+    if (isSummary) {
+      const ord = levelOrdinal(classifyAzikKey(core));
+      return ord >= lev1aOrd && ord <= stageLevelOrd;
+    }
+    if (!containsTargetLevel(k, stageLevel)) return false;
+    if (stagePred) return stagePred(core);
+    if (targetSuffix) return k.endsWith(targetSuffix);
+    return true;
+  };
+}
+
+/**
+ * effectiveDict の現在設定でこのステージが有効かを返す。
+ * 対象レベルの AZIK キーが 1 つ以上 enable されていれば true。
+ * Practice カテゴリは常に true。
+ */
+export function isStageEnabled(
+  stageId: string,
+  effectiveDict: Record<string, AzikMapping>,
+): boolean {
+  const stageLevel = STAGE_MAX_LEVELS[stageId];
+  if (!stageLevel || stageLevel === AzikLevel.Practice) return true;
+
+  const isSummary = stageId.includes("summary");
+  const matches = makeStageKeyMatcher(
+    stageLevel,
+    isSummary,
+    STAGE_KEY_PREDS[stageId],
+    STAGE_PURITY_RULES[stageId]?.targetSuffix,
+  );
+
+  return Object.values(effectiveDict).some(m => m.azik.some(matches));
+}
+
+/**
+ * 語がこのステージでブロックされるか返す。
+ * ベース辞書でターゲットのセグメントを持つが、effectiveDict でその AZIK が
+ * disabled になっている語は true（出題フィルター対象）。
+ * Practice カテゴリは常に false（フィルターなし）。
+ */
+export function isWordBlockedForStage(
+  word: TypingWord,
+  stageId: string,
+  effectiveDict: Record<string, AzikMapping>,
+): boolean {
+  const stageLevel = STAGE_MAX_LEVELS[stageId];
+  if (!stageLevel || stageLevel === AzikLevel.Practice) return false;
+
+  const isSummary = stageId.includes("summary");
+  const matches = makeStageKeyMatcher(
+    stageLevel,
+    isSummary,
+    STAGE_KEY_PREDS[stageId],
+    STAGE_PURITY_RULES[stageId]?.targetSuffix,
+  );
+
+  for (const seg of word.segments) {
+    const baseEntry = AZIK_DICTIONARY[seg.kana];
+    if (!baseEntry) continue;
+
+    const baseSeg: AzikSegment = { kana: seg.kana, normal: baseEntry.normal, azik: baseEntry.azik };
+    if (!isTargetSegment(baseSeg, stageLevel, isSummary)) continue;
+    if (!baseEntry.azik.some(matches)) continue;
+
+    const effectiveAzik = effectiveDict[seg.kana]?.azik ?? baseEntry.azik;
+    if (!effectiveAzik.some(matches)) return true;
+  }
+  return false;
+}

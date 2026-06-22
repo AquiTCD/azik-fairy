@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, buildValidKeys, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel } from "@/data/stages/wordValidator";
+import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel, isWordBlockedForStage } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
@@ -327,10 +327,12 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         stage.category === "Practice"  ? 50 :
         settings.wordsPerSession
       );
-      const sourceWords = limit > 0 && stage.words.length > limit
+      const allWords = limit > 0 && stage.words.length > limit
         ? [...stage.words].sort(() => Math.random() - 0.5).slice(0, limit)
         : stage.words;
-      initializedWords = sourceWords.map(w => createTypingWord(w.kanji, w.kana, dict));
+      const mappedWords = allWords.map(w => createTypingWord(w.kanji, w.kana, dict));
+      const sourceWords = mappedWords.filter(w => !isWordBlockedForStage(w, stage.id, dict));
+      initializedWords = sourceWords.length > 0 ? sourceWords : mappedWords;
     }
 
     const counts = calculateOptimalKeyCounts(initializedWords);
