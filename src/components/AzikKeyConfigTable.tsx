@@ -147,7 +147,7 @@ export default function AzikKeyConfigTable({ config, baseDict, onSetKanaKeys }: 
                   return (
                     <div key={kana} className="flex items-center gap-2 px-3 py-2 bg-zinc-900 flex-wrap">
                       {/* かな */}
-                      <span className="w-8 text-center text-base font-bold text-zinc-300 shrink-0">{kana}</span>
+                      <span className="w-12 text-center text-base font-bold text-zinc-300 shrink-0">{kana}</span>
 
                       {/* 通常ローマ字（Lev0のみ = 純粋なローマ字入力のみ表示） */}
                       <div className="flex gap-1 flex-wrap shrink-0">
