@@ -43,7 +43,6 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
 
   // --- 小書き仮名 (外来語表記用フォールバック) ---
   // ぁぃぅぇぉ: azik では x は し行専用（xa=しゃ等、2文字）と被るため x+単母音を除外。
-  // mergeCustomAzikRules の smallKanaPrefix 設定で l系 / xx系 を切替可能。
   // ゃゅょ: xya/xyu/xyo は し行 xa/xi/xu/xe/xo と3文字 vs 2文字で別キー。競合なし、そのまま。
   "ぁ": { normal: ["xa", "la"], azik: ["la"] },
   "ぃ": { normal: ["xi", "li"], azik: ["li"] },
@@ -551,126 +550,6 @@ export const AZIK_DICTIONARY: Record<string, AzikMapping> = {
 };
 
 // -------------------------------------------------------------
-// カスタムルールをマージする関数
-// -------------------------------------------------------------
-export interface AzikFeatures {
-  enableSpecial: boolean;                    // 特殊拡張 (こと/もの/する等)
-  enableForeign: boolean;                    // 外来語拡張 (tgi/dci/tgu/dcu)
-  nAlternative: "off" | "left" | "all";     // 撥音ZキーへのN代替: off=Zのみ / left=左手子音のみ / all=全子音
-  smallKanaPrefix: "l" | "xx" | "both";     // 小書き仮名入力プレフィックス: l=ltu系 / xx=xx系(SKK用) / both=両方
-}
-
-// QWERTYキーボードで左手で打つ子音 (b/c/d/f/g/r/s/t/v/w/x/z)
-const LEFT_HAND_CONSONANTS = new Set(['b', 'c', 'd', 'f', 'g', 'r', 's', 't', 'v', 'w', 'x', 'z']);
-
-const SPECIAL_KANAS = new Set(["こと", "もの", "する", "です", "ます", "という"]);
-const FOREIGN_KANAS = new Set(["てぃ", "でぃ", "とぅ", "どぅ", "てゅ", "でゅ", "ふゅ", "ふょ"]);
-
-// ぁぃぅぇぉ のみ。ゃゅょ は xya/xyu/xyo で し行（xa等）と競合しないため不要。
-const SMALL_KANA_PREFIX_MAP: Record<string, { l: string; xx: string }> = {
-  "ぁ": { l: "la", xx: "xxa" },
-  "ぃ": { l: "li", xx: "xxi" },
-  "ぅ": { l: "lu", xx: "xxu" },
-  "ぇ": { l: "le", xx: "xxe" },
-  "ぉ": { l: "lo", xx: "xxo" },
-};
-
-export function mergeCustomAzikRules(
-  customRules: Record<string, string[]>,
-  features: AzikFeatures = { enableSpecial: true, enableForeign: true, nAlternative: "left", smallKanaPrefix: "l" }
-): Record<string, AzikMapping> {
-  const merged = JSON.parse(JSON.stringify(AZIK_DICTIONARY)) as Record<string, AzikMapping>;
-
-  const baseRules = [
-    { parent: "あん", defaultKey: "z" },
-    { parent: "いん", defaultKey: "k" },
-    { parent: "うん", defaultKey: "j" },
-    { parent: "えん", defaultKey: "d" },
-    { parent: "おん", defaultKey: "l" },
-    { parent: "あい", defaultKey: "q" },
-    { parent: "うう", defaultKey: "h" },
-    { parent: "えい", defaultKey: "w" },
-    { parent: "おう", defaultKey: "p" },
-  ];
-
-  for (const key of ["ん", "っ"] as const) {
-    if (customRules[key]?.length) merged[key].azik = customRules[key];
-  }
-  // ー: custom key は追加ヴァリアント。"-" は常に残す（AZIKの目的はヴァリアント追加であって置換でない）
-  if (customRules["ー"]?.length) {
-    merged["ー"].azik = Array.from(new Set(["-", ...customRules["ー"]]));
-  }
-
-  const specialRules = ["こと", "もの", "する", "です", "ます", "という"];
-  for (const key of specialRules) {
-    if (customRules[key]?.length) merged[key].azik = customRules[key];
-  }
-
-  // 撥音/二重母音拡張キーをdictionary全体に伝播。
-  // 複数カスタムキー対応: defaultKeyで終わるazikショートカットをcustomKeys全員で展開する。
-  for (const rule of baseRules) {
-    const customKeys = customRules[rule.parent];
-    if (!customKeys?.length) continue;
-    for (const [, map] of Object.entries(merged)) {
-      const newAzik: string[] = [];
-      for (const k of map.azik) {
-        if (k.length >= 2 && k.endsWith(rule.defaultKey)) {
-          for (const ck of customKeys) {
-            newAzik.push(k.slice(0, -1) + ck);
-          }
-        } else {
-          newAzik.push(k);
-        }
-      }
-      map.azik = [...new Set(newAzik)];
-    }
-  }
-
-  // フィーチャーフラグ: OFFにした機能のazikショートカットを通常入力に戻す
-  if (!features.enableSpecial) {
-    for (const kana of SPECIAL_KANAS) {
-      if (merged[kana]) merged[kana].azik = [...merged[kana].normal];
-    }
-  }
-
-  if (!features.enableForeign) {
-    for (const kana of FOREIGN_KANAS) {
-      if (merged[kana]) merged[kana].azik = [...merged[kana].normal];
-    }
-  }
-
-  // N代替: 撥音Zショートカット (sz/tz/gz等) に N を追加する
-  if (features.nAlternative !== "off") {
-    for (const [kana, map] of Object.entries(merged)) {
-      if (kana.length < 2 || !kana.endsWith("ん")) continue;
-      const extra: string[] = [];
-      for (const k of map.azik) {
-        if (k.length >= 2 && k.endsWith("z")) {
-          const firstChar = k[0];
-          if (features.nAlternative === "all" || LEFT_HAND_CONSONANTS.has(firstChar)) {
-            extra.push(k.slice(0, -1) + "n");
-          }
-        }
-      }
-      if (extra.length > 0) {
-        map.azik = [...new Set([...map.azik, ...extra])];
-      }
-    }
-  }
-
-  // 小書き仮名プレフィックス: l/xx/both から azik バリアントを決定
-  const prefix = features.smallKanaPrefix ?? "l";
-  for (const [kana, keys] of Object.entries(SMALL_KANA_PREFIX_MAP)) {
-    if (!merged[kana]) continue;
-    const variants: string[] = [];
-    if (prefix === "l"    || prefix === "both") variants.push(keys.l);
-    if (prefix === "xx"   || prefix === "both") variants.push(keys.xx);
-    merged[kana].azik = variants;
-  }
-
-  return merged;
-}
-
 // -------------------------------------------------------------
 // かな文字列に対して有効なキー列の全集合を生成する
 // -------------------------------------------------------------
@@ -808,62 +687,6 @@ export function createTypingWord(
   };
 }
 
-
-// -------------------------------------------------------------
-// TSV (Google日本語入力) / CSV・conf (SKK kana-rule.conf) のパーサー
-// -------------------------------------------------------------
-export function parseExternalRomajiTable(text: string): Record<string, string[]> {
-  const customRules: Record<string, string[]> = {};
-  const targetKanas = [
-    "ん", "っ",
-    "あん", "いん", "うん", "えん", "おん",
-    "あい", "うう", "えい", "おう"
-  ];
-
-  const push = (key: string, val: string) => {
-    if (!customRules[key]) customRules[key] = [];
-    if (!customRules[key].includes(val)) customRules[key].push(val);
-  };
-
-  if (!text) return customRules;
-
-  const lines = text.split(/\r?\n/);
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-
-    let parts: string[] = [];
-    if (trimmed.includes("\t")) {
-      parts = trimmed.split("\t");
-    } else if (trimmed.includes(",")) {
-      parts = trimmed.split(",");
-    }
-
-    if (parts.length >= 2) {
-      const romaji = parts[0].trim().toLowerCase();
-      const kana = parts[1].trim();
-
-      // 直接マッピング: 1文字ローマ字 → 対象かな (重複なく複数収集)
-      if (romaji.length === 1 && targetKanas.includes(kana)) {
-        push(kana, romaji);
-        continue;
-      }
-
-      // 2文字エントリの k* 系から撥音/二重母音の拡張キーを推論
-      // 例: kz,かん → あん=z、kq,かい → あい=q (複数エントリがあれば両方収集)
-      if (romaji.length === 2 && romaji[0] === "k") {
-        const KA_SERIES_TO_ABSTRACT: Record<string, string> = {
-          "かん": "あん", "きん": "いん", "くん": "うん", "けん": "えん", "こん": "おん",
-          "かい": "あい", "くう": "うう", "けい": "えい", "こう": "おう",
-        };
-        const abstractPattern = KA_SERIES_TO_ABSTRACT[kana];
-        if (abstractPattern) push(abstractPattern, romaji[1]);
-      }
-    }
-  }
-
-  return customRules;
-}
 
 // -------------------------------------------------------------
 // お題全体の理論最小打鍵数を計算するヘルパー
