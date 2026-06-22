@@ -1,4 +1,5 @@
 import { SoundThemeName } from "@/hooks/useAzikSound";
+import { CommentId } from "@/data/resultComments";
 
 export type RankType = "PERFECT" | "A" | "B" | "C";
 
@@ -10,7 +11,7 @@ export interface GameStats {
   missCount: number;
   azikRatio: number;
   rank: RankType;
-  comment: string;
+  comment: CommentId;
   savedKeys: number;
   keyHeatmap: Record<string, { miss: number; attempt: number }>;
 }

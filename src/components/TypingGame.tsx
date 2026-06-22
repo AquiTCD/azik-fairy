@@ -17,7 +17,8 @@ import KeyPatternButtons from "./KeyPatternButtons";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
 import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
-import resultComments from "../../public/data/result_comments.json";
+import { resultComments, COMMENT_IDS_BY_RANK, CommentId } from "@/data/resultComments";
+import { WEAKNESS_STAGE_ID } from "@/constants/game";
 
 const FAIRY_QUOTES = {
   start: [
@@ -96,8 +97,6 @@ function RubyText({ kanji, kana }: { kanji: string; kana: string }) {
     </span>
   );
 }
-
-const WEAKNESS_STAGE_ID = "__weakness__";
 
 interface TypingGameProps {
   stageId: string;
@@ -197,13 +196,9 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     const savedKeys = Math.max(0, totalNormal - totalKeys);
 
     const rank = getRank(accuracy, wpm, azikRatio);
-    const commentIds = rank === "PERFECT" ? ["P1", "P2", "P3", "P4"]
-      : rank === "A" ? ["A1", "A2", "A3", "A4"]
-      : rank === "B" ? ["B1", "B2", "B3", "B4"]
-      : ["C1", "C2", "C3", "C4", "C5"];
-    const commentId = commentIds[Math.floor(Math.random() * commentIds.length)];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const commentText = (resultComments as any)[commentId] || "";
+    const commentIds = COMMENT_IDS_BY_RANK[rank];
+    const commentId: CommentId = commentIds[Math.floor(Math.random() * commentIds.length)];
+    const commentText = resultComments[commentId] || "";
 
     setFairyMessage(commentText);
     const rankEmotion: FairyEmotion = rank === "PERFECT" ? "perfect" : rank === "A" ? "proud" : "happy";

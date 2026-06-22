@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { getRandomAds } from "@/data/adData";
-import { calcStars, calcStreak, getNextStageId, getWeaknessRanking, mergeWeaknessStats, mergeSessionHistory } from "@/utils/gameLogic";
+import { calcStars, calcStreak, getWeaknessRanking, mergeWeaknessStats, mergeSessionHistory } from "@/utils/gameLogic";
 import { STAGES } from "@/data/stages";
 import { loadStage } from "@/data/stages";
 import { mergeCustomAzikRules, createTypingWord, TypingWord } from "@/data/azikRules";
@@ -15,14 +15,14 @@ import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AdBanner from "@/components/AdBanner";
 import KeyNavGroup from "@/components/KeyNavGroup";
 import AzikKeyVisualizer from "@/components/AzikKeyVisualizer";
-import KeyboardDiagram from "@/components/KeyboardDiagram";
 import StatsScreen from "@/components/StatsScreen";
 import TimeAttackGame from "@/components/TimeAttackGame";
-import XIcon from "@/components/XIcon";
 import ModeButton from "@/components/ModeButton";
-import { GameStats, GameSettings, StageProgress, UserProgress, GameState, TimeAttackBest } from "@/types/game";
-import { buildTweetUrl } from "@/utils/tweetUtils";
-import resultComments from "../../public/data/result_comments.json";
+import ResultScreen from "@/components/ResultScreen";
+import { GameStats, GameSettings, UserProgress, GameState, TimeAttackBest } from "@/types/game";
+import { WEAKNESS_STAGE_ID, SETTINGS_STORAGE_KEY } from "@/constants/game";
+import { useProgressStorage } from "@/hooks/useProgressStorage";
+import { migrateSettings } from "@/utils/settingsMigration";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -99,12 +99,6 @@ function TitleProgressBar({ stageProgress, totalKeysTyped, streak }: {
   );
 }
 
-const SHARE_BTN_CLASS = "w-full font-pixel font-bold tracking-wider rounded transition-all duration-150 bg-sky-950 text-sky-300 border-2 border-sky-500 hover:bg-sky-500 hover:text-white focus:bg-sky-500 focus:text-white focus:outline-none px-6 py-4 flex items-center justify-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]";
-
-const STORAGE_KEY = "azik-fairy-settings";
-const PROGRESS_STORAGE_KEY = "azik-fairy-progress";
-const WEAKNESS_PRACTICE_STAGE_ID = "__weakness__";
-
 const DEFAULT_SETTINGS: GameSettings = {
   isTraining: true,
   isFullTraining: false,
@@ -122,24 +116,13 @@ const DEFAULT_SETTINGS: GameSettings = {
   ghostRaceEnabled: true,
 };
 
-const DEFAULT_PROGRESS: UserProgress = {
-  stageProgress: {},
-  totalKeysTyped: 0,
-  lastPlayDate: "",
-  streak: 0,
-  seenStageIntros: [],
-  weaknessStats: {},
-  sessionHistory: [],
-  timeAttackBest: null,
-};
-
 export default function Home() {
   const [gameState, setGameState] = useState<GameState>("TITLE");
   const [flowMode, setFlowMode] = useState<"training" | "challenge">("training");
   const [selectedStageId, setSelectedStageId] = useState<string | null>(null);
 
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
-  const [progress, setProgress] = useState<UserProgress>(DEFAULT_PROGRESS);
+  const { progress, saveProgress, clearProgress, load: loadProgress } = useProgressStorage();
   const [isMounted, setIsMounted] = useState(false);
   const [stats, setStats] = useState<GameStats | null>(null);
 
@@ -160,45 +143,21 @@ export default function Home() {
   // 1. マウント時に LocalStorage から設定と進捗を復元
   useEffect(() => {
     setIsMounted(true);
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (parsed.customRules) {
-          const migrated: Record<string, string[]> = {};
-          for (const [k, v] of Object.entries(parsed.customRules)) {
-            if (typeof v === "string") migrated[k] = [v];
-            else if (Array.isArray(v)) migrated[k] = v as string[];
-          }
-          parsed.customRules = migrated;
-        }
-        if (parsed.soundTheme === "off") {
-          parsed.soundEnabled = false;
-          parsed.soundTheme = "soft";
-        } else if (parsed.soundTheme === "default") {
-          parsed.soundEnabled = true;
-          parsed.soundTheme = "soft";
-        }
-        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+        setSettings(migrateSettings(parsed, DEFAULT_SETTINGS));
       } catch (e) {
         console.error("Failed to load settings from localStorage:", e);
       }
     }
-
-    const storedProgress = localStorage.getItem(PROGRESS_STORAGE_KEY);
-    if (storedProgress) {
-      try {
-        const parsed = JSON.parse(storedProgress);
-        setProgress({ ...DEFAULT_PROGRESS, ...parsed });
-      } catch (e) {
-        console.error("Failed to load progress from localStorage:", e);
-      }
-    }
-  }, []);
+    loadProgress();
+  }, [loadProgress]);
 
   // 弱点単語のロード（弱点練習ステージ選択時）
   useEffect(() => {
-    if (selectedStageId !== WEAKNESS_PRACTICE_STAGE_ID) return;
+    if (selectedStageId !== WEAKNESS_STAGE_ID) return;
     setWeaknessWords(null);
     const weaknessKeys = getWeaknessRanking(progress.weaknessStats);
     loadStage("practice-words-1").then(stage => {
@@ -220,7 +179,7 @@ export default function Home() {
   // 2. 設定変更時に LocalStorage に自動保存
   const handleUpdateSettings = (newSettings: GameSettings) => {
     setSettings(newSettings);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings));
   };
 
   const startStage = (stageId: string) => {
@@ -236,32 +195,26 @@ export default function Home() {
   };
 
   const handleStartWeaknessPractice = () => {
-    setSelectedStageId(WEAKNESS_PRACTICE_STAGE_ID);
+    setSelectedStageId(WEAKNESS_STAGE_ID);
     setGameState("PLAYING");
   };
 
   const handleStartFromIntro = (markAsSeen: boolean) => {
     if (!selectedStageId) return;
     if (markAsSeen) {
-      const newSeen = [...progress.seenStageIntros, selectedStageId];
-      const newProgress = { ...progress, seenStageIntros: newSeen };
-      setProgress(newProgress);
-      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+      saveProgress({ ...progress, seenStageIntros: [...progress.seenStageIntros, selectedStageId] });
     }
     setGameState("PLAYING");
   };
 
   const handleClearProgress = () => {
     if (confirm("すべてのスコアと進捗を削除しますか？この操作は元に戻せません。")) {
-      setProgress(DEFAULT_PROGRESS);
-      localStorage.removeItem(PROGRESS_STORAGE_KEY);
+      clearProgress();
     }
   };
 
   const handleResetStageIntros = () => {
-    const newProgress = { ...progress, seenStageIntros: [] };
-    setProgress(newProgress);
-    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+    saveProgress({ ...progress, seenStageIntros: [] });
   };
 
   const handleFinishGame = (gameStats: GameStats) => {
@@ -274,7 +227,7 @@ export default function Home() {
     const newStreak = calcStreak(progress.lastPlayDate, todayStr, progress.streak);
 
     // 弱点ステージはstageProgressに記録しない
-    const isWeaknessStage = selectedStageId === WEAKNESS_PRACTICE_STAGE_ID;
+    const isWeaknessStage = selectedStageId === WEAKNESS_STAGE_ID;
     const stage = isWeaknessStage ? null : STAGES.find(s => s.id === selectedStageId);
 
     const updatedStageProgress = isWeaknessStage
@@ -326,8 +279,7 @@ export default function Home() {
       sessionHistory: updatedSessionHistory,
     };
 
-    setProgress(newProgress);
-    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+    saveProgress(newProgress);
   };
 
   // ⑤ タイムアタック終了ハンドラ
@@ -339,9 +291,7 @@ export default function Home() {
           : progress.timeAttackBest)
       : { wpm: result.wpm, accuracy: result.accuracy, date: todayStr };
 
-    const newProgress = { ...progress, timeAttackBest: newBest };
-    setProgress(newProgress);
-    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(newProgress));
+    saveProgress({ ...progress, timeAttackBest: newBest });
   };
 
   if (!isMounted) {
@@ -472,12 +422,12 @@ export default function Home() {
           onBackToStageSelect={() => setGameState("STAGE_SELECT")}
           onUpdateSettings={handleUpdateSettings}
           ghostBestWpm={
-            selectedStageId !== WEAKNESS_PRACTICE_STAGE_ID
+            selectedStageId !== WEAKNESS_STAGE_ID
               ? progress.stageProgress[selectedStageId]?.bestWpm
               : undefined
           }
           weaknessOverrideWords={
-            selectedStageId === WEAKNESS_PRACTICE_STAGE_ID
+            selectedStageId === WEAKNESS_STAGE_ID
               ? (weaknessWords ?? undefined)
               : undefined
           }
@@ -520,113 +470,16 @@ export default function Home() {
 
       {/* リザルト画面 */}
       {gameState === "RESULT" && stats && (
-        <FairyScreenLayout
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          fairy={{ message: (resultComments as any)[stats.comment] || stats.comment, emotion: stats.rank === "PERFECT" ? "perfect" : stats.rank === "A" ? "proud" : "happy" }}
-          fairyColClassName="animate-in fade-in zoom-in-95 duration-500 flex flex-col gap-4"
-          fairySlot={
-            <>
-              {/* ③ キーヒートマップ（フェアリーの下） */}
-              {stats.keyHeatmap && (() => {
-                const hasHeat = Object.values(stats.keyHeatmap).some(e => e.attempt >= 3 && e.miss / e.attempt >= 0.2);
-                return hasHeat ? (
-                  <div className="w-full">
-                    <p className="text-[10px] font-pixel text-zinc-400 mb-1 text-center">= KEY HEATMAP =</p>
-                    <KeyboardDiagram
-                      activeKeys={[]}
-                      layout={settings.keyboardLayout}
-                      showLegend={true}
-                      heatmap={stats.keyHeatmap}
-                      compact={true}
-                    />
-                  </div>
-                ) : null;
-              })()}
-              <AdBanner ads={resultAds} layout="vertical" />
-            </>
-          }
-        >
-          {/* 左カラム: スコアとボタン */}
-          <div className="flex-1 flex flex-col gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-widest border-b-2 border-green-500 pb-2 w-full font-pixel text-center">
-              = RESULT =
-            </h2>
-
-            <div className="flex flex-col gap-3 w-full bg-zinc-950 border-2 border-green-500 p-5 rounded text-base shadow-[inset_2px_2px_5px_rgba(0,0,0,0.8)] font-pixel">
-              <div className="flex justify-between">
-                <span>TIME ELAPSED:</span>
-                <span className="font-bold text-green-300">{stats.time.toFixed(1)}s</span>
-              </div>
-              <div className="flex justify-between">
-                <span>KEYS TYPED:</span>
-                <span className="font-bold text-green-300">{stats.totalKeys}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>SPEED (WPM):</span>
-                <span className="font-bold text-yellow-300">{stats.wpm}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>ACCURACY:</span>
-                <span className="font-bold text-yellow-300">{stats.accuracy}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>MISS COUNT:</span>
-                <span className="font-bold text-red-400">{stats.missCount}</span>
-              </div>
-              <div className="flex justify-between border-t border-green-800 pt-2 mt-1">
-                <span>AZIK RATIO:</span>
-                <span className="font-bold text-cyan-300">{stats.azikRatio}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>SAVED KEYS:</span>
-                <span className="font-bold text-cyan-300">{stats.savedKeys}</span>
-              </div>
-            </div>
-
-            {/* ボタン群 */}
-            {(() => {
-              const isWeaknessResult = selectedStageId === WEAKNESS_PRACTICE_STAGE_ID;
-              const stageMeta = selectedStageId && !isWeaknessResult ? STAGES.find(s => s.id === selectedStageId) : null;
-              const stageTitle = stageMeta?.name ?? (isWeaknessResult ? "弱点練習" : selectedStageId ?? "");
-              const origin = typeof window !== "undefined" ? window.location.origin : "";
-              const isPracticeOrChallengeStage = stageMeta?.category === "Practice" || stageMeta?.category === "Challenge";
-              const isTrainingShare = !isPracticeOrChallengeStage || settings.isTraining;
-              const tweetUrl = buildTweetUrl(stats, stageTitle, isTrainingShare, origin);
-
-              return (
-                <KeyNavGroup className="flex flex-col gap-3 w-full">
-                  <a href={tweetUrl} target="_blank" rel="noopener noreferrer" className={SHARE_BTN_CLASS}>
-                    <XIcon className="w-5 h-5" />
-                    <span className="text-sm">{isTrainingShare ? "POST TRAINING" : "POST RESULT"}</span>
-                  </a>
-                  {!isWeaknessResult && selectedStageId && getNextStageId(selectedStageId) && (
-                    <GameButton variant="primary" size="md" onClick={() => startStage(getNextStageId(selectedStageId)!)} className="w-full">
-                      NEXT STAGE &gt;
-                    </GameButton>
-                  )}
-                  {selectedStageId && (
-                    <GameButton variant="secondary" size="md" onClick={() => {
-                      if (isWeaknessResult) {
-                        handleStartWeaknessPractice();
-                      } else {
-                        startStage(selectedStageId);
-                      }
-                    }} className="w-full">
-                      RETRY STAGE
-                    </GameButton>
-                  )}
-                  <GameButton variant="ghost" size="sm" onClick={() => setGameState("STAGE_SELECT")} className="w-full">
-                    STAGE SELECT
-                  </GameButton>
-                  <GameButton variant="danger" size="sm" onClick={() => setGameState("TITLE")} className="w-full">
-                    BACK TO TITLE
-                  </GameButton>
-                </KeyNavGroup>
-              );
-            })()}
-
-          </div>
-        </FairyScreenLayout>
+        <ResultScreen
+          stats={stats}
+          selectedStageId={selectedStageId}
+          settings={settings}
+          resultAds={resultAds}
+          onStartStage={startStage}
+          onStartWeaknessPractice={handleStartWeaknessPractice}
+          onGoToStageSelect={() => setGameState("STAGE_SELECT")}
+          onGoToTitle={() => setGameState("TITLE")}
+        />
       )}
     </main>
   );
