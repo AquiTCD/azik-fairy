@@ -124,7 +124,7 @@ export default function Home() {
 
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const { progress, saveProgress, clearProgress, load: loadProgress } = useProgressStorage();
-  const { effectiveDict, isCustomized, importConf, reset: resetUserAzikConfig } = useUserAzikConfig();
+  const { effectiveDict, config: userAzikConfig, importConf, reset: resetUserAzikConfig } = useUserAzikConfig();
   const [isMounted, setIsMounted] = useState(false);
   const [stats, setStats] = useState<GameStats | null>(null);
 
@@ -447,7 +447,7 @@ export default function Home() {
           onResetStageIntros={handleResetStageIntros}
           onImportConf={importConf}
           onResetUserConfig={resetUserAzikConfig}
-          isCustomized={isCustomized}
+          userAzikConfig={userAzikConfig}
         />
       )}
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { GameSettings } from "@/types/game";
 import { SoundThemeName } from "@/hooks/useAzikSound";
-import { parseExternalRomajiTable } from "@/data/azikRules";
+import { parseExternalRomajiTable, AZIK_DICTIONARY } from "@/data/azikRules";
 import GameButton from "@/components/GameButton";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 
@@ -15,7 +15,7 @@ interface SettingsProps {
   onResetStageIntros: () => void;
   onImportConf?: (confText: string) => void;
   onResetUserConfig?: () => void;
-  isCustomized?: boolean;
+  userAzikConfig?: import("@/data/userAzikConfig").UserAzikConfig;
 }
 
 // 本当に人によって違う3キーのみUIで設定可能。
@@ -27,7 +27,8 @@ const getCustomizableKeys = (layout: "US" | "JIS") => [
   { label: "長音 ー", key: "ー", defaultVal: layout === "JIS" ? ":" : "-" },
 ] as const;
 
-export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros, onImportConf, onResetUserConfig, isCustomized }: SettingsProps) {
+export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros, onImportConf, onResetUserConfig, userAzikConfig }: SettingsProps) {
+  const isCustomized = !!userAzikConfig && Object.keys(userAzikConfig.entries).length > 0;
   const [activeSubTab, setActiveSubTab] = useState<"FORM" | "JSON" | "TSV_SKK">("FORM");
   const [introResetDone, setIntroResetDone] = useState(false);
 
@@ -652,12 +653,14 @@ z,あん`}
               <h3 className="text-sm font-bold text-cyan-400 font-pixel">■ MY AZIK CONFIG</h3>
               <div className="flex flex-col gap-2 p-4 bg-zinc-800 border border-zinc-700 rounded">
                 <div>
-                  <span className="font-bold text-sm tracking-wider text-cyan-300 font-pixel">IMPORT kana-rule.conf:</span>
-                  <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">macSKK の kana-rule.conf をペーストすると、無効化・差し替えしたキーが練習に反映されます。</p>
+                  <span className="font-bold text-sm tracking-wider text-cyan-300 font-pixel">IMPORT kana-rule.conf / TSV:</span>
+                  <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">
+                    macSKK の kana-rule.conf（カンマ区切り）または Google 日本語入力のローマ字テーブル（タブ区切り TSV）をペーストすると、azik ショートカットの有効/無効が練習に反映されます。
+                  </p>
                 </div>
                 <textarea
                   className="w-full h-28 bg-zinc-900 border border-zinc-600 text-green-300 text-xs font-mono p-2 rounded resize-y"
-                  placeholder={"# kana-rule.conf の内容をここにペースト\nq,ん\n;,っ\n..."}
+                  placeholder={"# macSKK conf 例\nq,ん\n;,っ\nwz,わん\n\n# Google IME TSV 例\nq\tん\n;\tっ"}
                   onChange={(e) => {
                     if (e.target.value.trim()) onImportConf(e.target.value);
                   }}
@@ -674,6 +677,61 @@ z,あん`}
                   </div>
                 )}
               </div>
+
+              {/* 現在の有効キー差分テーブル */}
+              {userAzikConfig && (() => {
+                const disabled: Array<{ kana: string; base: string[] }> = [];
+                const replaced: Array<{ kana: string; base: string[]; current: string[] }> = [];
+
+                for (const [kana, entry] of Object.entries(userAzikConfig.entries)) {
+                  const base = AZIK_DICTIONARY[kana];
+                  if (!base) continue;
+                  if (entry.mode === "disable") {
+                    disabled.push({ kana, base: base.azik });
+                  } else if (entry.mode === "replace" && entry.replacementKeys) {
+                    replaced.push({ kana, base: base.azik, current: entry.replacementKeys });
+                  }
+                }
+
+                if (disabled.length === 0 && replaced.length === 0) {
+                  return (
+                    <p className="text-[10px] text-zinc-500 font-pixel mt-1">変更なし — デフォルトと同じ設定です</p>
+                  );
+                }
+
+                return (
+                  <div className="flex flex-col gap-2 mt-1">
+                    {disabled.length > 0 && (
+                      <div>
+                        <p className="text-[10px] text-red-400 font-pixel mb-1">DISABLED ({disabled.length}件)</p>
+                        <div className="flex flex-wrap gap-1">
+                          {disabled.map(({ kana, base }) => (
+                            <span key={kana} className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-900 border border-red-800 rounded text-[10px] font-mono">
+                              <span className="text-zinc-300">{kana}</span>
+                              <span className="text-red-400 line-through opacity-60">{base.join("/")}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {replaced.length > 0 && (
+                      <div>
+                        <p className="text-[10px] text-yellow-400 font-pixel mb-1">REPLACED ({replaced.length}件)</p>
+                        <div className="flex flex-wrap gap-1">
+                          {replaced.map(({ kana, base, current }) => (
+                            <span key={kana} className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-900 border border-yellow-800 rounded text-[10px] font-mono">
+                              <span className="text-zinc-300">{kana}</span>
+                              <span className="text-red-400 line-through opacity-60">{base.join("/")}</span>
+                              <span className="text-zinc-500">→</span>
+                              <span className="text-yellow-300">{current.join("/")}</span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           )}
 

@@ -111,7 +111,22 @@ describe("parseConfToUserConfig", () => {
   it("わん: wz が conf に存在すれば keep", () => {
     const conf = "wz,わん\n";
     const result = parseConfToUserConfig(conf);
-    // わん の base azik は ["wz"] → conf と一致 → keep
     expect(result.entries["わん"]?.mode).toBe("keep");
+  });
+
+  it("TSV形式（Google 日本語入力）: タブ区切りを認識する", () => {
+    const tsv = "q\tん\nwz\tわん\n";
+    const result = parseConfToUserConfig(tsv);
+    expect(result.entries["ん"]?.mode).toBe("keep");
+    expect(result.entries["わん"]?.mode).toBe("keep");
+    // TSV にないかなは disable
+    expect(result.entries["かん"]?.mode).toBe("disable");
+  });
+
+  it("TSV: xn のみ定義でも replace になる", () => {
+    const tsv = "xn\tん\n";
+    const result = parseConfToUserConfig(tsv);
+    expect(result.entries["ん"]?.mode).toBe("replace");
+    expect(result.entries["ん"]?.replacementKeys).toContain("xn");
   });
 });

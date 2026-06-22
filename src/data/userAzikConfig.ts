@@ -59,7 +59,8 @@ export function parseConfToUserConfig(
     const line = rawLine.trim();
     if (!line || line.startsWith("#")) continue;
 
-    const parts = line.split(",");
+    // TSV（Google 日本語入力）とCSV（macSKK conf）を自動判別
+    const parts = line.includes("\t") ? line.split("\t") : line.split(",");
     if (parts.length < 2) continue;
 
     const inputKey = parts[0].trim();
