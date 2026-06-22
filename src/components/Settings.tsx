@@ -26,7 +26,7 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
   const [introResetDone, setIntroResetDone] = useState(false);
   const [importInput, setImportInput] = useState("");
 
-  const toggleSetting = (key: keyof Omit<GameSettings, "wordsPerSession" | "keyboardLayout" | "enableSpecial" | "soundTheme">) => {
+  const toggleSetting = (key: keyof Omit<GameSettings, "wordsPerSession" | "keyboardLayout" | "soundTheme">) => {
     onUpdateSettings({
       ...settings,
       [key]: !settings[key],
@@ -247,36 +247,6 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
               </div>
               <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
                 基礎〜特殊の練習ステージのみ適用。ランダムサンプリングで件数を制限します。実戦は50件固定、お題は全件通し。
-              </p>
-            </div>
-          </div>
-
-          {/* AZIKフィーチャー設定セクション */}
-          <div className="flex flex-col gap-4 mt-2">
-            <h3 className="text-sm font-bold text-green-300 border-b border-green-950 pb-1">■ KEY CONFIG</h3>
-
-            {/* AZIKフィーチャー */}
-            <div className="flex flex-col gap-3 p-3 bg-zinc-800 border border-zinc-700 rounded">
-              <span className="text-sm font-extrabold font-sans text-zinc-300 tracking-wider">AZIK FEATURES:</span>
-
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <span className="text-sm font-extrabold font-sans text-green-300">特殊拡張</span>
-                  <span className="text-xs text-zinc-300 ml-2 font-sans">こと[kt] もの[mn] する[sr] など Lev4 ステージ</span>
-                </div>
-                <button
-                  onClick={() => onUpdateSettings({ ...settings, enableSpecial: !settings.enableSpecial })}
-                  className={`px-3 py-0.5 text-xs font-pixel font-bold border-2 flex-shrink-0 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.enableSpecial
-                    ? "bg-green-500 text-black border-green-500"
-                    : "bg-zinc-700 text-green-400 border-green-500"
-                    }`}
-                >
-                  {settings.enableSpecial ? "ON" : "OFF"}
-                </button>
-              </div>
-
-              <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                OFFにすると Lev4（語短縮）の練習ステージが非表示になります。キーショートカットの有効/無効は下の MY AZIK CONFIG で個別に設定してください。
               </p>
             </div>
           </div>

@@ -21,8 +21,7 @@ interface StageSelectorProps {
   effectiveDict?: Record<string, AzikMapping>;
 }
 
-function isCategoryEnabled(categoryId: string, settings: GameSettings): boolean {
-  if (categoryId === "Lev4") return settings.enableSpecial;
+function isCategoryEnabled(_categoryId: string, _settings: GameSettings): boolean {
   return true;
 }
 

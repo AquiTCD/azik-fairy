@@ -25,7 +25,6 @@ export interface GameSettings {
   soundEnabled: boolean;
   soundTheme: SoundThemeName;
   wordsPerSession: number;
-  enableSpecial: boolean;
   ghostRaceEnabled: boolean;
 }
 

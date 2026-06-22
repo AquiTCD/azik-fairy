@@ -11,10 +11,11 @@ export function migrateSettings(raw: Record<string, unknown>, defaults: GameSett
   // （古い localStorage データを読み込んでもクラッシュしないよう、変換せず削除）
   delete patched.customRules;
 
-  // 旧フィールド nAlternative / smallKanaPrefix / enableForeign も削除
+  // 旧フィールドを削除
   delete patched.nAlternative;
   delete patched.smallKanaPrefix;
   delete patched.enableForeign;
+  delete patched.enableSpecial;
 
   // soundTheme: 旧 "off" → soundEnabled: false + theme: "soft"
   if (patched.soundTheme === "off") {
