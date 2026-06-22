@@ -23,6 +23,7 @@ import { GameStats, GameSettings, UserProgress, GameState, TimeAttackBest } from
 import { WEAKNESS_STAGE_ID, SETTINGS_STORAGE_KEY } from "@/constants/game";
 import { useProgressStorage } from "@/hooks/useProgressStorage";
 import { migrateSettings } from "@/utils/settingsMigration";
+import { useUserAzikConfig } from "@/hooks/useUserAzikConfig";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -123,6 +124,7 @@ export default function Home() {
 
   const [settings, setSettings] = useState<GameSettings>(DEFAULT_SETTINGS);
   const { progress, saveProgress, clearProgress, load: loadProgress } = useProgressStorage();
+  const { effectiveDict, isCustomized, importConf, reset: resetUserAzikConfig } = useUserAzikConfig();
   const [isMounted, setIsMounted] = useState(false);
   const [stats, setStats] = useState<GameStats | null>(null);
 
@@ -431,6 +433,7 @@ export default function Home() {
               ? (weaknessWords ?? undefined)
               : undefined
           }
+          effectiveDict={effectiveDict}
         />
       )}
 
@@ -442,6 +445,9 @@ export default function Home() {
           onBackToTitle={() => setGameState("TITLE")}
           onClearProgress={handleClearProgress}
           onResetStageIntros={handleResetStageIntros}
+          onImportConf={importConf}
+          onResetUserConfig={resetUserAzikConfig}
+          isCustomized={isCustomized}
         />
       )}
 
@@ -465,6 +471,7 @@ export default function Home() {
           onFinish={handleTimeAttackFinish}
           onBack={() => setGameState("TITLE")}
           prevBest={progress.timeAttackBest}
+          effectiveDict={effectiveDict}
         />
       )}
 

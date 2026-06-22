@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, AzikSegment, createTypingWord, buildValidKeys, AZIK_DICTIONARY } from "@/data/azikRules";
+import { TypingWord, AzikSegment, createTypingWord, buildValidKeys, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
 import { loadStage } from "@/data/stages";
 import { GameSettings, TimeAttackBest } from "@/types/game";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
@@ -21,9 +21,10 @@ interface TimeAttackGameProps {
   onFinish: (result: { wpm: number; accuracy: number }) => void;
   onBack: () => void;
   prevBest: TimeAttackBest | null;
+  effectiveDict?: Record<string, AzikMapping>;
 }
 
-export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }: TimeAttackGameProps) {
+export default function TimeAttackGame({ settings, onFinish, onBack, prevBest, effectiveDict }: TimeAttackGameProps) {
   const [words, setWords] = useState<TypingWord[]>([]);
   const [completedWordCount, setCompletedWordCount] = useState(0);
   const [remaining, setRemaining] = useState(TIME_LIMIT);
@@ -55,7 +56,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest }:
   }, [onFinish]);
 
   const getAllowedPatterns = useCallback((seg: AzikSegment) =>
-    buildValidKeys(seg.kana, AZIK_DICTIONARY, (_sub, keys) => keys), []);
+    buildValidKeys(seg.kana, effectiveDict ?? AZIK_DICTIONARY, (_sub, keys) => keys), [effectiveDict]);
 
   const onFirstKey = useCallback(() => {
     setIsStarting(true);

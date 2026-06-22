@@ -13,6 +13,9 @@ interface SettingsProps {
   onBackToTitle: () => void;
   onClearProgress: () => void;
   onResetStageIntros: () => void;
+  onImportConf?: (confText: string) => void;
+  onResetUserConfig?: () => void;
+  isCustomized?: boolean;
 }
 
 // 本当に人によって違う3キーのみUIで設定可能。
@@ -24,7 +27,7 @@ const getCustomizableKeys = (layout: "US" | "JIS") => [
   { label: "長音 ー", key: "ー", defaultVal: layout === "JIS" ? ":" : "-" },
 ] as const;
 
-export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros }: SettingsProps) {
+export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros, onImportConf, onResetUserConfig, isCustomized }: SettingsProps) {
   const [activeSubTab, setActiveSubTab] = useState<"FORM" | "JSON" | "TSV_SKK">("FORM");
   const [introResetDone, setIntroResetDone] = useState(false);
 
@@ -642,6 +645,37 @@ z,あん`}
             </div>
 
           </div>
+
+          {/* ユーザー AZIK conf インポート */}
+          {onImportConf && (
+            <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
+              <h3 className="text-sm font-bold text-cyan-400 font-pixel">■ MY AZIK CONFIG</h3>
+              <div className="flex flex-col gap-2 p-4 bg-zinc-800 border border-zinc-700 rounded">
+                <div>
+                  <span className="font-bold text-sm tracking-wider text-cyan-300 font-pixel">IMPORT kana-rule.conf:</span>
+                  <p className="text-[10px] opacity-75 font-sans mt-1 leading-relaxed">macSKK の kana-rule.conf をペーストすると、無効化・差し替えしたキーが練習に反映されます。</p>
+                </div>
+                <textarea
+                  className="w-full h-28 bg-zinc-900 border border-zinc-600 text-green-300 text-xs font-mono p-2 rounded resize-y"
+                  placeholder={"# kana-rule.conf の内容をここにペースト\nq,ん\n;,っ\n..."}
+                  onChange={(e) => {
+                    if (e.target.value.trim()) onImportConf(e.target.value);
+                  }}
+                />
+                {isCustomized && onResetUserConfig && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-cyan-400 font-pixel">✓ カスタム設定適用中</span>
+                    <button
+                      onClick={onResetUserConfig}
+                      className="px-3 py-1 bg-zinc-900 border border-zinc-600 text-zinc-400 hover:bg-zinc-700 hover:text-white transition-colors rounded text-xs cursor-pointer font-bold font-pixel whitespace-nowrap"
+                    >
+                      RESET TO DEFAULT
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* レッスン説明リセット */}
           <div className="flex flex-col gap-3 mt-2 border-t border-zinc-700 pt-4">
