@@ -17,15 +17,19 @@ export function migrateSettings(raw: Record<string, unknown>, defaults: GameSett
   delete patched.enableForeign;
   delete patched.enableSpecial;
 
-  // soundTheme: 旧 "off" → soundEnabled: false + theme: "soft"
   if (patched.soundTheme === "off") {
-    patched.soundEnabled = false;
     patched.soundTheme = "soft";
   }
-  // soundTheme: 旧 "default" → soundEnabled: true + theme: "soft"
   if (patched.soundTheme === "default") {
-    patched.soundEnabled = true;
     patched.soundTheme = "soft";
+  }
+
+  // soundEnabled was removed: migrate to soundVolume
+  if ("soundEnabled" in patched) {
+    if (patched.soundEnabled === true && !patched.soundVolume) {
+      patched.soundVolume = 70;
+    }
+    delete patched.soundEnabled;
   }
 
   return { ...defaults, ...patched };

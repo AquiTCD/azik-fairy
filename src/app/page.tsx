@@ -106,8 +106,8 @@ const DEFAULT_SETTINGS: GameSettings = {
   showGuide: true,
   showTable: true,
   keyboardLayout: "JIS",
-  soundEnabled: false,
   soundTheme: "soft",
+  soundVolume: 0,
   wordsPerSession: 30,
   ghostRaceEnabled: true,
 };
@@ -382,8 +382,9 @@ export default function Home() {
             stage={stageMeta}
             onStart={handleStartFromIntro}
             onBackToStageSelect={() => setGameState("STAGE_SELECT")}
-            soundEnabled={settings.soundEnabled}
-            onToggleSound={() => handleUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+            soundVolume={settings.soundVolume}
+            soundTheme={settings.soundTheme}
+            onVolumeChange={v => handleUpdateSettings({ ...settings, soundVolume: v })}
             layout={settings.keyboardLayout}
             effectiveDict={effectiveDict}
           />

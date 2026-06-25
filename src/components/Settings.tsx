@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { GameSettings } from "@/types/game";
-import { SoundThemeName } from "@/hooks/useAzikSound";
+import { SoundThemeName, playPreview } from "@/hooks/useAzikSound";
 import { AZIK_DICTIONARY } from "@/data/azikRules";
 import { UserDictConfig } from "@/data/userDictConfig";
 import GameButton from "@/components/GameButton";
@@ -26,7 +26,12 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
   const [introResetDone, setIntroResetDone] = useState(false);
   const [importInput, setImportInput] = useState("");
 
-  const toggleSetting = (key: keyof Omit<GameSettings, "wordsPerSession" | "keyboardLayout" | "soundTheme">) => {
+  const handleVolumeChange = useCallback((vol: number) => {
+    onUpdateSettings({ ...settings, soundVolume: vol });
+    playPreview(settings.soundTheme, vol);
+  }, [settings, onUpdateSettings]);
+
+  const toggleSetting = (key: keyof Omit<GameSettings, "wordsPerSession" | "keyboardLayout" | "soundTheme" | "soundVolume">) => {
     onUpdateSettings({
       ...settings,
       [key]: !settings[key],
@@ -177,22 +182,12 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
               <div className="flex justify-between items-start gap-4">
                 <span className="font-bold text-sm md:text-base tracking-wider">SOUND THEME:</span>
                 <div className="flex gap-2 flex-wrap justify-end">
-                  <button
-                    onClick={() => onUpdateSettings({ ...settings, soundEnabled: false })}
-                    className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                      !settings.soundEnabled
-                        ? "bg-green-500 text-black border-green-500"
-                        : "bg-zinc-700 text-green-400 border-green-500"
-                    }`}
-                  >
-                    OFF
-                  </button>
                   {(["soft", "8bit", "typewriter"] as SoundThemeName[]).map(t => (
                     <button
                       key={t}
-                      onClick={() => onUpdateSettings({ ...settings, soundEnabled: true, soundTheme: t })}
+                      onClick={() => onUpdateSettings({ ...settings, soundTheme: t })}
                       className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${
-                        settings.soundEnabled && settings.soundTheme === t
+                        settings.soundTheme === t
                           ? "bg-green-500 text-black border-green-500"
                           : "bg-zinc-700 text-green-400 border-green-500"
                       }`}
@@ -202,8 +197,23 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
                   ))}
                 </div>
               </div>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-xs font-pixel text-green-400 shrink-0">VOL:</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={settings.soundVolume}
+                  onChange={e => handleVolumeChange(Number(e.target.value))}
+                  className="flex-1 accent-green-400 cursor-pointer"
+                />
+                <span className="text-xs font-pixel text-green-300 w-8 text-right">
+                  {settings.soundVolume === 0 ? "OFF" : settings.soundVolume}
+                </span>
+              </div>
               <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-                効果音のテーマを選択します。OFF / SOFT / 8BIT / TYPE の4種類。ゲーム画面からもON/OFFのみ切り替え可能です。
+                効果音のテーマを選択し、音量を調節します。VOL 0 でミュートになります。スライダーを動かすと試聴できます。
               </p>
             </div>
 

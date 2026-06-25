@@ -22,8 +22,8 @@ export interface GameSettings {
   showGuide: boolean;
   showTable: boolean;
   keyboardLayout: "US" | "JIS";
-  soundEnabled: boolean;
   soundTheme: SoundThemeName;
+  soundVolume: number;
   wordsPerSession: number;
   ghostRaceEnabled: boolean;
 }
