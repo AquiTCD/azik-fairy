@@ -13,6 +13,14 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.10.0",
+    date: "2026-06-25",
+    items: [
+      "音量設定の追加",
+      "FAQ の整備",
+    ],
+  },
+  {
     version: "v1.9.0",
     date: "2026-06-23",
     items: [
