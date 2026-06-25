@@ -13,6 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.10.1",
+    date: "2026-06-26",
+    items: [
+      "長音にまつわる表示の問題を修正",
+    ],
+  },
+  {
     version: "v1.10.0",
     date: "2026-06-25",
     items: [

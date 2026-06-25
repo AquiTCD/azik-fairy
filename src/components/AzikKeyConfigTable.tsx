@@ -141,7 +141,9 @@ export default function AzikKeyConfigTable({ config, baseDict, onSetKanaKeys }: 
                   const baseMapping = baseDict[kana];
                   const userEntry = config[kana];
                   const effectiveAzik = userEntry ? userEntry.azik : baseMapping.azik;
-                  const isAllDisabled = effectiveAzik.length === 0 && baseMapping.azik.length > 0;
+                  const normalSet = new Set(baseMapping.normal);
+                  const pureAzikKeys = baseMapping.azik.filter(k => !normalSet.has(k));
+                  const isAllDisabled = pureAzikKeys.length > 0 && pureAzikKeys.every(k => !effectiveAzik.includes(k));
                   const isModified = userEntry !== undefined;
 
                   return (
@@ -160,7 +162,7 @@ export default function AzikKeyConfigTable({ config, baseDict, onSetKanaKeys }: 
 
                       {/* AZIKキー chips */}
                       <div className="flex gap-1 flex-wrap flex-1 items-center">
-                        {baseMapping.azik.map(k => {
+                        {baseMapping.azik.filter(k => !normalSet.has(k)).map(k => {
                           const inEffective = effectiveAzik.includes(k);
                           if (inEffective) {
                             return (

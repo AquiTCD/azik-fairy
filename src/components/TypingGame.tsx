@@ -436,17 +436,18 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const isPlayingPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
   const isEffectivelyTraining = !isPlayingPracticeOrChallenge || settings.isTraining;
 
+  // ステージフィルター済みの表示用パターン（currentSeg.azikは未フィルター生データのため使わない）
+  const displayPatterns = currentSeg ? getAllowedPatterns(currentSeg) : [];
+
   const azikHint = currentSeg
-    ? `${currentSeg.kana} ➔ ${currentSeg.azik.map(k => `[${k}]`).join(" or ")}` +
+    ? `${currentSeg.kana} ➔ ${displayPatterns.map(k => `[${k}]`).join(" or ")}` +
       (!isEffectivelyTraining ? ` (通常: ${currentSeg.normal.map(k => `[${k}]`).join("/")})` : "")
     : "";
 
-  const azikNextKeys = currentSeg
-    ? currentSeg.azik.flatMap(pattern => {
-        const remaining = pattern.slice(inputBuffer.length);
-        return remaining.length > 0 ? [remaining[0]] : [];
-      })
-    : [];
+  const azikNextKeys = displayPatterns.flatMap(pattern => {
+    const remaining = pattern.slice(inputBuffer.length);
+    return remaining.length > 0 ? [remaining[0]] : [];
+  });
 
   const normalNextKeys = currentSeg
     ? [...new Set(currentSeg.normal.flatMap(pattern => {
@@ -553,7 +554,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           {settings.showGuide && currentSeg && (
             <div className="mt-5 flex flex-col items-center text-sm opacity-80 w-full">
               <span className="text-green-300 font-bold text-xs font-pixel">NEXT KEY:</span>
-              <KeyPatternButtons patterns={currentSeg.azik} inputBuffer={inputBuffer} />
+              <KeyPatternButtons patterns={displayPatterns} inputBuffer={inputBuffer} />
               <KeyboardDiagram
                 activeKeys={azikNextKeys}
                 normalKeys={normalNextKeys}

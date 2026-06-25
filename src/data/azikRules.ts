@@ -668,8 +668,8 @@ export function splitIntoAzikSegments(
         if (dictionary[subStr]) {
           result.push({
             kana: subStr,
-            normal: dictionary[subStr].normal,
-            azik: dictionary[subStr].azik,
+            normal: [...dictionary[subStr].normal],
+            azik: [...dictionary[subStr].azik],
           });
           i += len;
           found = true;
