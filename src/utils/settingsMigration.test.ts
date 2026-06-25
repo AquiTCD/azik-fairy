@@ -8,8 +8,8 @@ const DEFAULTS: GameSettings = {
   showGuide: true,
   showTable: true,
   keyboardLayout: "JIS",
-  soundEnabled: false,
   soundTheme: "soft",
+  soundVolume: 0,
   wordsPerSession: 30,
   ghostRaceEnabled: true,
 };
@@ -48,25 +48,53 @@ describe("migrateSettings", () => {
   });
 
   describe("soundTheme のマイグレーション", () => {
-    it('soundTheme "off" → soundEnabled: false, soundTheme: "soft"', () => {
+    it('soundTheme "off" → soundTheme: "soft"（soundVolume はデフォルト値）', () => {
       const raw = { soundTheme: "off" };
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.soundEnabled).toBe(false);
       expect(result.soundTheme).toBe("soft");
+      expect((result as any).soundEnabled).toBeUndefined();
     });
 
-    it('soundTheme "default" → soundEnabled: true, soundTheme: "soft"', () => {
+    it('soundTheme "default" → soundTheme: "soft"（soundVolume はデフォルト値）', () => {
       const raw = { soundTheme: "default" };
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.soundEnabled).toBe(true);
       expect(result.soundTheme).toBe("soft");
+      expect((result as any).soundEnabled).toBeUndefined();
     });
 
     it('soundTheme "8bit" はそのまま維持', () => {
-      const raw = { soundTheme: "8bit", soundEnabled: true };
+      const raw = { soundTheme: "8bit" };
       const result = migrateSettings(raw, DEFAULTS);
       expect(result.soundTheme).toBe("8bit");
-      expect(result.soundEnabled).toBe(true);
+    });
+  });
+
+  describe("旧 soundEnabled のマイグレーション", () => {
+    it("soundEnabled: true かつ soundVolume なし → soundVolume: 70 に昇格", () => {
+      const raw = { soundEnabled: true };
+      const result = migrateSettings(raw, DEFAULTS);
+      expect(result.soundVolume).toBe(70);
+      expect((result as any).soundEnabled).toBeUndefined();
+    });
+
+    it("soundEnabled: false かつ soundVolume なし → soundVolume はデフォルト (0) のまま", () => {
+      const raw = { soundEnabled: false };
+      const result = migrateSettings(raw, DEFAULTS);
+      expect(result.soundVolume).toBe(0);
+      expect((result as any).soundEnabled).toBeUndefined();
+    });
+
+    it("soundEnabled: true かつ soundVolume 指定あり → soundVolume は既存値を優先", () => {
+      const raw = { soundEnabled: true, soundVolume: 50 };
+      const result = migrateSettings(raw, DEFAULTS);
+      expect(result.soundVolume).toBe(50);
+      expect((result as any).soundEnabled).toBeUndefined();
+    });
+
+    it("soundEnabled なし → soundEnabled フィールドは存在しない", () => {
+      const raw = { soundTheme: "8bit" };
+      const result = migrateSettings(raw, DEFAULTS);
+      expect((result as any).soundEnabled).toBeUndefined();
     });
   });
 
@@ -75,8 +103,8 @@ describe("migrateSettings", () => {
       const raw = { isTraining: false };
       const result = migrateSettings(raw, DEFAULTS);
       expect(result.isTraining).toBe(false);
-      expect(result.showGuide).toBe(true); // デフォルト維持
-      expect(result.wordsPerSession).toBe(30); // デフォルト維持
+      expect(result.showGuide).toBe(true);
+      expect(result.wordsPerSession).toBe(30);
     });
 
     it("空オブジェクトはすべてデフォルト値になる", () => {

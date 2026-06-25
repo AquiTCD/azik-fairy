@@ -15,7 +15,7 @@ import KanaSegmentDisplay from "./KanaSegmentDisplay";
 import KeyPatternButtons from "./KeyPatternButtons";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
-import { SpeakerHigh, SpeakerSlash } from "@phosphor-icons/react";
+import VolumeControl from "@/components/VolumeControl";
 import { resultComments, COMMENT_IDS_BY_RANK, CommentId } from "@/data/resultComments";
 import { WEAKNESS_STAGE_ID } from "@/constants/game";
 
@@ -133,7 +133,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const startedAtRef = useRef<number | null>(null);
   const optimalKeysRef = useRef({ totalNormal: 0, totalAzik: 0 });
 
-  const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
+  const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundTheme, settings.soundVolume);
 
   const getAllowedPatterns = useCallback((currentSeg: AzikSegment): string[] => {
     const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
@@ -601,21 +601,16 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           </div>
         )}
 
-        {/* 戻るボタン + 音声ON/OFFトグル */}
+        {/* 戻るボタン + 音量コントロール */}
         <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             STAGE SELECT
           </GameButton>
-          <button
-            onClick={() => onUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
-            title={settings.soundEnabled ? "音声 ON（クリックでOFF）" : "音声 OFF（クリックでON）"}
-            className="p-2 border border-zinc-700 rounded text-zinc-400 hover:text-green-400 hover:border-green-700 transition-colors duration-150"
-          >
-            {settings.soundEnabled
-              ? <SpeakerHigh size={18} weight="bold" />
-              : <SpeakerSlash size={18} weight="bold" />
-            }
-          </button>
+          <VolumeControl
+            volume={settings.soundVolume}
+            theme={settings.soundTheme}
+            onVolumeChange={v => onUpdateSettings({ ...settings, soundVolume: v })}
+          />
         </div>
       </div>
 

@@ -36,7 +36,7 @@ export default function TimeAttackGame({ settings, onFinish, onBack, prevBest, e
   const missCountRef = useRef(0);
   const completedCharsRef = useRef(0);
 
-  const { playCorrect, playMiss, playWordComplete } = useAzikSound(settings.soundEnabled ? settings.soundTheme : "off");
+  const { playCorrect, playMiss, playWordComplete } = useAzikSound(settings.soundTheme, settings.soundVolume);
 
   const loadWords = useCallback(async (): Promise<TypingWord[]> => {
     const stage = await loadStage("practice-words-1");

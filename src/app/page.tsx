@@ -106,8 +106,8 @@ const DEFAULT_SETTINGS: GameSettings = {
   showGuide: true,
   showTable: true,
   keyboardLayout: "JIS",
-  soundEnabled: false,
   soundTheme: "soft",
+  soundVolume: 0,
   wordsPerSession: 30,
   ghostRaceEnabled: true,
 };
@@ -345,7 +345,7 @@ export default function Home() {
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.9.0 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.10.0 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
             </div>
           </div>
         </FairyScreenLayout>
@@ -382,8 +382,9 @@ export default function Home() {
             stage={stageMeta}
             onStart={handleStartFromIntro}
             onBackToStageSelect={() => setGameState("STAGE_SELECT")}
-            soundEnabled={settings.soundEnabled}
-            onToggleSound={() => handleUpdateSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+            soundVolume={settings.soundVolume}
+            soundTheme={settings.soundTheme}
+            onVolumeChange={v => handleUpdateSettings({ ...settings, soundVolume: v })}
             layout={settings.keyboardLayout}
             effectiveDict={effectiveDict}
           />
