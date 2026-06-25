@@ -287,18 +287,47 @@ export default function HelpFAQ({ onBackToTitle }: HelpFAQProps) {
           {activeTab === "FAQ" && (
             <div className="flex flex-col gap-4 text-xs">
               <div>
-                <h4 className="font-bold text-green-400">Q. キーを押しても全く進まない文字がある！</h4>
+                <h4 className="font-bold text-green-400">Q. TRAININGモードとCHALLENGEモードの違いは？</h4>
                 <p className="pl-3 opacity-90 mt-1">
-                  A. それは<strong>AZIK強制モード</strong>が作動しているサインです！<br />
-                  画面の下部にある「💡 AZIK FAIRY HINT」を確認し、二重母音や撥音などの短縮キー（例：「ん」なら <kbd className="bg-zinc-800 px-1 border border-zinc-700">q</kbd>）を押してください。
+                  A. <strong>TRAINING</strong> は通常のローマ字入力も受け付ける自由練習モードです。AZIKに慣れていない段階や、まずは問題文を読む目的に向いています。<br />
+                  <strong>CHALLENGE</strong> はAZIKショートカットを使える箇所では通常のローマ字入力を強制シャットアウトするモードです。AZIKの入力パターンを指に覚え込ませるためのスパルタ仕様で、上達への近道です。
                 </p>
               </div>
 
               <div className="border-t border-zinc-900 pt-3">
-                <h4 className="font-bold text-green-400">Q. 設定したカスタムルールが消えてしまう</h4>
+                <h4 className="font-bold text-green-400">Q. キーを押しても全く進まない文字がある！</h4>
                 <p className="pl-3 opacity-90 mt-1">
-                  A. 設定はブラウザの <strong>LocalStorage</strong> に自動で保存されます。<br />
-                  シークレットモードや、ブラウザのクッキー/ストレージ消去を行うとリセットされることがあります。
+                  A. それはCHALLENGEモードの<strong>AZIK強制モード</strong>が作動しているサインです！<br />
+                  画面の下部にある「💡 AZIK FAIRY HINT」を確認し、二重母音や撥音などの短縮キー（例：「ん」なら <kbd className="bg-zinc-800 px-1 border border-zinc-700">q</kbd>）を押してください。TRAININGモードに切り替えると通常ローマ字でも入力できます。
+                </p>
+              </div>
+
+              <div className="border-t border-zinc-900 pt-3">
+                <h4 className="font-bold text-green-400">Q. タイムアタックって何？</h4>
+                <p className="pl-3 opacity-90 mt-1">
+                  A. <strong>タイムアタック</strong>は60秒間に何文字打てるかを競うモードです。ステージ式の学習とは別に、総合的な語彙から出題されます。純粋なAZIK入力スピードの自己記録更新を目指すのに最適です。WPMの記録はタイトル画面から確認できます。
+                </p>
+              </div>
+
+              <div className="border-t border-zinc-900 pt-3">
+                <h4 className="font-bold text-green-400">Q. ゴーストレースって何？</h4>
+                <p className="pl-3 opacity-90 mt-1">
+                  A. <strong>ゴーストレース</strong>は、そのステージの自己ベストWPMで入力する「幽霊」とリアルタイムに並走できる機能です。進捗バー上に幽霊（👻）の位置が表示され、過去の自分に負けないよう緊張感を持って練習できます。OPTIONS画面でON/OFFを切り替えられます。
+                </p>
+              </div>
+
+              <div className="border-t border-zinc-900 pt-3">
+                <h4 className="font-bold text-green-400">Q. 弱点練習ってどういう仕組み？</h4>
+                <p className="pl-3 opacity-90 mt-1">
+                  A. <strong>弱点練習</strong>は、練習中にミスが多かった仮名パターン（例：「えい」「しゅ」など）を自動的に記録・分析し、その苦手な組み合わせだけを集中練習できるカスタムステージを自動生成する機能です。ステージ選択画面の「WEAKNESS」ボタン、またはリザルト画面の「弱点練習」ボタンから起動できます。
+                </p>
+              </div>
+
+              <div className="border-t border-zinc-900 pt-3">
+                <h4 className="font-bold text-green-400">Q. 設定したカスタムルールや進捗が消えてしまう</h4>
+                <p className="pl-3 opacity-90 mt-1">
+                  A. 設定・進捗・統計データはすべてブラウザの <strong>LocalStorage</strong> に自動で保存されます。<br />
+                  シークレットモードや、ブラウザのクッキー/ストレージ消去を行うとリセットされることがあります。別デバイスへの引き継ぎには現時点では対応していません。
                 </p>
               </div>
 
