@@ -175,7 +175,7 @@ export default function Home() {
   const startStage = (stageId: string) => {
     setSelectedStageId(stageId);
     const stage = STAGES.find(s => s.id === stageId);
-    const isLevStage = stage && !["Practice", "Challenge"].includes(stage.category);
+    const isLevStage = stage && !["Practice", "Challenge", "SKK"].includes(stage.category);
     const hasSeen = progress.seenStageIntros.includes(stageId);
     if (isLevStage && !hasSeen) {
       setGameState("STAGE_INTRO");

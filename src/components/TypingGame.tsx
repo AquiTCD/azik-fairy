@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, buildValidKeys, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
-import { loadStage } from "@/data/stages";
+import { loadStage, STAGES } from "@/data/stages";
+import SkkTypingGame from "./SkkTypingGame";
 import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel, isWordBlockedForStage } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
 import { GameSettings } from "@/types/game";
@@ -109,16 +110,18 @@ interface TypingGameProps {
 }
 
 export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect, onUpdateSettings, ghostBestWpm, weaknessOverrideWords, effectiveDict }: TypingGameProps) {
+  const isSkkStage = STAGES.find(s => s.id === stageId)?.category === "SKK";
   const [stage, setStage] = useState<StageData | null>(null);
 
   useEffect(() => {
+    if (isSkkStage) return;
     if (stageId === WEAKNESS_STAGE_ID) {
       setStage({ id: WEAKNESS_STAGE_ID, name: "弱点練習", category: "Practice", description: "弱点集中練習", words: [] } as unknown as StageData);
       return;
     }
     setStage(null);
     loadStage(stageId).then(setStage);
-  }, [stageId]);
+  }, [stageId, isSkkStage]);
 
   const [words, setWords] = useState<TypingWord[]>([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -468,6 +471,18 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const myKeyProgress = optimalKeys.totalAzik > 0
     ? Math.min(1, totalCorrectKeys / optimalKeys.totalAzik)
     : wordIndex / Math.max(words.length, 1);
+
+  if (isSkkStage) {
+    return (
+      <SkkTypingGame
+        stageId={stageId}
+        settings={settings}
+        onFinish={onFinish}
+        onBackToStageSelect={onBackToStageSelect}
+        onUpdateSettings={onUpdateSettings}
+      />
+    );
+  }
 
   return (
     <FairyScreenLayout

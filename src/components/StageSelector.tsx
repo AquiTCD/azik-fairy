@@ -33,6 +33,7 @@ const TRAINING_CATEGORIES = [
   { id: "Lev3a", label: "互換I",   sub: "長音/G/F" },
   { id: "Lev3b", label: "互換II",  sub: "ZC/ZF/SF..." },
   { id: "Lev4",  label: "語短縮",  sub: "こと/もの..." },
+  { id: "SKK",   label: "SKK",     sub: "送りがな変換" },
 ] as const;
 
 export default function StageSelector({
@@ -132,6 +133,7 @@ export default function StageSelector({
 
   const getFairyMessage = () => {
     if (isChallenge) return "実戦・お題ステージを選んでね！CHALLENGEモードでスコアが記録されるよ💎";
+    if (activeCategory === "SKK") return "SKK + AZIK送りがな練習！Shiftキーでリズムを掴もう⭐";
     const cat = categories.find(c => c.id === activeCategory);
     return `${cat?.label ?? ""}の練習ステージを選んでね！クリアするごとに星が増えてくよ⭐💎`;
   };
