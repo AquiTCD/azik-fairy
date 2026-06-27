@@ -1,4 +1,5 @@
 import { StageData } from "../azikRules";
+import { type SkkStageData } from "../skkRules";
 import { filterStageWords } from "./wordValidator";
 import chunksManifest from "./chunks/manifest.json";
 
@@ -44,6 +45,7 @@ export const STAGE_MANIFEST: StageMeta[] = [
   { id: "preset-chumon-no-oi-ryoriten",  category: "Challenge", wordCount:  18, name: "注文の多い料理店", description: "宮沢賢治の短編童話。山の中の不思議なレストランを訪れた紳士たちの物語。" },
   { id: "preset-wagahai-wa-neko-de-aru", category: "Challenge", wordCount:  15, name: "吾輩は猫である",   description: "夏目漱石の長編小説の冒頭。名前のない猫の視点から描かれる人間観察。" },
   { id: "preset-gongitsune",             category: "Challenge", wordCount:  18, name: "ごん狐",           description: "新美南吉の童話。いたずらっ子の子狐ごんと兵十の切ない物語。" },
+  { id: "skk-okuri-1", category: "SKK", wordCount: 20, name: "SKK送りがな入門", description: "macSKK + AZIKで送りがな変換を練習。Shift位置を覚えてSKK入力をマスターしよう。" },
 ];
 
 export const STAGES: StageMeta[] = STAGE_MANIFEST;
@@ -66,4 +68,11 @@ export async function loadStage(id: string): Promise<StageData> {
   }
 
   return filterStageWords(stage);
+}
+
+export async function loadSkkStage(id: string): Promise<SkkStageData> {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore vite:dynamic-import-vars is stricter than webpack; Next.js build works fine
+  const mod = await import(/* @vite-ignore */ `./${id}.json`);
+  return mod.default as SkkStageData;
 }

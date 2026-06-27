@@ -1,0 +1,271 @@
+{
+  "id": "skk-okuri-1",
+  "category": "SKK",
+  "name": "SKK送りがな入門",
+  "description": "macSKK + AZIKで送りがな変換を練習。Shift位置を覚えてSKK入力をマスターしよう。",
+  "concept": "標準SKK送りがな（Shift+子音）とAZIK <okuri> 短縮（Shift+AZIKキー末尾）の両方を練習。r系（〜る）・p系（〜おう→う）・q系（〜い）を中心に収録。",
+  "words": [
+    {
+      "display": "書く",
+      "reading": "か",
+      "okurigana": "く",
+      "inputType": "standard",
+      "keys": [
+        {"key": "k", "shift": true},
+        {"key": "a"},
+        {"key": "k", "shift": true},
+        {"key": "u"}
+      ],
+      "standardKeyCount": 4,
+      "hint": "K a K u"
+    },
+    {
+      "display": "走る",
+      "reading": "はし",
+      "okurigana": "る",
+      "inputType": "standard",
+      "keys": [
+        {"key": "h", "shift": true},
+        {"key": "a"},
+        {"key": "s"},
+        {"key": "i"},
+        {"key": "r", "shift": true},
+        {"key": "u"}
+      ],
+      "standardKeyCount": 6,
+      "hint": "H a s i R u"
+    },
+    {
+      "display": "動く",
+      "reading": "うご",
+      "okurigana": "く",
+      "inputType": "standard",
+      "keys": [
+        {"key": "u", "shift": true},
+        {"key": "g"},
+        {"key": "o"},
+        {"key": "k", "shift": true},
+        {"key": "u"}
+      ],
+      "standardKeyCount": 5,
+      "hint": "U g o K u"
+    },
+    {
+      "display": "成る",
+      "reading": "な",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "n", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "N R (nr=な+る)"
+    },
+    {
+      "display": "為る",
+      "reading": "す",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "s", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "S R (sr=す+る)"
+    },
+    {
+      "display": "足る",
+      "reading": "た",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "t", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "T R (tr=た+る)"
+    },
+    {
+      "display": "刈る",
+      "reading": "か",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "k", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "K R (kr=か+る)"
+    },
+    {
+      "display": "降る",
+      "reading": "ふ",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "h", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "H R (hr=ふ+る)"
+    },
+    {
+      "display": "寄る",
+      "reading": "よ",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "y", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "Y R (yr=よ+る)"
+    },
+    {
+      "display": "問う",
+      "reading": "と",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "t", "shift": true},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "T P (tp=と+う)"
+    },
+    {
+      "display": "添う",
+      "reading": "そ",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "s", "shift": true},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "S P (sp=そ+う)"
+    },
+    {
+      "display": "乞う",
+      "reading": "こ",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "k", "shift": true},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "K P (kp=こ+う)"
+    },
+    {
+      "display": "思う",
+      "reading": "おも",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "o", "shift": true},
+        {"key": "m"},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "O m P (mp=も+う)"
+    },
+    {
+      "display": "憩う",
+      "reading": "いこ",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "i", "shift": true},
+        {"key": "k"},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "I k P (kp=こ+う)"
+    },
+    {
+      "display": "食う",
+      "reading": "く",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "k", "shift": true},
+        {"key": "h", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "K H (kh=く+う)"
+    },
+    {
+      "display": "吸う",
+      "reading": "す",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "s", "shift": true},
+        {"key": "h", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "S H (sh=す+う)"
+    },
+    {
+      "display": "願い",
+      "reading": "ねが",
+      "okurigana": "い",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "n", "shift": true},
+        {"key": "e"},
+        {"key": "g"},
+        {"key": "q", "shift": true}
+      ],
+      "standardKeyCount": 5,
+      "hint": "N e g Q (gq=が+い)"
+    },
+    {
+      "display": "赤い",
+      "reading": "あか",
+      "okurigana": "い",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "a", "shift": true},
+        {"key": "k"},
+        {"key": "q", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "A k Q (kq=か+い)"
+    },
+    {
+      "display": "慣れる",
+      "reading": "な",
+      "okurigana": "れる",
+      "inputType": "standard",
+      "keys": [
+        {"key": "n", "shift": true},
+        {"key": "a"},
+        {"key": "r", "shift": true},
+        {"key": "e"},
+        {"key": "r"},
+        {"key": "u"}
+      ],
+      "standardKeyCount": 6,
+      "hint": "N a R e r u"
+    },
+    {
+      "display": "覚える",
+      "reading": "おぼ",
+      "okurigana": "える",
+      "inputType": "standard",
+      "keys": [
+        {"key": "o", "shift": true},
+        {"key": "b"},
+        {"key": "o"},
+        {"key": "e", "shift": true},
+        {"key": "r"},
+        {"key": "u"}
+      ],
+      "standardKeyCount": 6,
+      "hint": "O b o E r u"
+    }
+  ]
+}
