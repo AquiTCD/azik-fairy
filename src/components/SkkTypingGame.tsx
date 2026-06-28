@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { loadSkkStage } from "@/data/stages";
 import type { SkkStageData, SkkTypingWord, SkkKey } from "@/data/skkRules";
 import { flattenSentences } from "@/data/skkRules";
+import type { AzikMapping } from "@/data/azikRules";
 import { useSkkTypingInput } from "@/hooks/useSkkTypingInput";
 import type { GameSettings, GameStats } from "@/types/game";
 import FairyScreenLayout from "./FairyScreenLayout";
@@ -17,6 +18,7 @@ import { COMMENT_IDS_BY_RANK } from "@/data/resultComments";
 interface SkkTypingGameProps {
   stageId: string;
   settings: GameSettings;
+  effectiveDict?: Record<string, AzikMapping>;
   onFinish: (stats: GameStats) => void;
   onBackToStageSelect: () => void;
   onUpdateSettings: (s: GameSettings) => void;
@@ -112,6 +114,7 @@ function SegmentDetail({ word, keyIndex }: { word: SkkTypingWord; keyIndex: numb
 export default function SkkTypingGame({
   stageId,
   settings,
+  effectiveDict,
   onFinish,
   onBackToStageSelect,
   onUpdateSettings,
@@ -138,8 +141,8 @@ export default function SkkTypingGame({
 
   // sentences → 平坦化した SkkTypingWord[]（hookに渡す）
   const words: SkkTypingWord[] = useMemo(
-    () => (stage ? flattenSentences(stage.sentences) : []),
-    [stage],
+    () => (stage ? flattenSentences(stage.sentences, effectiveDict) : []),
+    [stage, effectiveDict],
   );
 
   // 各文の開始インデックスを記録

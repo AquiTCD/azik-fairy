@@ -1,5 +1,7 @@
 // SKK送りがなシミュレーション用の型定義とルール定数
 
+import { buildValidKeys, AzikMapping, AZIK_DICTIONARY } from "./azikRules";
+
 export interface SkkKey {
   key: string;      // lowercase (例: "k", "p", "i")
   shift?: boolean;  // true = Shift押下（変換開始 or 送りがなトリガー）
@@ -26,11 +28,11 @@ export type SkkSegmentType = "hiragana" | "kanji" | "okurigana";
 export interface SkkSegment {
   display: string;
   segmentType: SkkSegmentType;
-  keys: SkkKey[];
+  keys?: SkkKey[];          // okurigana は必須; kanji/hiragana は effectiveDict から動的生成
   standardKeyCount: number;
-  hint: string;
-  reading?: string;     // kanji / okurigana のみ
-  okurigana?: string;   // okurigana のみ
+  hint?: string;            // 省略時は keys から自動生成
+  reading?: string;         // kanji / okurigana のみ
+  okurigana?: string;       // okurigana のみ
   inputType?: SkkInputType; // okurigana のみ
 }
 
@@ -231,18 +233,52 @@ export function isSkkStageData(data: unknown): data is SkkStageData {
   return d.category === "SKK" && Array.isArray(d.sentences);
 }
 
-/** SkkSentence[] を hook が扱う SkkTypingWord[] に平坦化する */
-export function flattenSentences(sentences: SkkSentence[]): SkkTypingWord[] {
+/** ユーザーの effectiveDict でかな文字列をキー列に変換する（kanji/hiragana セグメント用） */
+function computeKanaKeys(
+  kana: string,
+  isKanji: boolean,
+  dict: Record<string, AzikMapping>,
+): SkkKey[] {
+  const sequences = buildValidKeys(kana, dict);
+  const seq = sequences.length > 0
+    ? sequences.reduce((a, b) => (a.length <= b.length ? a : b))
+    : [...kana].map(c => KANA_TO_ROMAJI[c] ?? c).join("");
+  return seq.split("").map((k, i) => ({
+    key: k,
+    ...(isKanji && i === 0 ? { shift: true } : {}),
+  }));
+}
+
+function skkKeysToHint(keys: SkkKey[]): string {
+  return keys.map(k => (k.shift ? k.key.toUpperCase() : k.key)).join(" ");
+}
+
+/** SkkSentence[] を hook が扱う SkkTypingWord[] に平坦化する。
+ *  kanji/hiragana セグメントのキー列は effectiveDict から動的生成。
+ *  okurigana セグメントは JSON の keys をそのまま使用。 */
+export function flattenSentences(
+  sentences: SkkSentence[],
+  effectiveDict: Record<string, AzikMapping> = AZIK_DICTIONARY,
+): SkkTypingWord[] {
   return sentences.flatMap(s =>
-    s.segments.map(seg => ({
-      display: seg.display,
-      sentence: s.text,
-      reading: seg.reading ?? "",
-      okurigana: seg.okurigana ?? "",
-      inputType: seg.inputType ?? "standard",
-      keys: seg.keys,
-      standardKeyCount: seg.standardKeyCount,
-      hint: seg.hint,
-    }))
+    s.segments.map(seg => {
+      let keys: SkkKey[];
+      if (seg.segmentType === "okurigana") {
+        keys = seg.keys!;
+      } else {
+        const kana = seg.segmentType === "kanji" ? (seg.reading ?? seg.display) : seg.display;
+        keys = computeKanaKeys(kana, seg.segmentType === "kanji", effectiveDict);
+      }
+      return {
+        display: seg.display,
+        sentence: s.text,
+        reading: seg.reading ?? "",
+        okurigana: seg.okurigana ?? "",
+        inputType: seg.inputType ?? "standard",
+        keys,
+        standardKeyCount: seg.standardKeyCount,
+        hint: seg.hint ?? skkKeysToHint(keys),
+      };
+    })
   );
 }

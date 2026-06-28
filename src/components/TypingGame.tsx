@@ -378,6 +378,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       <SkkTypingGame
         stageId={stageId}
         settings={settings}
+        effectiveDict={effectiveDict}
         onFinish={onFinish}
         onBackToStageSelect={onBackToStageSelect}
         onUpdateSettings={onUpdateSettings}
