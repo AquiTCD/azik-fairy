@@ -12,6 +12,7 @@ import type { FairyEmotion } from "./FairyHelper";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
 import VolumeControl from "@/components/VolumeControl";
+import KeyboardDiagram from "./KeyboardDiagram";
 import { getRank } from "@/utils/gameLogic";
 import { COMMENT_IDS_BY_RANK } from "@/data/resultComments";
 
@@ -64,37 +65,34 @@ function SegmentDetail({ word, keyIndex }: { word: SkkTypingWord; keyIndex: numb
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
-      {/* 単語表示 */}
+      {/* 単語表示（常に ruby で包んで rt の有無による高さ変化を防ぐ）*/}
       <div className="text-3xl md:text-4xl font-bold mt-1">
-        {type === "hiragana" ? (
-          <span className="text-slate-200">{word.display}</span>
-        ) : type === "kanji" ? (
-          <ruby>
+        <ruby>
+          {type === "hiragana" ? (
+            <span className="text-slate-200">{word.display}</span>
+          ) : type === "kanji" ? (
             <span className="text-white">{word.display}</span>
-            <rt className="text-xs text-green-300 tracking-normal select-none">{word.reading}</rt>
-          </ruby>
-        ) : (
-          /* okurigana */
-          <>
-            <ruby>
-              <span className="text-white">{word.display.replace(word.okurigana, "")}</span>
-              <rt className="text-xs text-green-300 tracking-normal select-none">{word.reading}</rt>
-            </ruby>
-            <span className="text-green-200">{word.okurigana}</span>
-          </>
+          ) : (
+            <span className="text-white">{word.display.replace(word.okurigana, "")}</span>
+          )}
+          <rt className="text-xs text-green-300 tracking-normal select-none">
+            {word.reading || " "}
+          </rt>
+        </ruby>
+        {type === "okurigana" && (
+          <span className="text-green-200">{word.okurigana}</span>
         )}
       </div>
 
-      {/* okurigana のみ reading/okuri ラベルを表示 */}
-      {type === "okurigana" && (
-        <div className="flex gap-4 text-xs text-slate-400">
-          <span>読み: <span className="text-cyan-300">{word.reading}</span></span>
-          <span>送り: <span className="text-yellow-300">{word.okurigana}</span></span>
-          <span className="text-slate-500">
-            {word.inputType === "azik-okuri" ? "AZIK <okuri>" : "標準SKK"}
-          </span>
-        </div>
-      )}
+      {/* 常に領域確保。okurigana のみ reading/okuri を表示 */}
+      <div className="h-4 flex gap-4 text-xs text-slate-400 items-center">
+        {type === "okurigana" && (
+          <>
+            <span>読み: <span className="text-cyan-300">{word.reading}</span></span>
+            <span>送り: <span className="text-yellow-300">{word.okurigana}</span></span>
+          </>
+        )}
+      </div>
 
       {/* キーチップ */}
       <div className="flex gap-2 items-center flex-wrap justify-center">
@@ -139,24 +137,32 @@ export default function SkkTypingGame({
     loadSkkStage(stageId).then(setStage);
   }, [stageId]);
 
-  // sentences → 平坦化した SkkTypingWord[]（hookに渡す）
+  // wordsPerSession を文数として扱い、ランダム選択
+  const selectedSentences = useMemo(() => {
+    if (!stage) return [];
+    const limit = settings.wordsPerSession;
+    const all = stage.sentences;
+    if (limit <= 0 || all.length <= limit) return all;
+    return [...all].sort(() => Math.random() - 0.5).slice(0, limit);
+  }, [stage, settings.wordsPerSession]);
+
+  // selectedSentences → 平坦化した SkkTypingWord[]（hookに渡す）
   const words: SkkTypingWord[] = useMemo(
-    () => (stage ? flattenSentences(stage.sentences, effectiveDict) : []),
-    [stage, effectiveDict],
+    () => flattenSentences(selectedSentences, effectiveDict),
+    [selectedSentences, effectiveDict],
   );
 
   // 各文の開始インデックスを記録
   const sentenceBoundaries = useMemo(() => {
-    if (!stage) return [];
     let idx = 0;
-    return stage.sentences.map(s => {
+    return selectedSentences.map(s => {
       const start = idx;
       idx += s.segments.length;
       return { start, end: idx - 1, text: s.text };
     });
-  }, [stage]);
+  }, [selectedSentences]);
 
-  const { currentWordIndex, currentKeyIndex, isMiss, isCompleted, stats, handleKeyDown, reset } =
+  const { currentWordIndex, currentKeyIndex, isMiss, isCompleted, stats, handleKeyDown } =
     useSkkTypingInput(words);
 
   // 現在の文
@@ -247,15 +253,6 @@ export default function SkkTypingGame({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMiss, currentWordIndex, currentKeyIndex]);
 
-  const handleReset = () => {
-    reset();
-    setStarted(false);
-    setElapsedTime(0);
-    startTimeRef.current = null;
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-    setFairy({ message: "文章全体をSKK + AZIKで入力しよう！Shiftのタイミングが肝心✨", emotion: "idle" });
-  };
-
   if (!stage) {
     return (
       <FairyScreenLayout fairy={{ message: "ステージを読み込み中…", emotion: "idle" }}>
@@ -265,7 +262,7 @@ export default function SkkTypingGame({
   }
 
   const currentWord = words[currentWordIndex];
-  const totalSentences = stage.sentences.length;
+  const totalSentences = selectedSentences.length;
   const progressPct = totalSentences > 0
     ? Math.round((currentSentenceIdx / totalSentences) * 100)
     : 0;
@@ -305,11 +302,27 @@ export default function SkkTypingGame({
         </div>
 
         {/* セグメント詳細 */}
-        <div className="min-h-[160px] flex items-center justify-center">
+        <div className="min-h-[120px] flex items-center justify-center">
           {currentWord ? (
             <SegmentDetail word={currentWord} keyIndex={currentKeyIndex} />
           ) : (
             <div className="text-slate-400 text-center">完了！</div>
+          )}
+        </div>
+
+        {/* キーガイド（常に領域確保してレイアウトジャンプを防ぐ）*/}
+        <div className="flex flex-col items-center w-full min-h-[110px]">
+          {settings.showGuide && currentWord && started && (
+            <KeyboardDiagram
+              activeKeys={
+                currentKeyIndex < currentWord.keys.length
+                  ? [currentWord.keys[currentKeyIndex].key]
+                  : []
+              }
+              typedKeys={currentWord.keys.slice(0, currentKeyIndex).map(k => k.key)}
+              layout={settings.keyboardLayout}
+              compact
+            />
           )}
         </div>
 
@@ -322,13 +335,10 @@ export default function SkkTypingGame({
           </div>
         )}
 
-        {/* 底部：MODE SELECT / RESET / 音量（TypingGame 同パターン）*/}
+        {/* 底部：MODE SELECT / 音量（TypingGame 同パターン）*/}
         <div className="flex items-center justify-between mt-1">
           <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
             MODE SELECT
-          </GameButton>
-          <GameButton variant="ghost" size="sm" onClick={handleReset}>
-            RESET
           </GameButton>
           <VolumeControl
             volume={settings.soundVolume}

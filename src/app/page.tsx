@@ -223,18 +223,18 @@ export default function Home() {
     const updatedStageProgress = isWeaknessStage
       ? progress.stageProgress
       : (() => {
-          const stars = calcStars(gameStats.accuracy, gameStats.wpm);
-          const current = progress.stageProgress[selectedStageId] || { stars: 0, bestWpm: 0, bestAccuracy: 0, bestTime: Infinity };
-          return {
-            ...progress.stageProgress,
-            [selectedStageId]: {
-              stars: Math.max(current.stars, stars),
-              bestWpm: Math.max(current.bestWpm, gameStats.wpm),
-              bestAccuracy: Math.max(current.bestAccuracy, gameStats.accuracy),
-              bestTime: Math.min(current.bestTime, gameStats.time),
-            },
-          };
-        })();
+        const stars = calcStars(gameStats.accuracy, gameStats.wpm);
+        const current = progress.stageProgress[selectedStageId] || { stars: 0, bestWpm: 0, bestAccuracy: 0, bestTime: Infinity };
+        return {
+          ...progress.stageProgress,
+          [selectedStageId]: {
+            stars: Math.max(current.stars, stars),
+            bestWpm: Math.max(current.bestWpm, gameStats.wpm),
+            bestAccuracy: Math.max(current.bestAccuracy, gameStats.accuracy),
+            bestTime: Math.min(current.bestTime, gameStats.time),
+          },
+        };
+      })();
 
     // ① 弱点統計の更新（Practice + 弱点練習）
     let updatedWeaknessStats = progress.weaknessStats;
@@ -277,8 +277,8 @@ export default function Home() {
     const todayStr = new Date().toLocaleDateString("sv-SE");
     const newBest: TimeAttackBest = progress.timeAttackBest
       ? (result.wpm > progress.timeAttackBest.wpm
-          ? { wpm: result.wpm, accuracy: result.accuracy, date: todayStr }
-          : progress.timeAttackBest)
+        ? { wpm: result.wpm, accuracy: result.accuracy, date: todayStr }
+        : progress.timeAttackBest)
       : { wpm: result.wpm, accuracy: result.accuracy, date: todayStr };
 
     saveProgress({ ...progress, timeAttackBest: newBest });
@@ -481,16 +481,16 @@ export default function Home() {
           ? STAGES.find(s => s.id === selectedStageId)?.category === "SKK"
           : false;
         return (
-        <ResultScreen
-          stats={stats}
-          selectedStageId={selectedStageId}
-          settings={settings}
-          resultAds={resultAds}
-          onStartStage={startStage}
-          onStartWeaknessPractice={handleStartWeaknessPractice}
-          onGoToStageSelect={() => setGameState(isSkkMode ? "MODE_SELECT" : "STAGE_SELECT")}
-          onGoToTitle={() => setGameState("TITLE")}
-        />
+          <ResultScreen
+            stats={stats}
+            selectedStageId={selectedStageId}
+            settings={settings}
+            resultAds={resultAds}
+            onStartStage={startStage}
+            onStartWeaknessPractice={handleStartWeaknessPractice}
+            onGoToStageSelect={() => setGameState(isSkkMode ? "MODE_SELECT" : "STAGE_SELECT")}
+            onGoToTitle={() => setGameState("TITLE")}
+          />
         );
       })()}
     </main>
