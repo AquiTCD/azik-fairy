@@ -271,28 +271,17 @@ export default function SkkTypingGame({
     : 0;
 
   return (
-    <FairyScreenLayout fairy={fairy} fairySlot={
-      <VolumeControl
-        volume={settings.soundVolume}
-        theme={settings.soundTheme}
-        onVolumeChange={vol => onUpdateSettings({ ...settings, soundVolume: vol })}
-      />
-    }>
+    <FairyScreenLayout fairy={fairy}>
       <div className="flex flex-col gap-5 w-full">
-        {/* ヘッダー */}
-        <div className="flex justify-between items-center">
-          <button onClick={onBackToStageSelect} className="text-slate-400 hover:text-white text-sm transition-colors">
-            ← 戻る
-          </button>
-          <div className="flex items-center gap-4 text-sm text-slate-400">
-            <span>文 {Math.min(currentSentenceIdx + 1, totalSentences)} / {totalSentences}</span>
-            <span>
-              {String(Math.floor(elapsedTime / 60)).padStart(2, "0")}:{String(elapsedTime % 60).padStart(2, "0")}
-            </span>
-            <span className={`px-2 py-0.5 rounded text-xs ${isMiss ? "bg-red-900 text-red-300" : "text-slate-500"}`}>
-              ミス: {stats.missCount}
-            </span>
-          </div>
+        {/* ヘッダー：進捗・タイマー・ミス */}
+        <div className="flex justify-end items-center gap-4 text-sm text-slate-400">
+          <span>文 {Math.min(currentSentenceIdx + 1, totalSentences)} / {totalSentences}</span>
+          <span>
+            {String(Math.floor(elapsedTime / 60)).padStart(2, "0")}:{String(elapsedTime % 60).padStart(2, "0")}
+          </span>
+          <span className={`px-2 py-0.5 rounded text-xs ${isMiss ? "bg-red-900 text-red-300" : "text-slate-500"}`}>
+            ミス: {stats.missCount}
+          </span>
         </div>
 
         {/* プログレスバー（文単位） */}
@@ -324,11 +313,6 @@ export default function SkkTypingGame({
           )}
         </div>
 
-        {/* 操作ボタン */}
-        <div className="flex justify-center">
-          <GameButton onClick={handleReset} variant="secondary" size="sm">リセット</GameButton>
-        </div>
-
         {/* 未スタート時のガイド */}
         {!started && (
           <div className="text-xs text-slate-500 text-center space-y-1 border border-slate-800 rounded-lg p-3">
@@ -337,6 +321,21 @@ export default function SkkTypingGame({
             <p className="text-slate-600 mt-2">キーを押すとスタート</p>
           </div>
         )}
+
+        {/* 底部：MODE SELECT / RESET / 音量（TypingGame 同パターン）*/}
+        <div className="flex items-center justify-between mt-1">
+          <GameButton variant="ghost" size="sm" onClick={onBackToStageSelect}>
+            MODE SELECT
+          </GameButton>
+          <GameButton variant="ghost" size="sm" onClick={handleReset}>
+            RESET
+          </GameButton>
+          <VolumeControl
+            volume={settings.soundVolume}
+            theme={settings.soundTheme}
+            onVolumeChange={vol => onUpdateSettings({ ...settings, soundVolume: vol })}
+          />
+        </div>
       </div>
     </FairyScreenLayout>
   );
