@@ -151,12 +151,16 @@ describe("buildStandardSkkKeys", () => {
 });
 
 describe("isSkkStageData", () => {
-  it("category=SKK のオブジェクトで true を返す", () => {
-    expect(isSkkStageData({ category: "SKK", id: "x", name: "x", description: "x", words: [] })).toBe(true);
+  it("category=SKK かつ sentences[] を持つオブジェクトで true を返す", () => {
+    expect(isSkkStageData({ category: "SKK", id: "x", name: "x", description: "x", sentences: [] })).toBe(true);
+  });
+
+  it("sentences がなければ false を返す（旧 words 形式も false）", () => {
+    expect(isSkkStageData({ category: "SKK", id: "x", name: "x", description: "x", words: [] })).toBe(false);
   });
 
   it("category=Lev1 のオブジェクトで false を返す", () => {
-    expect(isSkkStageData({ category: "Lev1", id: "x", name: "x", description: "x", words: [] })).toBe(false);
+    expect(isSkkStageData({ category: "Lev1", id: "x", name: "x", description: "x", sentences: [] })).toBe(false);
   });
 
   it("null で false を返す", () => {

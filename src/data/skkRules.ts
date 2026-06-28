@@ -7,15 +7,37 @@ export interface SkkKey {
 
 export type SkkInputType = "standard" | "azik-okuri";
 
+/** hook内部の打鍵単位。SkkSegment を平坦化して生成する */
 export interface SkkTypingWord {
   display: string;          // 表示用: "書く"
-  sentence?: string;        // 文脈文: "毎日日記を書く。" （display を含む）
-  reading: string;          // 漢字確定部分のかな: "か"
-  okurigana: string;        // 送りがな: "く"
+  sentence?: string;        // 所属する文 (SkkSentence.text)
+  reading: string;          // 漢字確定部分のかな: "か"（ひらがなセグメントは ""）
+  okurigana: string;        // 送りがな: "く"（ひらがな/純漢字セグメントは ""）
   inputType: SkkInputType;
-  keys: SkkKey[];           // 期待キー列（AZIK使用時）
-  standardKeyCount: number; // 標準SKK（AZIK非使用）での理論打鍵数
-  hint: string;             // 人間向け説明: "K a K u" or "I k P (kp=こ+う)"
+  keys: SkkKey[];           // 期待キー列
+  standardKeyCount: number; // AZIK非使用時の理論打鍵数（AZIK節約比率計算用）
+  hint: string;
+}
+
+/** ステージJSON上のセグメント種別 */
+export type SkkSegmentType = "hiragana" | "kanji" | "okurigana";
+
+/** ステージJSON上の1セグメント（ひらがな/純漢字/送りがな）*/
+export interface SkkSegment {
+  display: string;
+  segmentType: SkkSegmentType;
+  keys: SkkKey[];
+  standardKeyCount: number;
+  hint: string;
+  reading?: string;     // kanji / okurigana のみ
+  okurigana?: string;   // okurigana のみ
+  inputType?: SkkInputType; // okurigana のみ
+}
+
+/** ステージJSON上の1文 */
+export interface SkkSentence {
+  text: string;
+  segments: SkkSegment[];
 }
 
 export interface SkkStageData {
@@ -24,7 +46,7 @@ export interface SkkStageData {
   name: string;
   description: string;
   concept?: string;
-  words: SkkTypingWord[];
+  sentences: SkkSentence[];
 }
 
 // -------------------------------------------------------------
@@ -204,9 +226,23 @@ function buildStandardReadingKeys(kana: string): SkkKey[] {
 
 /** SkkStageData の型ガード */
 export function isSkkStageData(data: unknown): data is SkkStageData {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    (data as SkkStageData).category === "SKK"
+  if (typeof data !== "object" || data === null) return false;
+  const d = data as Record<string, unknown>;
+  return d.category === "SKK" && Array.isArray(d.sentences);
+}
+
+/** SkkSentence[] を hook が扱う SkkTypingWord[] に平坦化する */
+export function flattenSentences(sentences: SkkSentence[]): SkkTypingWord[] {
+  return sentences.flatMap(s =>
+    s.segments.map(seg => ({
+      display: seg.display,
+      sentence: s.text,
+      reading: seg.reading ?? "",
+      okurigana: seg.okurigana ?? "",
+      inputType: seg.inputType ?? "standard",
+      keys: seg.keys,
+      standardKeyCount: seg.standardKeyCount,
+      hint: seg.hint,
+    }))
   );
 }
