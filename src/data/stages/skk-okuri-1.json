@@ -102,9 +102,9 @@
           "display": "飯",
           "segmentType": "kanji",
           "reading": "めし",
-          "keys": [{"key": "m", "shift": true}, {"key": "e"}, {"key": "x"}, {"key": "i"}],
+          "keys": [{"key": "m", "shift": true}, {"key": "e"}, {"key": "s"}, {"key": "i"}],
           "standardKeyCount": 4,
-          "hint": "M e x i (xi=し)"
+          "hint": "M e s i"
         },
         {
           "display": "を",
@@ -162,9 +162,9 @@
           "display": "道",
           "segmentType": "kanji",
           "reading": "みち",
-          "keys": [{"key": "m", "shift": true}, {"key": "i"}, {"key": "c"}, {"key": "i"}],
+          "keys": [{"key": "m", "shift": true}, {"key": "i"}, {"key": "t"}, {"key": "i"}],
           "standardKeyCount": 4,
-          "hint": "M i c i (ci=ち)"
+          "hint": "M i t i"
         },
         {
           "display": "に",
@@ -312,9 +312,9 @@
           "display": "毎日",
           "segmentType": "kanji",
           "reading": "まいにち",
-          "keys": [{"key": "m", "shift": true}, {"key": "q"}, {"key": "n"}, {"key": "i"}, {"key": "c"}, {"key": "i"}],
+          "keys": [{"key": "m", "shift": true}, {"key": "q"}, {"key": "n"}, {"key": "i"}, {"key": "t"}, {"key": "i"}],
           "standardKeyCount": 7,
-          "hint": "M q n i c i (mq=まい, ci=ち)"
+          "hint": "M q n i t i (mq=まい)"
         },
         {
           "display": "走る",
