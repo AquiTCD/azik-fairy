@@ -373,6 +373,18 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [startedAt, pendingStats]);
 
+  if (isSkkStage) {
+    return (
+      <SkkTypingGame
+        stageId={stageId}
+        settings={settings}
+        onFinish={onFinish}
+        onBackToStageSelect={onBackToStageSelect}
+        onUpdateSettings={onUpdateSettings}
+      />
+    );
+  }
+
   if (words.length === 0) {
     return <div className="text-green-400 font-pixel text-xl">LOADING STAGE DATA...</div>;
   }
@@ -471,18 +483,6 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const myKeyProgress = optimalKeys.totalAzik > 0
     ? Math.min(1, totalCorrectKeys / optimalKeys.totalAzik)
     : wordIndex / Math.max(words.length, 1);
-
-  if (isSkkStage) {
-    return (
-      <SkkTypingGame
-        stageId={stageId}
-        settings={settings}
-        onFinish={onFinish}
-        onBackToStageSelect={onBackToStageSelect}
-        onUpdateSettings={onUpdateSettings}
-      />
-    );
-  }
 
   return (
     <FairyScreenLayout
