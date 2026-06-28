@@ -365,6 +365,10 @@ export default function Home() {
                 onClick={() => { setFlowMode("challenge"); handleUpdateSettings({ ...settings, isTraining: false }); setGameState("STAGE_SELECT"); }} />
               <ModeButton color="sky" title="TIME ATTACK" subtitle="1分間AZIK速度測定"
                 onClick={() => setGameState("TIME_ATTACK")} />
+              <div className="border-t border-zinc-800 pt-2 w-full">
+                <ModeButton color="purple" title="SKK TYPING" subtitle="送りがな変換・Shiftタイミング"
+                  onClick={() => { setSelectedStageId("skk-okuri-1"); setGameState("PLAYING"); }} />
+              </div>
               <GameButton variant="danger" size="sm" onClick={() => setGameState("TITLE")} className="w-full">
                 BACK TO TITLE
               </GameButton>
@@ -407,26 +411,29 @@ export default function Home() {
       )}
 
       {/* プレイ中 */}
-      {gameState === "PLAYING" && selectedStageId && (
-        <TypingGame
-          stageId={selectedStageId}
-          settings={settings}
-          onFinish={handleFinishGame}
-          onBackToStageSelect={() => setGameState("STAGE_SELECT")}
-          onUpdateSettings={handleUpdateSettings}
-          ghostBestWpm={
-            selectedStageId !== WEAKNESS_STAGE_ID
-              ? progress.stageProgress[selectedStageId]?.bestWpm
-              : undefined
-          }
-          weaknessOverrideWords={
-            selectedStageId === WEAKNESS_STAGE_ID
-              ? (weaknessWords ?? undefined)
-              : undefined
-          }
-          effectiveDict={effectiveDict}
-        />
-      )}
+      {gameState === "PLAYING" && selectedStageId && (() => {
+        const isSkkMode = STAGES.find(s => s.id === selectedStageId)?.category === "SKK";
+        return (
+          <TypingGame
+            stageId={selectedStageId}
+            settings={settings}
+            onFinish={handleFinishGame}
+            onBackToStageSelect={() => setGameState(isSkkMode ? "MODE_SELECT" : "STAGE_SELECT")}
+            onUpdateSettings={handleUpdateSettings}
+            ghostBestWpm={
+              selectedStageId !== WEAKNESS_STAGE_ID
+                ? progress.stageProgress[selectedStageId]?.bestWpm
+                : undefined
+            }
+            weaknessOverrideWords={
+              selectedStageId === WEAKNESS_STAGE_ID
+                ? (weaknessWords ?? undefined)
+                : undefined
+            }
+            effectiveDict={effectiveDict}
+          />
+        );
+      })()}
 
       {/* 設定画面 */}
       {gameState === "SETTINGS" && (
@@ -469,7 +476,11 @@ export default function Home() {
       )}
 
       {/* リザルト画面 */}
-      {gameState === "RESULT" && stats && (
+      {gameState === "RESULT" && stats && (() => {
+        const isSkkMode = selectedStageId
+          ? STAGES.find(s => s.id === selectedStageId)?.category === "SKK"
+          : false;
+        return (
         <ResultScreen
           stats={stats}
           selectedStageId={selectedStageId}
@@ -477,10 +488,11 @@ export default function Home() {
           resultAds={resultAds}
           onStartStage={startStage}
           onStartWeaknessPractice={handleStartWeaknessPractice}
-          onGoToStageSelect={() => setGameState("STAGE_SELECT")}
+          onGoToStageSelect={() => setGameState(isSkkMode ? "MODE_SELECT" : "STAGE_SELECT")}
           onGoToTitle={() => setGameState("TITLE")}
         />
-      )}
+        );
+      })()}
     </main>
   );
 }
