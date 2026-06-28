@@ -5,7 +5,9 @@ import {
   buildAzikOkuriKeys,
   buildStandardSkkKeys,
   isSkkStageData,
+  flattenSentences,
 } from "./skkRules";
+import type { SkkSentence } from "./skkRules";
 
 describe("SKK_AZIK_OKURI_TABLE", () => {
   it("r系ルールが全て定義されている", () => {
@@ -165,5 +167,79 @@ describe("isSkkStageData", () => {
 
   it("null で false を返す", () => {
     expect(isSkkStageData(null)).toBe(false);
+  });
+});
+
+describe("flattenSentences - 漢字→ひらがな Shift 付与", () => {
+  const makeSentence = (segments: SkkSentence["segments"]): SkkSentence => ({
+    text: "テスト",
+    segments,
+  });
+
+  it("kanji の直後の hiragana 先頭キーに Shift が付く（MesiWoKuU パターン）", () => {
+    const sentence = makeSentence([
+      {
+        display: "飯",
+        segmentType: "kanji",
+        reading: "めし",
+        standardKeyCount: 4,
+      },
+      {
+        display: "を",
+        segmentType: "hiragana",
+        standardKeyCount: 2,
+      },
+    ]);
+    const words = flattenSentences([sentence]);
+    const woKeys = words[1].keys;
+    expect(woKeys[0]).toEqual({ key: "w", shift: true });
+    expect(woKeys[1]).toEqual({ key: "o" });
+  });
+
+  it("文頭の hiragana には Shift が付かない", () => {
+    const sentence = makeSentence([
+      {
+        display: "を",
+        segmentType: "hiragana",
+        standardKeyCount: 2,
+      },
+    ]);
+    const words = flattenSentences([sentence]);
+    expect(words[0].keys[0]).toEqual({ key: "w" });
+  });
+
+  it("hiragana の直後の hiragana には Shift が付かない", () => {
+    const sentence = makeSentence([
+      { display: "が", segmentType: "hiragana", standardKeyCount: 2 },
+      { display: "を", segmentType: "hiragana", standardKeyCount: 2 },
+    ]);
+    const words = flattenSentences([sentence]);
+    expect(words[1].keys[0]).toEqual({ key: "w" });
+  });
+
+  it("okurigana の直後の hiragana には Shift が付かない", () => {
+    const sentence = makeSentence([
+      {
+        display: "為る",
+        segmentType: "okurigana",
+        reading: "す",
+        okurigana: "る",
+        inputType: "azik-okuri",
+        keys: [{ key: "s", shift: true }, { key: "r", shift: true }],
+        standardKeyCount: 4,
+      },
+      { display: "が", segmentType: "hiragana", standardKeyCount: 2 },
+    ]);
+    const words = flattenSentences([sentence]);
+    expect(words[1].keys[0]).toEqual({ key: "g" });
+  });
+
+  it("ヒントが W o として生成される", () => {
+    const sentence = makeSentence([
+      { display: "飯", segmentType: "kanji", reading: "めし", standardKeyCount: 4 },
+      { display: "を", segmentType: "hiragana", standardKeyCount: 2 },
+    ]);
+    const words = flattenSentences([sentence]);
+    expect(words[1].hint).toBe("W o");
   });
 });

@@ -255,19 +255,31 @@ function skkKeysToHint(keys: SkkKey[]): string {
 
 /** SkkSentence[] を hook が扱う SkkTypingWord[] に平坦化する。
  *  kanji/hiragana セグメントのキー列は effectiveDict から動的生成。
- *  okurigana セグメントは JSON の keys をそのまま使用。 */
+ *  okurigana セグメントは JSON の keys をそのまま使用。
+ *
+ *  漢字→ひらがな遷移: macSKK では漢字▽モード中に Shift+次キーを押すと
+ *  漢字を確定しつつそのキーで次の入力を開始する。そのため kanji の直後に
+ *  来る hiragana セグメントの先頭キーには Shift が必要。 */
 export function flattenSentences(
   sentences: SkkSentence[],
   effectiveDict: Record<string, AzikMapping> = AZIK_DICTIONARY,
 ): SkkTypingWord[] {
   return sentences.flatMap(s =>
-    s.segments.map(seg => {
+    s.segments.map((seg, segIndex) => {
+      const prevSeg = segIndex > 0 ? s.segments[segIndex - 1] : null;
+      const isHiraganaAfterKanji =
+        seg.segmentType === "hiragana" && prevSeg?.segmentType === "kanji";
+
       let keys: SkkKey[];
       if (seg.segmentType === "okurigana") {
         keys = seg.keys!;
       } else {
         const kana = seg.segmentType === "kanji" ? (seg.reading ?? seg.display) : seg.display;
         keys = computeKanaKeys(kana, seg.segmentType === "kanji", effectiveDict);
+        if (isHiraganaAfterKanji && keys.length > 0) {
+          // 漢字▽モード終了 + 次入力開始を兼ねる Shift（macSKK の挙動に準拠）
+          keys = [{ ...keys[0], shift: true }, ...keys.slice(1)];
+        }
       }
       return {
         display: seg.display,
