@@ -8,13 +8,14 @@ export interface SkkKey {
 export type SkkInputType = "standard" | "azik-okuri";
 
 export interface SkkTypingWord {
-  display: string;         // 表示用: "書く"
-  reading: string;         // 漢字確定部分のかな: "か"
-  okurigana: string;       // 送りがな: "く"
+  display: string;          // 表示用: "書く"
+  sentence?: string;        // 文脈文: "毎日日記を書く。" （display を含む）
+  reading: string;          // 漢字確定部分のかな: "か"
+  okurigana: string;        // 送りがな: "く"
   inputType: SkkInputType;
-  keys: SkkKey[];          // 期待キー列（AZIK使用時）
+  keys: SkkKey[];           // 期待キー列（AZIK使用時）
   standardKeyCount: number; // 標準SKK（AZIK非使用）での理論打鍵数
-  hint: string;            // 人間向け説明: "K a K u" or "I k P (kp=こ+う)"
+  hint: string;             // 人間向け説明: "K a K u" or "I k P (kp=こ+う)"
 }
 
 export interface SkkStageData {

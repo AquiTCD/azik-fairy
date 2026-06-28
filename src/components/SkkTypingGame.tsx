@@ -36,12 +36,33 @@ function KeyChip({ skkKey, active, done }: { skkKey: SkkKey; active: boolean; do
   return <span className={`${base} ${color}`}>{label}</span>;
 }
 
-function WordDisplay({ word, keyIndex }: { word: SkkTypingWord; keyIndex: number }) {
+function SentenceContext({ sentence, target }: { sentence: string; target: string }) {
+  const idx = sentence.indexOf(target);
+  if (idx === -1) return <span className="text-slate-300">{sentence}</span>;
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="text-4xl font-bold text-white">
+    <span className="text-slate-300">
+      {sentence.slice(0, idx)}
+      <span className="text-white font-bold underline decoration-yellow-400 decoration-2 underline-offset-4">
+        {target}
+      </span>
+      {sentence.slice(idx + target.length)}
+    </span>
+  );
+}
+
+function WordDisplay({ word, keyIndex }: { word: SkkTypingWord; keyIndex: number }) {
+  const kanjiOnly = word.display.replace(word.okurigana, "");
+  return (
+    <div className="flex flex-col items-center gap-3 w-full">
+      {word.sentence && (
+        <div className="text-xl md:text-2xl text-center px-4 py-2 bg-slate-900/60 rounded-lg border border-slate-700 w-full">
+          <SentenceContext sentence={word.sentence} target={word.display} />
+        </div>
+      )}
+
+      <div className="text-4xl font-bold text-white mt-2">
         <ruby>
-          <span className="text-white">{word.display.replace(word.okurigana, "")}</span>
+          <span className="text-white">{kanjiOnly}</span>
           <rt className="text-xs text-green-300 tracking-normal select-none">
             {word.reading}
           </rt>

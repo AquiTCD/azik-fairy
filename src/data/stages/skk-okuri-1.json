@@ -7,6 +7,7 @@
   "words": [
     {
       "display": "書く",
+      "sentence": "毎日日記を書く習慣をつけよう。",
       "reading": "か",
       "okurigana": "く",
       "inputType": "standard",
@@ -21,6 +22,7 @@
     },
     {
       "display": "走る",
+      "sentence": "朝の公園を気持ちよく走る。",
       "reading": "はし",
       "okurigana": "る",
       "inputType": "standard",
@@ -37,6 +39,7 @@
     },
     {
       "display": "動く",
+      "sentence": "体を動かすことが大切だ。",
       "reading": "うご",
       "okurigana": "く",
       "inputType": "standard",
@@ -51,192 +54,8 @@
       "hint": "U g o K u"
     },
     {
-      "display": "成る",
-      "reading": "な",
-      "okurigana": "る",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "n", "shift": true},
-        {"key": "r", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "N R (nr=な+る)"
-    },
-    {
-      "display": "為る",
-      "reading": "す",
-      "okurigana": "る",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "s", "shift": true},
-        {"key": "r", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "S R (sr=す+る)"
-    },
-    {
-      "display": "足る",
-      "reading": "た",
-      "okurigana": "る",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "t", "shift": true},
-        {"key": "r", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "T R (tr=た+る)"
-    },
-    {
-      "display": "刈る",
-      "reading": "か",
-      "okurigana": "る",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "k", "shift": true},
-        {"key": "r", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "K R (kr=か+る)"
-    },
-    {
-      "display": "降る",
-      "reading": "ふ",
-      "okurigana": "る",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "h", "shift": true},
-        {"key": "r", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "H R (hr=ふ+る)"
-    },
-    {
-      "display": "寄る",
-      "reading": "よ",
-      "okurigana": "る",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "y", "shift": true},
-        {"key": "r", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "Y R (yr=よ+る)"
-    },
-    {
-      "display": "問う",
-      "reading": "と",
-      "okurigana": "う",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "t", "shift": true},
-        {"key": "p", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "T P (tp=と+う)"
-    },
-    {
-      "display": "添う",
-      "reading": "そ",
-      "okurigana": "う",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "s", "shift": true},
-        {"key": "p", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "S P (sp=そ+う)"
-    },
-    {
-      "display": "乞う",
-      "reading": "こ",
-      "okurigana": "う",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "k", "shift": true},
-        {"key": "p", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "K P (kp=こ+う)"
-    },
-    {
-      "display": "思う",
-      "reading": "おも",
-      "okurigana": "う",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "o", "shift": true},
-        {"key": "m"},
-        {"key": "p", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "O m P (mp=も+う)"
-    },
-    {
-      "display": "憩う",
-      "reading": "いこ",
-      "okurigana": "う",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "i", "shift": true},
-        {"key": "k"},
-        {"key": "p", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "I k P (kp=こ+う)"
-    },
-    {
-      "display": "食う",
-      "reading": "く",
-      "okurigana": "う",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "k", "shift": true},
-        {"key": "h", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "K H (kh=く+う)"
-    },
-    {
-      "display": "吸う",
-      "reading": "す",
-      "okurigana": "う",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "s", "shift": true},
-        {"key": "h", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "S H (sh=す+う)"
-    },
-    {
-      "display": "願い",
-      "reading": "ねが",
-      "okurigana": "い",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "n", "shift": true},
-        {"key": "e"},
-        {"key": "g"},
-        {"key": "q", "shift": true}
-      ],
-      "standardKeyCount": 5,
-      "hint": "N e g Q (gq=が+い)"
-    },
-    {
-      "display": "赤い",
-      "reading": "あか",
-      "okurigana": "い",
-      "inputType": "azik-okuri",
-      "keys": [
-        {"key": "a", "shift": true},
-        {"key": "k"},
-        {"key": "q", "shift": true}
-      ],
-      "standardKeyCount": 4,
-      "hint": "A k Q (kq=か+い)"
-    },
-    {
       "display": "慣れる",
+      "sentence": "練習すれば必ず慣れる。",
       "reading": "な",
       "okurigana": "れる",
       "inputType": "standard",
@@ -253,6 +72,7 @@
     },
     {
       "display": "覚える",
+      "sentence": "単語をひとつひとつ覚える。",
       "reading": "おぼ",
       "okurigana": "える",
       "inputType": "standard",
@@ -266,6 +86,206 @@
       ],
       "standardKeyCount": 6,
       "hint": "O b o E r u"
+    },
+    {
+      "display": "成る",
+      "sentence": "努力すれば夢が現実に成る。",
+      "reading": "な",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "n", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "N R (nr=な+る)"
+    },
+    {
+      "display": "為る",
+      "sentence": "毎日欠かさず練習を為る。",
+      "reading": "す",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "s", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "S R (sr=す+る)"
+    },
+    {
+      "display": "足る",
+      "sentence": "必要な量で十分に足る。",
+      "reading": "た",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "t", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "T R (tr=た+る)"
+    },
+    {
+      "display": "刈る",
+      "sentence": "秋になると黄金色の稲を刈る。",
+      "reading": "か",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "k", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "K R (kr=か+る)"
+    },
+    {
+      "display": "降る",
+      "sentence": "明日は雪が降るという予報だ。",
+      "reading": "ふ",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "h", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "H R (hr=ふ+る)"
+    },
+    {
+      "display": "寄る",
+      "sentence": "帰り道にいつもの本屋に寄る。",
+      "reading": "よ",
+      "okurigana": "る",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "y", "shift": true},
+        {"key": "r", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "Y R (yr=よ+る)"
+    },
+    {
+      "display": "問う",
+      "sentence": "先生にその理由を問う。",
+      "reading": "と",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "t", "shift": true},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "T P (tp=と+う)"
+    },
+    {
+      "display": "添う",
+      "sentence": "相手の気持ちに添う。",
+      "reading": "そ",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "s", "shift": true},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "S P (sp=そ+う)"
+    },
+    {
+      "display": "乞う",
+      "sentence": "神様に御加護を乞う。",
+      "reading": "こ",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "k", "shift": true},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "K P (kp=こ+う)"
+    },
+    {
+      "display": "思う",
+      "sentence": "将来のことをじっくり思う。",
+      "reading": "おも",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "o", "shift": true},
+        {"key": "m"},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "O m P (mp=も+う)"
+    },
+    {
+      "display": "憩う",
+      "sentence": "木陰のベンチで静かに憩う。",
+      "reading": "いこ",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "i", "shift": true},
+        {"key": "k"},
+        {"key": "p", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "I k P (kp=こ+う)"
+    },
+    {
+      "display": "食う",
+      "sentence": "腹が減ったから早めに飯を食う。",
+      "reading": "く",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "k", "shift": true},
+        {"key": "h", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "K H (kh=く+う)"
+    },
+    {
+      "display": "吸う",
+      "sentence": "深呼吸して新鮮な空気を吸う。",
+      "reading": "す",
+      "okurigana": "う",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "s", "shift": true},
+        {"key": "h", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "S H (sh=す+う)"
+    },
+    {
+      "display": "願い",
+      "sentence": "合格を願い、毎日勉強する。",
+      "reading": "ねが",
+      "okurigana": "い",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "n", "shift": true},
+        {"key": "e"},
+        {"key": "g"},
+        {"key": "q", "shift": true}
+      ],
+      "standardKeyCount": 5,
+      "hint": "N e g Q (gq=が+い)"
+    },
+    {
+      "display": "赤い",
+      "sentence": "夕焼けで空が赤い。",
+      "reading": "あか",
+      "okurigana": "い",
+      "inputType": "azik-okuri",
+      "keys": [
+        {"key": "a", "shift": true},
+        {"key": "k"},
+        {"key": "q", "shift": true}
+      ],
+      "standardKeyCount": 4,
+      "hint": "A k Q (kq=か+い)"
     }
   ]
 }
