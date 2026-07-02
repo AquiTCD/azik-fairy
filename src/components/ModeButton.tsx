@@ -2,7 +2,7 @@
 
 import React from "react";
 
-type ModeColor = "green" | "yellow" | "sky";
+type ModeColor = "green" | "yellow" | "sky" | "purple";
 
 interface ModeButtonProps {
   color: ModeColor;
@@ -15,6 +15,7 @@ const SCHEME: Record<ModeColor, { text: string; sub: string; border: string; hov
   green:  { text: "text-green-300",  sub: "text-green-500",  border: "border-green-500",  hover: "hover:bg-green-950",  focus: "focus:bg-green-950  focus:ring-green-400"  },
   yellow: { text: "text-yellow-300", sub: "text-yellow-500", border: "border-yellow-500", hover: "hover:bg-yellow-950", focus: "focus:bg-yellow-950 focus:ring-yellow-400" },
   sky:    { text: "text-sky-300",    sub: "text-sky-500",    border: "border-sky-500",    hover: "hover:bg-sky-950",    focus: "focus:bg-sky-950    focus:ring-sky-400"    },
+  purple: { text: "text-purple-300", sub: "text-purple-500", border: "border-purple-500", hover: "hover:bg-purple-950", focus: "focus:bg-purple-950 focus:ring-purple-400" },
 };
 
 export default function ModeButton({ color, title, subtitle, onClick }: ModeButtonProps) {

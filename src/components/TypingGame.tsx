@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, buildValidKeys, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
-import { loadStage } from "@/data/stages";
-import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel, isWordBlockedForStage } from "@/data/stages/wordValidator";
+import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
+import { getAllowedPatterns as getPatterns } from "@/utils/allowedPatterns";
+import { loadStage, STAGES } from "@/data/stages";
+import SkkTypingGame from "./SkkTypingGame";
+import { isWordBlockedForStage } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
@@ -109,16 +111,18 @@ interface TypingGameProps {
 }
 
 export default function TypingGame({ stageId, settings, onFinish, onBackToStageSelect, onUpdateSettings, ghostBestWpm, weaknessOverrideWords, effectiveDict }: TypingGameProps) {
+  const isSkkStage = STAGES.find(s => s.id === stageId)?.category === "SKK";
   const [stage, setStage] = useState<StageData | null>(null);
 
   useEffect(() => {
+    if (isSkkStage) return;
     if (stageId === WEAKNESS_STAGE_ID) {
       setStage({ id: WEAKNESS_STAGE_ID, name: "弱点練習", category: "Practice", description: "弱点集中練習", words: [] } as unknown as StageData);
       return;
     }
     setStage(null);
     loadStage(stageId).then(setStage);
-  }, [stageId]);
+  }, [stageId, isSkkStage]);
 
   const [words, setWords] = useState<TypingWord[]>([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -136,69 +140,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundTheme, settings.soundVolume);
 
   const getAllowedPatterns = useCallback((currentSeg: AzikSegment): string[] => {
-    const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
-    const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
-
-    const dict = effectiveDict ?? AZIK_DICTIONARY;
-
-    // 非トレーニングモード: 全分割パターンを許容
-    if (!effectivelyTraining) {
-      return buildValidKeys(currentSeg.kana, dict, (_sub, keys) => keys);
-    }
-
-    const stageLevel = STAGE_MAX_LEVELS[stageId];
-
-    // レベル未定義 / Practice: azik キーのみ（全分割経由で）
-    if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
-      return buildValidKeys(currentSeg.kana, dict, (sub, allKeys) => {
-        const entry = dict[sub];
-        return entry ? entry.azik : allKeys;
-      }, true);
-    }
-
-    const isSummaryStage = stageId.includes("summary");
-    const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
-    const stagePred = STAGE_KEY_PREDS[stageId];
-
-    // サブセグメントごとにステージフォーカスを適用するフィルター
-    const filter = (sub: string, allKeys: string[]): string[] => {
-      const entry = dict[sub];
-      if (!entry) return [];
-      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
-
-      if (!isSummaryStage && stagePred) {
-        const targetKeys = pseudoSeg.azik.filter(k => stagePred(getCore(k)));
-        if (targetKeys.length > 0) return targetKeys;
-        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
-      }
-
-      const isTarget = isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
-      if (!isTarget) {
-        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
-      }
-      if (!isSummaryStage) {
-        return pseudoSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
-      }
-      return pseudoSeg.azik;
-    };
-
-    // ターゲットキーを持つかな分割は許可する (みょ→mgo のようなケース)
-    // 非ターゲットの allKeys 経由分割 (し→shi 等) のみをブロック
-    const subTargetPred = (sub: string): boolean => {
-      const entry = dict[sub];
-      if (!entry) return false;
-      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
-      if (!isSummaryStage && stagePred) {
-        return pseudoSeg.azik.some(k => stagePred(getCore(k)));
-      }
-      return isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
-    };
-
-    const result = buildValidKeys(currentSeg.kana, dict, filter, true, subTargetPred);
-    if (result.length > 0) return result;
-    // azik が無効化されているか filter が全パスを除外 → normal キーにフォールバック
-    // (base の azik にフォールバックすると disabled 設定を無視してしまうため)
-    return buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.normal ?? [], true);
+    return getPatterns(currentSeg, {
+      stageId,
+      stageCategory: stage?.category,
+      isTraining: settings.isTraining,
+      isFullTraining: settings.isFullTraining,
+      dict: effectiveDict ?? AZIK_DICTIONARY,
+    });
   }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining, effectiveDict]);
 
   const onFirstKey = useCallback(() => {
@@ -370,6 +318,19 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [startedAt, pendingStats]);
 
+  if (isSkkStage) {
+    return (
+      <SkkTypingGame
+        stageId={stageId}
+        settings={settings}
+        effectiveDict={effectiveDict}
+        onFinish={onFinish}
+        onBackToStageSelect={onBackToStageSelect}
+        onUpdateSettings={onUpdateSettings}
+      />
+    );
+  }
+
   if (words.length === 0) {
     return <div className="text-green-400 font-pixel text-xl">LOADING STAGE DATA...</div>;
   }
@@ -437,7 +398,10 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const isEffectivelyTraining = !isPlayingPracticeOrChallenge || settings.isTraining;
 
   // ステージフィルター済みの表示用パターン（currentSeg.azikは未フィルター生データのため使わない）
-  const displayPatterns = currentSeg ? getAllowedPatterns(currentSeg) : [];
+  // inputBuffer でプレフィックスフィルタ: 打った文字と合わない候補を除去
+  const displayPatterns = currentSeg
+    ? getAllowedPatterns(currentSeg).filter(p => p.startsWith(inputBuffer))
+    : [];
 
   const azikHint = currentSeg
     ? `${currentSeg.kana} ➔ ${displayPatterns.map(k => `[${k}]`).join(" or ")}` +
@@ -496,7 +460,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       }
     >
       {/* ===== ゲーム本体 ===== */}
-      <div className={`flex-1 flex flex-col gap-4 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
+      <div className={`flex-1 flex flex-col gap-3 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
 
         {/* 進捗ゲージ（単語ベース） */}
         <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -531,16 +495,16 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         )}
 
         {/* タイピングボード */}
-        <div className="w-full flex flex-col items-center p-6 lg:p-8 bg-zinc-950 border-2 border-green-500 rounded-md min-h-[160px] justify-center relative shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]">
+        <div className="w-full flex flex-col items-center p-4 lg:p-5 bg-zinc-950 border-2 border-green-500 rounded-md min-h-[140px] justify-center relative shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]">
           {/* 漢字（ルビ付き） */}
-          <div className="flex items-center justify-center min-h-[4.5rem] md:min-h-[5rem] lg:min-h-[6rem] w-full text-center mb-2">
+          <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[5rem] w-full text-center mb-1">
             <div className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {currentWord ? (stage?.category === "Challenge" ? currentWord.kanji : <RubyText kanji={currentWord.kanji} kana={currentWord.kana} />) : ""}
             </div>
           </div>
 
           {/* ひらがなセグメント */}
-          <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem] w-full mb-2">
+          <div className="flex items-center justify-center min-h-[2.5rem] md:min-h-[3rem] lg:min-h-[3.5rem] w-full mb-1">
             {currentWord && (
               <KanaSegmentDisplay
                 segments={currentWord.segments}
@@ -552,7 +516,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
           {/* キーガイド */}
           {settings.showGuide && currentSeg && (
-            <div className="mt-5 flex flex-col items-center text-sm opacity-80 w-full">
+            <div className="mt-3 flex flex-col items-center text-sm opacity-80 w-full">
               <span className="text-green-300 font-bold text-xs font-pixel">NEXT KEY:</span>
               <KeyPatternButtons patterns={displayPatterns} inputBuffer={inputBuffer} />
               <KeyboardDiagram
@@ -583,7 +547,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
               <span>💡 AZIK HINT:</span>
               <span className="animate-pulse">{isEffectivelyTraining ? (settings.isFullTraining ? "TRAINING/FULL" : "TRAINING/FOCUS") : "NORMAL"}</span>
             </div>
-            <div className="font-pixel text-zinc-200 border-b border-zinc-700 pb-1.5 mb-1">
+            <div className="font-sans text-zinc-200 border-b border-zinc-700 pb-1.5 mb-1 h-10 overflow-y-auto chip-scroll">
               {azikHint}
             </div>
             <p className="opacity-75 font-sans text-xs min-h-[1.25rem]">

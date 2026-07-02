@@ -19,7 +19,7 @@ export interface TypingWord {
 
 export interface StageData {
   id: string;
-  category: "Lev1" | "Lev2a" | "Lev2b" | "Lev3a" | "Lev3b" | "Lev4" | "Practice" | "Challenge";
+  category: "Lev1" | "Lev2a" | "Lev2b" | "Lev3a" | "Lev3b" | "Lev4" | "Practice" | "Challenge" | "SKK";
   azikLevel?: string;  // 最大許容AZIKレベル (wordValidator.AzikLevel)
   name: string;
   description: string;

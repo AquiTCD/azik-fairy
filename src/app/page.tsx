@@ -175,7 +175,7 @@ export default function Home() {
   const startStage = (stageId: string) => {
     setSelectedStageId(stageId);
     const stage = STAGES.find(s => s.id === stageId);
-    const isLevStage = stage && !["Practice", "Challenge"].includes(stage.category);
+    const isLevStage = stage && !["Practice", "Challenge", "SKK"].includes(stage.category);
     const hasSeen = progress.seenStageIntros.includes(stageId);
     if (isLevStage && !hasSeen) {
       setGameState("STAGE_INTRO");
@@ -223,18 +223,18 @@ export default function Home() {
     const updatedStageProgress = isWeaknessStage
       ? progress.stageProgress
       : (() => {
-          const stars = calcStars(gameStats.accuracy, gameStats.wpm);
-          const current = progress.stageProgress[selectedStageId] || { stars: 0, bestWpm: 0, bestAccuracy: 0, bestTime: Infinity };
-          return {
-            ...progress.stageProgress,
-            [selectedStageId]: {
-              stars: Math.max(current.stars, stars),
-              bestWpm: Math.max(current.bestWpm, gameStats.wpm),
-              bestAccuracy: Math.max(current.bestAccuracy, gameStats.accuracy),
-              bestTime: Math.min(current.bestTime, gameStats.time),
-            },
-          };
-        })();
+        const stars = calcStars(gameStats.accuracy, gameStats.wpm);
+        const current = progress.stageProgress[selectedStageId] || { stars: 0, bestWpm: 0, bestAccuracy: 0, bestTime: Infinity };
+        return {
+          ...progress.stageProgress,
+          [selectedStageId]: {
+            stars: Math.max(current.stars, stars),
+            bestWpm: Math.max(current.bestWpm, gameStats.wpm),
+            bestAccuracy: Math.max(current.bestAccuracy, gameStats.accuracy),
+            bestTime: Math.min(current.bestTime, gameStats.time),
+          },
+        };
+      })();
 
     // ① 弱点統計の更新（Practice + 弱点練習）
     let updatedWeaknessStats = progress.weaknessStats;
@@ -277,8 +277,8 @@ export default function Home() {
     const todayStr = new Date().toLocaleDateString("sv-SE");
     const newBest: TimeAttackBest = progress.timeAttackBest
       ? (result.wpm > progress.timeAttackBest.wpm
-          ? { wpm: result.wpm, accuracy: result.accuracy, date: todayStr }
-          : progress.timeAttackBest)
+        ? { wpm: result.wpm, accuracy: result.accuracy, date: todayStr }
+        : progress.timeAttackBest)
       : { wpm: result.wpm, accuracy: result.accuracy, date: todayStr };
 
     saveProgress({ ...progress, timeAttackBest: newBest });
@@ -298,7 +298,7 @@ export default function Home() {
       {/* タイトル画面 */}
       {gameState === "TITLE" && (
         <FairyScreenLayout fairy={{ emotion: "idle", message: getTitleFairyMessage(progress.totalKeysTyped, progress.streak) }}>
-          <div className="flex-1 flex flex-col items-center gap-4 text-center">
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-widest font-pixel"
               style={{ animation: 'glow-yellow 2.4s ease-in-out infinite' }}
@@ -345,7 +345,7 @@ export default function Home() {
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.10.1 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.11.0 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
             </div>
           </div>
         </FairyScreenLayout>
@@ -354,7 +354,7 @@ export default function Home() {
       {/* モード選択 */}
       {gameState === "MODE_SELECT" && (
         <FairyScreenLayout fairy={{ emotion: "idle", message: "どのモードで遊ぶ？TRAININGはAZIKを練習するモード、CHALLENGEはスコアを記録するモードだよ！⚡" }}>
-          <div className="flex-1 flex flex-col items-center gap-6">
+          <div className="flex-1 flex flex-col items-center justify-center gap-6">
             <h2 className="text-2xl font-bold tracking-widest border-b-2 border-green-500 pb-2 w-full font-pixel text-center">
               = SELECT MODE =
             </h2>
@@ -365,6 +365,10 @@ export default function Home() {
                 onClick={() => { setFlowMode("challenge"); handleUpdateSettings({ ...settings, isTraining: false }); setGameState("STAGE_SELECT"); }} />
               <ModeButton color="sky" title="TIME ATTACK" subtitle="1分間AZIK速度測定"
                 onClick={() => setGameState("TIME_ATTACK")} />
+              <div className="border-t border-zinc-800 pt-2 w-full">
+                <ModeButton color="purple" title="SKK TYPING" subtitle="送りがな変換・Shiftタイミング"
+                  onClick={() => { setSelectedStageId("skk-okuri-1"); setGameState("PLAYING"); }} />
+              </div>
               <GameButton variant="danger" size="sm" onClick={() => setGameState("TITLE")} className="w-full">
                 BACK TO TITLE
               </GameButton>
@@ -407,26 +411,29 @@ export default function Home() {
       )}
 
       {/* プレイ中 */}
-      {gameState === "PLAYING" && selectedStageId && (
-        <TypingGame
-          stageId={selectedStageId}
-          settings={settings}
-          onFinish={handleFinishGame}
-          onBackToStageSelect={() => setGameState("STAGE_SELECT")}
-          onUpdateSettings={handleUpdateSettings}
-          ghostBestWpm={
-            selectedStageId !== WEAKNESS_STAGE_ID
-              ? progress.stageProgress[selectedStageId]?.bestWpm
-              : undefined
-          }
-          weaknessOverrideWords={
-            selectedStageId === WEAKNESS_STAGE_ID
-              ? (weaknessWords ?? undefined)
-              : undefined
-          }
-          effectiveDict={effectiveDict}
-        />
-      )}
+      {gameState === "PLAYING" && selectedStageId && (() => {
+        const isSkkMode = STAGES.find(s => s.id === selectedStageId)?.category === "SKK";
+        return (
+          <TypingGame
+            stageId={selectedStageId}
+            settings={settings}
+            onFinish={handleFinishGame}
+            onBackToStageSelect={() => setGameState(isSkkMode ? "MODE_SELECT" : "STAGE_SELECT")}
+            onUpdateSettings={handleUpdateSettings}
+            ghostBestWpm={
+              selectedStageId !== WEAKNESS_STAGE_ID
+                ? progress.stageProgress[selectedStageId]?.bestWpm
+                : undefined
+            }
+            weaknessOverrideWords={
+              selectedStageId === WEAKNESS_STAGE_ID
+                ? (weaknessWords ?? undefined)
+                : undefined
+            }
+            effectiveDict={effectiveDict}
+          />
+        );
+      })()}
 
       {/* 設定画面 */}
       {gameState === "SETTINGS" && (
@@ -469,18 +476,23 @@ export default function Home() {
       )}
 
       {/* リザルト画面 */}
-      {gameState === "RESULT" && stats && (
-        <ResultScreen
-          stats={stats}
-          selectedStageId={selectedStageId}
-          settings={settings}
-          resultAds={resultAds}
-          onStartStage={startStage}
-          onStartWeaknessPractice={handleStartWeaknessPractice}
-          onGoToStageSelect={() => setGameState("STAGE_SELECT")}
-          onGoToTitle={() => setGameState("TITLE")}
-        />
-      )}
+      {gameState === "RESULT" && stats && (() => {
+        const isSkkMode = selectedStageId
+          ? STAGES.find(s => s.id === selectedStageId)?.category === "SKK"
+          : false;
+        return (
+          <ResultScreen
+            stats={stats}
+            selectedStageId={selectedStageId}
+            settings={settings}
+            resultAds={resultAds}
+            onStartStage={startStage}
+            onStartWeaknessPractice={handleStartWeaknessPractice}
+            onGoToStageSelect={() => setGameState(isSkkMode ? "MODE_SELECT" : "STAGE_SELECT")}
+            onGoToTitle={() => setGameState("TITLE")}
+          />
+        );
+      })()}
     </main>
   );
 }

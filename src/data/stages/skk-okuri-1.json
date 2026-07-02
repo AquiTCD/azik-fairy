@@ -1,0 +1,1080 @@
+{
+  "id": "skk-okuri-1",
+  "category": "SKK",
+  "name": "SKK送りがな入門",
+  "description": "文章全体をSKK + AZIKで入力する。ひらがな直打ち・純漢字変換・送りがな変換を一文の中で練習。",
+  "concept": "標準SKK送りがな（Shift+子音）とAZIK <okuri> 短縮（Shift+AZIKキー末尾）をリアルな文章の中で練習。r系（〜る）・p系（〜おう→う）・q系（〜い）・複数音節okuriganaを含む全39文収録。出題数はセッション設定に従いランダム選択。",
+  "sentences": [
+    {
+      "text": "雨が降る",
+      "segments": [
+        {
+          "display": "雨",
+          "segmentType": "kanji",
+          "reading": "あめ",
+          "keys": [{"key": "a", "shift": true}, {"key": "m"}, {"key": "e"}],
+          "standardKeyCount": 3,
+          "hint": "A m e"
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "keys": [{"key": "g"}, {"key": "a"}],
+          "standardKeyCount": 2,
+          "hint": "g a"
+        },
+        {
+          "display": "降る",
+          "segmentType": "okurigana",
+          "reading": "ふ",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "h", "shift": true}, {"key": "r", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "H R (hr=ふ+る)"
+        }
+      ]
+    },
+    {
+      "text": "稲を刈る",
+      "segments": [
+        {
+          "display": "稲",
+          "segmentType": "kanji",
+          "reading": "いね",
+          "keys": [{"key": "i", "shift": true}, {"key": "n"}, {"key": "e"}],
+          "standardKeyCount": 3,
+          "hint": "I n e"
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "keys": [{"key": "w"}, {"key": "o"}],
+          "standardKeyCount": 2,
+          "hint": "w o"
+        },
+        {
+          "display": "刈る",
+          "segmentType": "okurigana",
+          "reading": "か",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "k", "shift": true}, {"key": "r", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "K R (kr=か+る)"
+        }
+      ]
+    },
+    {
+      "text": "夢が成る",
+      "segments": [
+        {
+          "display": "夢",
+          "segmentType": "kanji",
+          "reading": "ゆめ",
+          "keys": [{"key": "y", "shift": true}, {"key": "m"}, {"key": "e"}],
+          "standardKeyCount": 3,
+          "hint": "Y m e"
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "keys": [{"key": "g"}, {"key": "a"}],
+          "standardKeyCount": 2,
+          "hint": "g a"
+        },
+        {
+          "display": "成る",
+          "segmentType": "okurigana",
+          "reading": "な",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "n", "shift": true}, {"key": "r", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "N R (nr=な+る)"
+        }
+      ]
+    },
+    {
+      "text": "飯を食う",
+      "segments": [
+        {
+          "display": "飯",
+          "segmentType": "kanji",
+          "reading": "めし",
+          "keys": [{"key": "m", "shift": true}, {"key": "e"}, {"key": "s"}, {"key": "i"}],
+          "standardKeyCount": 4,
+          "hint": "M e s i"
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "keys": [{"key": "w"}, {"key": "o"}],
+          "standardKeyCount": 2,
+          "hint": "w o"
+        },
+        {
+          "display": "食う",
+          "segmentType": "okurigana",
+          "reading": "く",
+          "okurigana": "う",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "k", "shift": true}, {"key": "h", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "K H (kh=く+う)"
+        }
+      ]
+    },
+    {
+      "text": "空気を吸う",
+      "segments": [
+        {
+          "display": "空気",
+          "segmentType": "kanji",
+          "reading": "くうき",
+          "keys": [{"key": "k", "shift": true}, {"key": "h"}, {"key": "k"}, {"key": "i"}],
+          "standardKeyCount": 5,
+          "hint": "K h k i (kh=くう)"
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "keys": [{"key": "w"}, {"key": "o"}],
+          "standardKeyCount": 2,
+          "hint": "w o"
+        },
+        {
+          "display": "吸う",
+          "segmentType": "okurigana",
+          "reading": "す",
+          "okurigana": "う",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "s", "shift": true}, {"key": "h", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "S H (sh=す+う)"
+        }
+      ]
+    },
+    {
+      "text": "道に寄る",
+      "segments": [
+        {
+          "display": "道",
+          "segmentType": "kanji",
+          "reading": "みち",
+          "keys": [{"key": "m", "shift": true}, {"key": "i"}, {"key": "t"}, {"key": "i"}],
+          "standardKeyCount": 4,
+          "hint": "M i t i"
+        },
+        {
+          "display": "に",
+          "segmentType": "hiragana",
+          "keys": [{"key": "n"}, {"key": "i"}],
+          "standardKeyCount": 2,
+          "hint": "n i"
+        },
+        {
+          "display": "寄る",
+          "segmentType": "okurigana",
+          "reading": "よ",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "y", "shift": true}, {"key": "r", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "Y R (yr=よ+る)"
+        }
+      ]
+    },
+    {
+      "text": "本を書く",
+      "segments": [
+        {
+          "display": "本",
+          "segmentType": "kanji",
+          "reading": "ほん",
+          "keys": [{"key": "h", "shift": true}, {"key": "l"}],
+          "standardKeyCount": 3,
+          "hint": "H l (hl=ほん)"
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "keys": [{"key": "w"}, {"key": "o"}],
+          "standardKeyCount": 2,
+          "hint": "w o"
+        },
+        {
+          "display": "書く",
+          "segmentType": "okurigana",
+          "reading": "か",
+          "okurigana": "く",
+          "inputType": "standard",
+          "keys": [{"key": "k", "shift": true}, {"key": "a"}, {"key": "k", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 4,
+          "hint": "K a K u"
+        }
+      ]
+    },
+    {
+      "text": "先生に問う",
+      "segments": [
+        {
+          "display": "先生",
+          "segmentType": "kanji",
+          "reading": "せんせい",
+          "keys": [{"key": "s", "shift": true}, {"key": "d"}, {"key": "s"}, {"key": "w"}],
+          "standardKeyCount": 6,
+          "hint": "S d s w (sd=せん, sw=せい)"
+        },
+        {
+          "display": "に",
+          "segmentType": "hiragana",
+          "keys": [{"key": "n"}, {"key": "i"}],
+          "standardKeyCount": 2,
+          "hint": "n i"
+        },
+        {
+          "display": "問う",
+          "segmentType": "okurigana",
+          "reading": "と",
+          "okurigana": "う",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "t", "shift": true}, {"key": "p", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "T P (tp=と+う)"
+        }
+      ]
+    },
+    {
+      "text": "神に乞う",
+      "segments": [
+        {
+          "display": "神",
+          "segmentType": "kanji",
+          "reading": "かみ",
+          "keys": [{"key": "k", "shift": true}, {"key": "a"}, {"key": "m"}, {"key": "i"}],
+          "standardKeyCount": 4,
+          "hint": "K a m i"
+        },
+        {
+          "display": "に",
+          "segmentType": "hiragana",
+          "keys": [{"key": "n"}, {"key": "i"}],
+          "standardKeyCount": 2,
+          "hint": "n i"
+        },
+        {
+          "display": "乞う",
+          "segmentType": "okurigana",
+          "reading": "こ",
+          "okurigana": "う",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "k", "shift": true}, {"key": "p", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "K P (kp=こ+う)"
+        }
+      ]
+    },
+    {
+      "text": "空が赤い",
+      "segments": [
+        {
+          "display": "空",
+          "segmentType": "kanji",
+          "reading": "そら",
+          "keys": [{"key": "s", "shift": true}, {"key": "o"}, {"key": "r"}, {"key": "a"}],
+          "standardKeyCount": 4,
+          "hint": "S o r a"
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "keys": [{"key": "g"}, {"key": "a"}],
+          "standardKeyCount": 2,
+          "hint": "g a"
+        },
+        {
+          "display": "赤い",
+          "segmentType": "okurigana",
+          "reading": "あか",
+          "okurigana": "い",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "a", "shift": true}, {"key": "k"}, {"key": "q", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "A k Q (kq=か+い)"
+        }
+      ]
+    },
+    {
+      "text": "毎日走る",
+      "segments": [
+        {
+          "display": "毎日",
+          "segmentType": "kanji",
+          "reading": "まいにち",
+          "keys": [{"key": "m", "shift": true}, {"key": "q"}, {"key": "n"}, {"key": "i"}, {"key": "t"}, {"key": "i"}],
+          "standardKeyCount": 7,
+          "hint": "M q n i t i (mq=まい)"
+        },
+        {
+          "display": "走る",
+          "segmentType": "okurigana",
+          "reading": "はし",
+          "okurigana": "る",
+          "inputType": "standard",
+          "keys": [{"key": "h", "shift": true}, {"key": "a"}, {"key": "s"}, {"key": "i"}, {"key": "r", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 6,
+          "hint": "H a s i R u"
+        }
+      ]
+    },
+    {
+      "text": "将来を思う",
+      "segments": [
+        {
+          "display": "将来",
+          "segmentType": "kanji",
+          "reading": "しょうらい",
+          "keys": [{"key": "x", "shift": true}, {"key": "p"}, {"key": "r"}, {"key": "q"}],
+          "standardKeyCount": 6,
+          "hint": "X p r q (xp=しょう, rq=らい)"
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "keys": [{"key": "w"}, {"key": "o"}],
+          "standardKeyCount": 2,
+          "hint": "w o"
+        },
+        {
+          "display": "思う",
+          "segmentType": "okurigana",
+          "reading": "おも",
+          "okurigana": "う",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "o", "shift": true}, {"key": "m"}, {"key": "p", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "O m P (mp=も+う)"
+        }
+      ]
+    },
+    {
+      "text": "合格を願い",
+      "segments": [
+        {
+          "display": "合格",
+          "segmentType": "kanji",
+          "reading": "ごうかく",
+          "keys": [{"key": "g", "shift": true}, {"key": "p"}, {"key": "k"}, {"key": "a"}, {"key": "k"}, {"key": "u"}],
+          "standardKeyCount": 7,
+          "hint": "G p k a k u (gp=ごう)"
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "keys": [{"key": "w"}, {"key": "o"}],
+          "standardKeyCount": 2,
+          "hint": "w o"
+        },
+        {
+          "display": "願い",
+          "segmentType": "okurigana",
+          "reading": "ねが",
+          "okurigana": "い",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "n", "shift": true}, {"key": "e"}, {"key": "g"}, {"key": "q", "shift": true}],
+          "standardKeyCount": 5,
+          "hint": "N e g Q (gq=が+い)"
+        }
+      ]
+    },
+    {
+      "text": "心に添う",
+      "segments": [
+        {
+          "display": "心",
+          "segmentType": "kanji",
+          "reading": "こころ",
+          "keys": [{"key": "k", "shift": true}, {"key": "o"}, {"key": "k"}, {"key": "o"}, {"key": "r"}, {"key": "o"}],
+          "standardKeyCount": 6,
+          "hint": "K o k o r o"
+        },
+        {
+          "display": "に",
+          "segmentType": "hiragana",
+          "keys": [{"key": "n"}, {"key": "i"}],
+          "standardKeyCount": 2,
+          "hint": "n i"
+        },
+        {
+          "display": "添う",
+          "segmentType": "okurigana",
+          "reading": "そ",
+          "okurigana": "う",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "s", "shift": true}, {"key": "p", "shift": true}],
+          "standardKeyCount": 4,
+          "hint": "S P (sp=そ+う)"
+        }
+      ]
+    },
+    {
+      "text": "単語を覚える",
+      "segments": [
+        {
+          "display": "単語",
+          "segmentType": "kanji",
+          "reading": "たんご",
+          "keys": [{"key": "t", "shift": true}, {"key": "z"}, {"key": "g"}, {"key": "o"}],
+          "standardKeyCount": 5,
+          "hint": "T z g o (tz=たん)"
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "keys": [{"key": "w"}, {"key": "o"}],
+          "standardKeyCount": 2,
+          "hint": "w o"
+        },
+        {
+          "display": "覚える",
+          "segmentType": "okurigana",
+          "reading": "おぼ",
+          "okurigana": "える",
+          "inputType": "standard",
+          "keys": [{"key": "o", "shift": true}, {"key": "b"}, {"key": "o"}, {"key": "e", "shift": true}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 6,
+          "hint": "O b o E r u"
+        }
+      ]
+    },
+    {
+      "text": "矢が当たる",
+      "segments": [
+        {
+          "display": "矢",
+          "segmentType": "kanji",
+          "reading": "や",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "当たる",
+          "segmentType": "okurigana",
+          "reading": "あた",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "a", "shift": true}, {"key": "t"}, {"key": "r", "shift": true}],
+          "standardKeyCount": 5,
+          "hint": "A t R (tr=た+る)"
+        }
+      ]
+    },
+    {
+      "text": "橋が繋がる",
+      "segments": [
+        {
+          "display": "橋",
+          "segmentType": "kanji",
+          "reading": "はし",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "繋がる",
+          "segmentType": "okurigana",
+          "reading": "つなが",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "t", "shift": true}, {"key": "u"}, {"key": "n"}, {"key": "a"}, {"key": "g"}, {"key": "r", "shift": true}],
+          "standardKeyCount": 8,
+          "hint": "T u n a g R (gr=が+る)"
+        }
+      ]
+    },
+    {
+      "text": "机を擦る",
+      "segments": [
+        {
+          "display": "机",
+          "segmentType": "kanji",
+          "reading": "つくえ",
+          "standardKeyCount": 5
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "擦る",
+          "segmentType": "okurigana",
+          "reading": "こす",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "k", "shift": true}, {"key": "o"}, {"key": "s"}, {"key": "r", "shift": true}],
+          "standardKeyCount": 6,
+          "hint": "K o s R (sr=す+る)"
+        }
+      ]
+    },
+    {
+      "text": "花が散る",
+      "segments": [
+        {
+          "display": "花",
+          "segmentType": "kanji",
+          "reading": "はな",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "散る",
+          "segmentType": "okurigana",
+          "reading": "ち",
+          "okurigana": "る",
+          "inputType": "standard",
+          "keys": [{"key": "t", "shift": true}, {"key": "i"}, {"key": "r", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 4,
+          "hint": "T i R u"
+        }
+      ]
+    },
+    {
+      "text": "雪が溶ける",
+      "segments": [
+        {
+          "display": "雪",
+          "segmentType": "kanji",
+          "reading": "ゆき",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "溶ける",
+          "segmentType": "okurigana",
+          "reading": "と",
+          "okurigana": "ける",
+          "inputType": "standard",
+          "keys": [{"key": "t", "shift": true}, {"key": "o"}, {"key": "k", "shift": true}, {"key": "e"}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 6,
+          "hint": "T o K e r u"
+        }
+      ]
+    },
+    {
+      "text": "川に落ちる",
+      "segments": [
+        {
+          "display": "川",
+          "segmentType": "kanji",
+          "reading": "かわ",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "に",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "落ちる",
+          "segmentType": "okurigana",
+          "reading": "お",
+          "okurigana": "ちる",
+          "inputType": "standard",
+          "keys": [{"key": "o", "shift": true}, {"key": "t", "shift": true}, {"key": "i"}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 5,
+          "hint": "O T i r u"
+        }
+      ]
+    },
+    {
+      "text": "星が輝く",
+      "segments": [
+        {
+          "display": "星",
+          "segmentType": "kanji",
+          "reading": "ほし",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "輝く",
+          "segmentType": "okurigana",
+          "reading": "かがや",
+          "okurigana": "く",
+          "inputType": "standard",
+          "keys": [{"key": "k", "shift": true}, {"key": "a"}, {"key": "g"}, {"key": "a"}, {"key": "y"}, {"key": "a"}, {"key": "k", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 8,
+          "hint": "K a g a y a K u"
+        }
+      ]
+    },
+    {
+      "text": "心が動く",
+      "segments": [
+        {
+          "display": "心",
+          "segmentType": "kanji",
+          "reading": "こころ",
+          "standardKeyCount": 6
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "動く",
+          "segmentType": "okurigana",
+          "reading": "うご",
+          "okurigana": "く",
+          "inputType": "standard",
+          "keys": [{"key": "u", "shift": true}, {"key": "g"}, {"key": "o"}, {"key": "k", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 5,
+          "hint": "U g o K u"
+        }
+      ]
+    },
+    {
+      "text": "月が満ちる",
+      "segments": [
+        {
+          "display": "月",
+          "segmentType": "kanji",
+          "reading": "つき",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "満ちる",
+          "segmentType": "okurigana",
+          "reading": "み",
+          "okurigana": "ちる",
+          "inputType": "standard",
+          "keys": [{"key": "m", "shift": true}, {"key": "i"}, {"key": "t", "shift": true}, {"key": "i"}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 6,
+          "hint": "M i T i r u"
+        }
+      ]
+    },
+    {
+      "text": "紙が破れる",
+      "segments": [
+        {
+          "display": "紙",
+          "segmentType": "kanji",
+          "reading": "かみ",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "破れる",
+          "segmentType": "okurigana",
+          "reading": "やぶ",
+          "okurigana": "れる",
+          "inputType": "standard",
+          "keys": [{"key": "y", "shift": true}, {"key": "a"}, {"key": "b"}, {"key": "u"}, {"key": "r", "shift": true}, {"key": "e"}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 8,
+          "hint": "Y a b u R e r u"
+        }
+      ]
+    },
+    {
+      "text": "旅を楽しむ",
+      "segments": [
+        {
+          "display": "旅",
+          "segmentType": "kanji",
+          "reading": "たび",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "楽しむ",
+          "segmentType": "okurigana",
+          "reading": "たのし",
+          "okurigana": "む",
+          "inputType": "standard",
+          "keys": [{"key": "t", "shift": true}, {"key": "a"}, {"key": "n"}, {"key": "o"}, {"key": "s"}, {"key": "i"}, {"key": "m", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 8,
+          "hint": "T a n o s i M u"
+        }
+      ]
+    },
+    {
+      "text": "霧が晴れる",
+      "segments": [
+        {
+          "display": "霧",
+          "segmentType": "kanji",
+          "reading": "きり",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "晴れる",
+          "segmentType": "okurigana",
+          "reading": "は",
+          "okurigana": "れる",
+          "inputType": "standard",
+          "keys": [{"key": "h", "shift": true}, {"key": "a"}, {"key": "r", "shift": true}, {"key": "e"}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 6,
+          "hint": "H a R e r u"
+        }
+      ]
+    },
+    {
+      "text": "願いが叶う",
+      "segments": [
+        {
+          "display": "願い",
+          "segmentType": "okurigana",
+          "reading": "ねが",
+          "okurigana": "い",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "n", "shift": true}, {"key": "e"}, {"key": "g"}, {"key": "q", "shift": true}],
+          "standardKeyCount": 5,
+          "hint": "N e g Q (gq=が+い)"
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "叶う",
+          "segmentType": "okurigana",
+          "reading": "かな",
+          "okurigana": "う",
+          "inputType": "standard",
+          "keys": [{"key": "k", "shift": true}, {"key": "a"}, {"key": "n"}, {"key": "a"}, {"key": "u", "shift": true}],
+          "standardKeyCount": 5,
+          "hint": "K a n a U"
+        }
+      ]
+    },
+    {
+      "text": "風が吹く",
+      "segments": [
+        {
+          "display": "風",
+          "segmentType": "kanji",
+          "reading": "かぜ",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "吹く",
+          "segmentType": "okurigana",
+          "reading": "ふ",
+          "okurigana": "く",
+          "inputType": "standard",
+          "keys": [{"key": "h", "shift": true}, {"key": "u"}, {"key": "k", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 4,
+          "hint": "H u K u"
+        }
+      ]
+    },
+    {
+      "text": "朝が来る",
+      "segments": [
+        {
+          "display": "朝",
+          "segmentType": "kanji",
+          "reading": "あさ",
+          "standardKeyCount": 3
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "来る",
+          "segmentType": "okurigana",
+          "reading": "く",
+          "okurigana": "る",
+          "inputType": "standard",
+          "keys": [{"key": "k", "shift": true}, {"key": "u"}, {"key": "r", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 4,
+          "hint": "K u R u"
+        }
+      ]
+    },
+    {
+      "text": "夜が明ける",
+      "segments": [
+        {
+          "display": "夜",
+          "segmentType": "kanji",
+          "reading": "よ",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "明ける",
+          "segmentType": "okurigana",
+          "reading": "あ",
+          "okurigana": "ける",
+          "inputType": "standard",
+          "keys": [{"key": "a", "shift": true}, {"key": "k", "shift": true}, {"key": "e"}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 5,
+          "hint": "A K e r u"
+        }
+      ]
+    },
+    {
+      "text": "嵐が止む",
+      "segments": [
+        {
+          "display": "嵐",
+          "segmentType": "kanji",
+          "reading": "あらし",
+          "standardKeyCount": 5
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "止む",
+          "segmentType": "okurigana",
+          "reading": "や",
+          "okurigana": "む",
+          "inputType": "standard",
+          "keys": [{"key": "y", "shift": true}, {"key": "a"}, {"key": "m", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 4,
+          "hint": "Y a M u"
+        }
+      ]
+    },
+    {
+      "text": "意見が纏まる",
+      "segments": [
+        {
+          "display": "意見",
+          "segmentType": "kanji",
+          "reading": "いけん",
+          "standardKeyCount": 5
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "纏まる",
+          "segmentType": "okurigana",
+          "reading": "まとま",
+          "okurigana": "る",
+          "inputType": "azik-okuri",
+          "keys": [{"key": "m", "shift": true}, {"key": "a"}, {"key": "t"}, {"key": "o"}, {"key": "m"}, {"key": "r", "shift": true}],
+          "standardKeyCount": 8,
+          "hint": "M a t o m R (mr=ま+る)"
+        }
+      ]
+    },
+    {
+      "text": "雲が流れる",
+      "segments": [
+        {
+          "display": "雲",
+          "segmentType": "kanji",
+          "reading": "くも",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "流れる",
+          "segmentType": "okurigana",
+          "reading": "なが",
+          "okurigana": "れる",
+          "inputType": "standard",
+          "keys": [{"key": "n", "shift": true}, {"key": "a"}, {"key": "g"}, {"key": "a"}, {"key": "r", "shift": true}, {"key": "e"}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 8,
+          "hint": "N a g a R e r u"
+        }
+      ]
+    },
+    {
+      "text": "光が消える",
+      "segments": [
+        {
+          "display": "光",
+          "segmentType": "kanji",
+          "reading": "ひかり",
+          "standardKeyCount": 6
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "消える",
+          "segmentType": "okurigana",
+          "reading": "き",
+          "okurigana": "える",
+          "inputType": "standard",
+          "keys": [{"key": "k", "shift": true}, {"key": "i"}, {"key": "e", "shift": true}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 5,
+          "hint": "K i E r u"
+        }
+      ]
+    },
+    {
+      "text": "季節が変わる",
+      "segments": [
+        {
+          "display": "季節",
+          "segmentType": "kanji",
+          "reading": "きせつ",
+          "standardKeyCount": 6
+        },
+        {
+          "display": "が",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "変わる",
+          "segmentType": "okurigana",
+          "reading": "かわ",
+          "okurigana": "る",
+          "inputType": "standard",
+          "keys": [{"key": "k", "shift": true}, {"key": "a"}, {"key": "w"}, {"key": "a"}, {"key": "r", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 6,
+          "hint": "K a w a R u"
+        }
+      ]
+    },
+    {
+      "text": "気持ちを伝える",
+      "segments": [
+        {
+          "display": "気持ち",
+          "segmentType": "kanji",
+          "reading": "きもち",
+          "standardKeyCount": 6
+        },
+        {
+          "display": "を",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "伝える",
+          "segmentType": "okurigana",
+          "reading": "つた",
+          "okurigana": "える",
+          "inputType": "standard",
+          "keys": [{"key": "t", "shift": true}, {"key": "u"}, {"key": "t"}, {"key": "a"}, {"key": "e", "shift": true}, {"key": "r"}, {"key": "u"}],
+          "standardKeyCount": 7,
+          "hint": "T u t a E r u"
+        }
+      ]
+    },
+    {
+      "text": "町に住む",
+      "segments": [
+        {
+          "display": "町",
+          "segmentType": "kanji",
+          "reading": "まち",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "に",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "住む",
+          "segmentType": "okurigana",
+          "reading": "す",
+          "okurigana": "む",
+          "inputType": "standard",
+          "keys": [{"key": "s", "shift": true}, {"key": "u"}, {"key": "m", "shift": true}, {"key": "u"}],
+          "standardKeyCount": 4,
+          "hint": "S u M u"
+        }
+      ]
+    },
+    {
+      "text": "友と笑う",
+      "segments": [
+        {
+          "display": "友",
+          "segmentType": "kanji",
+          "reading": "とも",
+          "standardKeyCount": 4
+        },
+        {
+          "display": "と",
+          "segmentType": "hiragana",
+          "standardKeyCount": 2
+        },
+        {
+          "display": "笑う",
+          "segmentType": "okurigana",
+          "reading": "わら",
+          "okurigana": "う",
+          "inputType": "standard",
+          "keys": [{"key": "w", "shift": true}, {"key": "a"}, {"key": "r"}, {"key": "a"}, {"key": "u", "shift": true}],
+          "standardKeyCount": 5,
+          "hint": "W a r a U"
+        }
+      ]
+    }
+  ]
+}

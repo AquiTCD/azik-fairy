@@ -25,7 +25,7 @@ interface StageSelectorProps {
 
 type CategoryType = StageData["category"];
 
-// TRAINING flow 用カテゴリ（Levのみ、Practiceを除外）
+// TRAINING flow 用カテゴリ（Levのみ、Practice/SKKを除外）
 const TRAINING_CATEGORIES = [
   { id: "Lev1",  label: "単打",    sub: "っ/ん/シャ/チャ" },
   { id: "Lev2a", label: "撥音",    sub: "○ん拡張" },

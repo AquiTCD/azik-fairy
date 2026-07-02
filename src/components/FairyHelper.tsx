@@ -42,9 +42,12 @@ export default function FairyHelper({ message, emotion }: FairyHelperProps) {
     <div className="flex flex-col items-center gap-3 w-full select-none">
       {/* 吹き出し */}
       <div
-        className={`relative w-full p-4 bg-zinc-900 border-4 border-double rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] min-h-[64px] flex items-center justify-center text-center transition-colors duration-200 ${BUBBLE_COLOR[emotion]}`}
+        className={`relative w-full p-4 bg-zinc-900 border-4 border-double rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-start transition-colors duration-200 ${BUBBLE_COLOR[emotion]}`}
       >
-        <p className="text-xs md:text-sm font-bold leading-relaxed tracking-wide font-sans whitespace-pre-line">
+        <p
+          className="text-xs md:text-sm font-bold leading-relaxed tracking-wide font-sans whitespace-pre-line w-full min-h-[4.5rem]"
+          style={{ fontFeatureSettings: '"palt"' }}
+        >
           {message}
         </p>
         <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-4 h-4 bg-zinc-900 border-r-4 border-b-4 border-double border-inherit rotate-45" />
