@@ -5,7 +5,7 @@ interface KeyPatternButtonsProps {
 
 export default function KeyPatternButtons({ patterns, inputBuffer }: KeyPatternButtonsProps) {
   return (
-    <div className="flex gap-2 font-pixel text-sm">
+    <div className="w-full flex flex-wrap gap-2 justify-center items-start font-pixel text-sm h-12 overflow-y-auto pb-1 chip-scroll">
       {patterns.map(pattern => {
         const remaining = pattern.slice(inputBuffer.length);
         return (

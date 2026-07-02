@@ -144,9 +144,12 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
     const dict = effectiveDict ?? AZIK_DICTIONARY;
 
-    // 非トレーニングモード: 全分割パターンを許容
+    // 非トレーニングモード: AZIKパターン優先、続いて通常ローマ字
     if (!effectivelyTraining) {
-      return buildValidKeys(currentSeg.kana, dict, (_sub, keys) => keys);
+      const azikOnly = buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.azik ?? []);
+      const allPatterns = buildValidKeys(currentSeg.kana, dict, (_sub, keys) => keys);
+      const azikSet = new Set(azikOnly);
+      return [...azikOnly, ...allPatterns.filter(p => !azikSet.has(p))];
     }
 
     const stageLevel = STAGE_MAX_LEVELS[stageId];
@@ -453,7 +456,10 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const isEffectivelyTraining = !isPlayingPracticeOrChallenge || settings.isTraining;
 
   // ステージフィルター済みの表示用パターン（currentSeg.azikは未フィルター生データのため使わない）
-  const displayPatterns = currentSeg ? getAllowedPatterns(currentSeg) : [];
+  // inputBuffer でプレフィックスフィルタ: 打った文字と合わない候補を除去
+  const displayPatterns = currentSeg
+    ? getAllowedPatterns(currentSeg).filter(p => p.startsWith(inputBuffer))
+    : [];
 
   const azikHint = currentSeg
     ? `${currentSeg.kana} ➔ ${displayPatterns.map(k => `[${k}]`).join(" or ")}` +
@@ -512,7 +518,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       }
     >
       {/* ===== ゲーム本体 ===== */}
-      <div className={`flex-1 flex flex-col gap-4 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
+      <div className={`flex-1 flex flex-col gap-3 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
 
         {/* 進捗ゲージ（単語ベース） */}
         <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
@@ -547,16 +553,16 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         )}
 
         {/* タイピングボード */}
-        <div className="w-full flex flex-col items-center p-6 lg:p-8 bg-zinc-950 border-2 border-green-500 rounded-md min-h-[160px] justify-center relative shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]">
+        <div className="w-full flex flex-col items-center p-4 lg:p-5 bg-zinc-950 border-2 border-green-500 rounded-md min-h-[140px] justify-center relative shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]">
           {/* 漢字（ルビ付き） */}
-          <div className="flex items-center justify-center min-h-[4.5rem] md:min-h-[5rem] lg:min-h-[6rem] w-full text-center mb-2">
+          <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[5rem] w-full text-center mb-1">
             <div className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               {currentWord ? (stage?.category === "Challenge" ? currentWord.kanji : <RubyText kanji={currentWord.kanji} kana={currentWord.kana} />) : ""}
             </div>
           </div>
 
           {/* ひらがなセグメント */}
-          <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[4.5rem] w-full mb-2">
+          <div className="flex items-center justify-center min-h-[2.5rem] md:min-h-[3rem] lg:min-h-[3.5rem] w-full mb-1">
             {currentWord && (
               <KanaSegmentDisplay
                 segments={currentWord.segments}
@@ -568,7 +574,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
           {/* キーガイド */}
           {settings.showGuide && currentSeg && (
-            <div className="mt-5 flex flex-col items-center text-sm opacity-80 w-full">
+            <div className="mt-3 flex flex-col items-center text-sm opacity-80 w-full">
               <span className="text-green-300 font-bold text-xs font-pixel">NEXT KEY:</span>
               <KeyPatternButtons patterns={displayPatterns} inputBuffer={inputBuffer} />
               <KeyboardDiagram
@@ -599,7 +605,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
               <span>💡 AZIK HINT:</span>
               <span className="animate-pulse">{isEffectivelyTraining ? (settings.isFullTraining ? "TRAINING/FULL" : "TRAINING/FOCUS") : "NORMAL"}</span>
             </div>
-            <div className="font-pixel text-zinc-200 border-b border-zinc-700 pb-1.5 mb-1">
+            <div className="font-sans text-zinc-200 border-b border-zinc-700 pb-1.5 mb-1 h-10 overflow-y-auto chip-scroll">
               {azikHint}
             </div>
             <p className="opacity-75 font-sans text-xs min-h-[1.25rem]">

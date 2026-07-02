@@ -298,7 +298,7 @@ export default function Home() {
       {/* タイトル画面 */}
       {gameState === "TITLE" && (
         <FairyScreenLayout fairy={{ emotion: "idle", message: getTitleFairyMessage(progress.totalKeysTyped, progress.streak) }}>
-          <div className="flex-1 flex flex-col items-center gap-4 text-center">
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-widest font-pixel"
               style={{ animation: 'glow-yellow 2.4s ease-in-out infinite' }}
@@ -354,7 +354,7 @@ export default function Home() {
       {/* モード選択 */}
       {gameState === "MODE_SELECT" && (
         <FairyScreenLayout fairy={{ emotion: "idle", message: "どのモードで遊ぶ？TRAININGはAZIKを練習するモード、CHALLENGEはスコアを記録するモードだよ！⚡" }}>
-          <div className="flex-1 flex flex-col items-center gap-6">
+          <div className="flex-1 flex flex-col items-center justify-center gap-6">
             <h2 className="text-2xl font-bold tracking-widest border-b-2 border-green-500 pb-2 w-full font-pixel text-center">
               = SELECT MODE =
             </h2>
