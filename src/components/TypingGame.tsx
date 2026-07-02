@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, buildValidKeys, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
+import { TypingWord, createTypingWord, AzikSegment, StageData, calculateOptimalKeyCounts, AZIK_DICTIONARY, AzikMapping } from "@/data/azikRules";
+import { getAllowedPatterns as getPatterns } from "@/utils/allowedPatterns";
 import { loadStage, STAGES } from "@/data/stages";
 import SkkTypingGame from "./SkkTypingGame";
-import { STAGE_MAX_LEVELS, AzikLevel, isTargetSegment, STAGE_KEY_PREDS, containsTargetLevel, isWordBlockedForStage } from "@/data/stages/wordValidator";
+import { isWordBlockedForStage } from "@/data/stages/wordValidator";
 import { useTypingInput, TypingKeyState } from "@/hooks/useTypingInput";
 import { GameSettings } from "@/types/game";
 import { FairyEmotion } from "./FairyHelper";
@@ -139,72 +140,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundTheme, settings.soundVolume);
 
   const getAllowedPatterns = useCallback((currentSeg: AzikSegment): string[] => {
-    const isPracticeOrChallenge = stage?.category === "Practice" || stage?.category === "Challenge";
-    const effectivelyTraining = !isPracticeOrChallenge || settings.isTraining;
-
-    const dict = effectiveDict ?? AZIK_DICTIONARY;
-
-    // 非トレーニングモード: AZIKパターン優先、続いて通常ローマ字
-    if (!effectivelyTraining) {
-      const azikOnly = buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.azik ?? []);
-      const allPatterns = buildValidKeys(currentSeg.kana, dict, (_sub, keys) => keys);
-      const azikSet = new Set(azikOnly);
-      return [...azikOnly, ...allPatterns.filter(p => !azikSet.has(p))];
-    }
-
-    const stageLevel = STAGE_MAX_LEVELS[stageId];
-
-    // レベル未定義 / Practice: azik キーのみ（全分割経由で）
-    if (!stageLevel || stageLevel === AzikLevel.Practice || isPracticeOrChallenge) {
-      return buildValidKeys(currentSeg.kana, dict, (sub, allKeys) => {
-        const entry = dict[sub];
-        return entry ? entry.azik : allKeys;
-      }, true);
-    }
-
-    const isSummaryStage = stageId.includes("summary");
-    const getCore = (k: string) => k.startsWith(";") && k.length > 1 ? k.slice(1) : k;
-    const stagePred = STAGE_KEY_PREDS[stageId];
-
-    // サブセグメントごとにステージフォーカスを適用するフィルター
-    const filter = (sub: string, allKeys: string[]): string[] => {
-      const entry = dict[sub];
-      if (!entry) return [];
-      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
-
-      if (!isSummaryStage && stagePred) {
-        const targetKeys = pseudoSeg.azik.filter(k => stagePred(getCore(k)));
-        if (targetKeys.length > 0) return targetKeys;
-        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
-      }
-
-      const isTarget = isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
-      if (!isTarget) {
-        return settings.isFullTraining ? pseudoSeg.azik : allKeys;
-      }
-      if (!isSummaryStage) {
-        return pseudoSeg.azik.filter(k => containsTargetLevel(k, stageLevel));
-      }
-      return pseudoSeg.azik;
-    };
-
-    // ターゲットキーを持つかな分割は許可する (みょ→mgo のようなケース)
-    // 非ターゲットの allKeys 経由分割 (し→shi 等) のみをブロック
-    const subTargetPred = (sub: string): boolean => {
-      const entry = dict[sub];
-      if (!entry) return false;
-      const pseudoSeg: AzikSegment = { kana: sub, normal: entry.normal, azik: entry.azik };
-      if (!isSummaryStage && stagePred) {
-        return pseudoSeg.azik.some(k => stagePred(getCore(k)));
-      }
-      return isTargetSegment(pseudoSeg, stageLevel, isSummaryStage);
-    };
-
-    const result = buildValidKeys(currentSeg.kana, dict, filter, true, subTargetPred);
-    if (result.length > 0) return result;
-    // azik が無効化されているか filter が全パスを除外 → normal キーにフォールバック
-    // (base の azik にフォールバックすると disabled 設定を無視してしまうため)
-    return buildValidKeys(currentSeg.kana, dict, (sub, _) => dict[sub]?.normal ?? [], true);
+    return getPatterns(currentSeg, {
+      stageId,
+      stageCategory: stage?.category,
+      isTraining: settings.isTraining,
+      isFullTraining: settings.isFullTraining,
+      dict: effectiveDict ?? AZIK_DICTIONARY,
+    });
   }, [stageId, stage?.category, settings.isTraining, settings.isFullTraining, effectiveDict]);
 
   const onFirstKey = useCallback(() => {
