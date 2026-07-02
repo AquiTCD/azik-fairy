@@ -13,6 +13,15 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.11.0",
+    date: "2026-07-02",
+    items: [
+      "SKK + AZIK による文章入力モードを追加（送りがな練習ステージ）",
+      "ゲーム画面の UI・レイアウトの改善",
+      "入力候補チップの横幅崩れ修正・入力に応じたフィルタリング",
+    ],
+  },
+  {
     version: "v1.10.1",
     date: "2026-06-26",
     items: [
