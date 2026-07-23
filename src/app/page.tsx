@@ -25,7 +25,7 @@ import { useProgressStorage } from "@/hooks/useProgressStorage";
 import { migrateSettings } from "@/utils/settingsMigration";
 import { useUserDictConfig } from "@/hooks/useUserDictConfig";
 import { applyThemeChange } from "@/utils/themeVolumeGroup";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeProvider, isOfficeTheme } from "@/contexts/ThemeContext";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -116,10 +116,24 @@ const DEFAULT_SETTINGS: GameSettings = {
   officeSoundVolume: 0,
 };
 
+const OFFICE_OVERRIDES =
+  "[&_.font-pixel]:!font-mono [&_.font-sans]:!font-mono " +
+  "[&_[class*='tracking-widest']]:!tracking-normal [&_[class*='tracking-wider']]:!tracking-normal " +
+  "[&_[class*='shadow-']]:!shadow-none " +
+  "[&_[class*='border-2']]:!border [&_[class*='border-4']]:!border [&_[class*='border-double']]:!border-solid " +
+  "[&_[class*='rounded-lg']]:!rounded [&_[class*='rounded-md']]:!rounded " +
+  "[&_[class*='animate-pulse']]:!animate-none [&_[class*='scale-110']]:!scale-100";
+
 const THEME_MAIN_CLASSES: Record<GameSettings["theme"], string> = {
   default: "bg-zinc-950 font-sans text-green-500",
-  "office-light": "bg-white text-black font-mono",
-  "office-dark": "bg-[#1e1e1e] text-[#d4d4d4] font-mono",
+  "office-light": `bg-white text-black font-mono ${OFFICE_OVERRIDES}`,
+  "office-dark": `bg-[#1e1e1e] text-[#d4d4d4] font-mono ${OFFICE_OVERRIDES}`,
+};
+
+const THEME_FILTER: Record<GameSettings["theme"], string | undefined> = {
+  default: undefined,
+  "office-dark": "grayscale(1) contrast(1.05)",
+  "office-light": "grayscale(1) invert(1) hue-rotate(180deg)",
 };
 
 export default function Home() {
@@ -310,7 +324,10 @@ export default function Home() {
 
   return (
     <ThemeProvider theme={settings.theme}>
-    <main className={`flex min-h-screen flex-col items-center justify-center p-4 md:p-8 ${THEME_MAIN_CLASSES[settings.theme]}`}>
+    <main
+      className={`flex min-h-screen flex-col items-center justify-center p-4 md:p-8 ${THEME_MAIN_CLASSES[settings.theme]}`}
+      style={{ filter: THEME_FILTER[settings.theme] }}
+    >
 
       {/* タイトル画面 */}
       {gameState === "TITLE" && (
@@ -318,7 +335,7 @@ export default function Home() {
           <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-widest font-pixel"
-              style={{ animation: 'glow-yellow 2.4s ease-in-out infinite' }}
+              style={isOfficeTheme(settings.theme) ? undefined : { animation: 'glow-yellow 2.4s ease-in-out infinite' }}
             >
               AZIK-FAIRY
             </h1>
