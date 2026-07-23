@@ -15,6 +15,7 @@ import VolumeControl from "@/components/VolumeControl";
 import KeyboardDiagram from "./KeyboardDiagram";
 import { getRank } from "@/utils/gameLogic";
 import { COMMENT_IDS_BY_RANK } from "@/data/resultComments";
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 interface SkkTypingGameProps {
   stageId: string;
@@ -132,6 +133,9 @@ export default function SkkTypingGame({
     settings.soundTheme,
     settings.soundVolume,
   );
+
+  const theme = useTheme();
+  const isSimple = isSimpleTheme(theme);
 
   useEffect(() => {
     loadSkkStage(stageId).then(setStage);
@@ -291,15 +295,21 @@ export default function SkkTypingGame({
     >
       <div className="flex-1 flex flex-col gap-5 w-full">
         {/* 進捗バー（文単位） */}
-        <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-          <div
-            className="bg-green-500 h-full transition-all duration-500"
-            style={{ width: `${progressPct}%` }}
-          />
-          <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference font-pixel">
+        {isSimple ? (
+          <div className="w-full text-center text-xs font-mono opacity-80">
             {Math.min(currentSentenceIdx + 1, totalSentences)} / {totalSentences} SENTENCES
-          </span>
-        </div>
+          </div>
+        ) : (
+          <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <div
+              className="bg-green-500 h-full transition-all duration-500"
+              style={{ width: `${progressPct}%` }}
+            />
+            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference font-pixel">
+              {Math.min(currentSentenceIdx + 1, totalSentences)} / {totalSentences} SENTENCES
+            </span>
+          </div>
+        )}
 
         {/* 文表示 */}
         <div className="px-4 py-3 bg-zinc-800/80 rounded-lg border border-zinc-700 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] min-h-[56px] flex items-center justify-center text-center">
@@ -327,21 +337,23 @@ export default function SkkTypingGame({
 
         {/* キーガイド / 未スタートガイド（キーボードを常にDOMに残してinvisibleで高さ確保）*/}
         <div className="relative flex flex-col items-center w-full">
-          <div className={!(started && settings.showGuide && currentWord) ? "invisible" : ""}>
-            <KeyboardDiagram
-              activeKeys={
-                started && currentWord && currentKeyIndex < currentWord.keys.length
-                  ? [currentWord.keys[currentKeyIndex].key]
-                  : []
-              }
-              typedKeys={
-                started && currentWord
-                  ? currentWord.keys.slice(0, currentKeyIndex).map(k => k.key)
-                  : []
-              }
-              layout={settings.keyboardLayout}
-            />
-          </div>
+          {!isSimple && (
+            <div className={!(started && settings.showGuide && currentWord) ? "invisible" : ""}>
+              <KeyboardDiagram
+                activeKeys={
+                  started && currentWord && currentKeyIndex < currentWord.keys.length
+                    ? [currentWord.keys[currentKeyIndex].key]
+                    : []
+                }
+                typedKeys={
+                  started && currentWord
+                    ? currentWord.keys.slice(0, currentKeyIndex).map(k => k.key)
+                    : []
+                }
+                layout={settings.keyboardLayout}
+              />
+            </div>
+          )}
           {!started && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-xs text-zinc-500 text-center space-y-1.5 border border-zinc-700 rounded-lg p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] w-full">

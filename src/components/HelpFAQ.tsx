@@ -13,6 +13,13 @@ type TabType = "ABOUT_AZIK" | "GAME_RULES" | "CUSTOM_RULES" | "FAQ" | "CHANGELOG
 
 const CHANGELOG = [
   {
+    version: "v1.12.0",
+    date: "2026-07-23",
+    items: [
+      "装飾を抑えたシンプルな配色テーマ「Simple」を追加（設定画面から切替可能）",
+    ],
+  },
+  {
     version: "v1.11.0",
     date: "2026-07-02",
     items: [

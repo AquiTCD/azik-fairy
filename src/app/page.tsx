@@ -24,6 +24,8 @@ import { WEAKNESS_STAGE_ID, SETTINGS_STORAGE_KEY } from "@/constants/game";
 import { useProgressStorage } from "@/hooks/useProgressStorage";
 import { migrateSettings } from "@/utils/settingsMigration";
 import { useUserDictConfig } from "@/hooks/useUserDictConfig";
+import { applyThemeChange } from "@/utils/themeVolumeGroup";
+import { ThemeProvider, useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -75,8 +77,25 @@ function TitleProgressBar({ stageProgress, totalKeysTyped, streak }: {
   totalKeysTyped: number;
   streak: number;
 }) {
+  const theme = useTheme();
+  const isSimple = isSimpleTheme(theme);
   const levCleared = LEV_STAGES.filter(s => (stageProgress[s.id]?.stars ?? 0) >= 2).length;
   const pct = Math.round((levCleared / LEV_TOTAL) * 100);
+
+  if (isSimple) {
+    return (
+      <div className="text-[10px] md:text-xs font-mono border border-current/30 px-4 py-2 rounded w-full flex justify-around opacity-80">
+        {totalKeysTyped > 0 && (
+          <>
+            <div>TOTAL KEYS: <span className="font-bold">{totalKeysTyped.toLocaleString()}</span></div>
+            <div>STREAK: <span className="font-bold">{streak} DAYS</span></div>
+          </>
+        )}
+        <div>STAGES: <span className="font-bold">{levCleared}</span> / {LEV_TOTAL}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="text-[10px] md:text-xs font-pixel text-green-300 border border-green-800 bg-zinc-950/80 px-4 py-2 rounded w-full flex flex-col gap-2 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.8)]">
       {totalKeysTyped > 0 && (
@@ -110,6 +129,30 @@ const DEFAULT_SETTINGS: GameSettings = {
   soundVolume: 0,
   wordsPerSession: 30,
   ghostRaceEnabled: true,
+  theme: "default",
+  simpleSoundVolume: 0,
+};
+
+const SIMPLE_OVERRIDES =
+  "[&_.font-pixel]:!font-mono [&_.font-sans]:!font-mono " +
+  "[&_[class*='tracking-widest']]:!tracking-normal [&_[class*='tracking-wider']]:!tracking-normal " +
+  "[&_[class*='shadow-']]:!shadow-none " +
+  "[&_[class*='border-2']]:!border [&_[class*='border-4']]:!border [&_[class*='border-double']]:!border-solid " +
+  "[&_[class*='rounded-lg']]:!rounded [&_[class*='rounded-md']]:!rounded " +
+  "[&_[class*='animate-pulse']]:!animate-none [&_[class*='scale-110']]:!scale-100";
+
+// The "simple" theme reuses the exact same base bg/text classes as default and
+// relies entirely on THEME_FILTER to derive its light look from it. Setting an
+// explicit bg-white here would get re-inverted by the filter on this same
+// element, silently canceling itself out.
+const THEME_MAIN_CLASSES: Record<GameSettings["theme"], string> = {
+  default: "bg-zinc-950 font-sans text-green-500",
+  simple: `bg-zinc-950 font-sans text-green-500 ${SIMPLE_OVERRIDES}`,
+};
+
+const THEME_FILTER: Record<GameSettings["theme"], string | undefined> = {
+  default: undefined,
+  simple: "grayscale(1) invert(1) hue-rotate(180deg) contrast(1.2)",
 };
 
 export default function Home() {
@@ -170,6 +213,12 @@ export default function Home() {
   const handleUpdateSettings = (newSettings: GameSettings) => {
     setSettings(newSettings);
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings));
+  };
+
+  // テーマ切り替え: default/simpleグループを跨ぐ場合のみ音量をスワップする
+  const handleThemeChange = (newTheme: GameSettings["theme"]) => {
+    const { theme, soundVolume, simpleSoundVolume } = applyThemeChange(settings, newTheme);
+    handleUpdateSettings({ ...settings, theme, soundVolume, simpleSoundVolume });
   };
 
   const startStage = (stageId: string) => {
@@ -293,7 +342,11 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8 bg-zinc-950 font-sans">
+    <ThemeProvider theme={settings.theme}>
+    <main
+      className={`flex min-h-screen flex-col items-center justify-center p-4 md:p-8 ${THEME_MAIN_CLASSES[settings.theme]}`}
+      style={{ filter: THEME_FILTER[settings.theme] }}
+    >
 
       {/* タイトル画面 */}
       {gameState === "TITLE" && (
@@ -301,7 +354,7 @@ export default function Home() {
           <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-widest font-pixel"
-              style={{ animation: 'glow-yellow 2.4s ease-in-out infinite' }}
+              style={isSimpleTheme(settings.theme) ? undefined : { animation: 'glow-yellow 2.4s ease-in-out infinite' }}
             >
               AZIK-FAIRY
             </h1>
@@ -345,7 +398,7 @@ export default function Home() {
 
             <div className="text-[9px] opacity-60 space-y-1">
               <p>※本サイトはAmazonアソシエイト・プログラムの参加者です。アフィリエイト広告を掲載しています。</p>
-              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.11.0 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
+              <p>© 2026 AquiTCD / azik-fairy &nbsp;|&nbsp; v1.12.0 &nbsp;|&nbsp; <a href="/privacy" className="hover:opacity-100 hover:underline">PRIVACY POLICY</a></p>
             </div>
           </div>
         </FairyScreenLayout>
@@ -440,6 +493,7 @@ export default function Home() {
         <Settings
           settings={settings}
           onUpdateSettings={handleUpdateSettings}
+          onThemeChange={handleThemeChange}
           onBackToTitle={() => setGameState("TITLE")}
           onClearProgress={handleClearProgress}
           onResetStageIntros={handleResetStageIntros}
@@ -494,5 +548,6 @@ export default function Home() {
         );
       })()}
     </main>
+    </ThemeProvider>
   );
 }

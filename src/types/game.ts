@@ -16,6 +16,8 @@ export interface GameStats {
   keyHeatmap: Record<string, { miss: number; attempt: number }>;
 }
 
+export type UiTheme = "default" | "simple";
+
 export interface GameSettings {
   isTraining: boolean;
   isFullTraining: boolean;
@@ -26,6 +28,9 @@ export interface GameSettings {
   soundVolume: number;
   wordsPerSession: number;
   ghostRaceEnabled: boolean;
+  theme: UiTheme;
+  /** "simple" テーマの音量バックアップ。soundVolume とのスワップは themeVolumeGroup.ts を参照。 */
+  simpleSoundVolume: number;
 }
 
 export interface StageProgress {

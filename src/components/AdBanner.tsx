@@ -1,5 +1,6 @@
 import React from "react";
 import { Ad } from "@/data/adData";
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 interface AdBannerProps {
   ads: Ad[];
@@ -7,6 +8,25 @@ interface AdBannerProps {
 }
 
 export default function AdBanner({ ads, layout = "horizontal" }: AdBannerProps) {
+  const theme = useTheme();
+
+  if (isSimpleTheme(theme)) {
+    return (
+      <div className="w-full text-left text-xs font-mono opacity-70">
+        <span className="block mb-1">References:</span>
+        <ul className="flex flex-col gap-1">
+          {ads.map(ad => (
+            <li key={ad.url + ad.label}>
+              <a href={ad.url} target="_blank" rel="noopener noreferrer" className="underline hover:opacity-100">
+                [Reference] {ad.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   const padding   = layout === "horizontal" ? "p-4 shadow-[inset_2px_2px_4px_rgba(0,0,0,0.8)]" : "p-3";
   const innerList = layout === "horizontal"
     ? "flex justify-center gap-4 text-xs flex-wrap"

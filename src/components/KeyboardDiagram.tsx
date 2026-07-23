@@ -1,5 +1,30 @@
 "use client";
 
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
+import { classifyKeyState, KeyVisualState } from "@/utils/keyboardDiagramState";
+
+const RETRO_KEY_STYLES: Record<KeyVisualState, string> = {
+  active: "bg-yellow-400 text-black border-yellow-300 shadow-[0_3px_0_#ca8a04] font-bold scale-110",
+  normal: "bg-zinc-600 text-zinc-300 border-zinc-500 font-bold",
+  typed: "bg-zinc-700 text-zinc-500 border-zinc-600",
+  "heat-severe": "bg-red-600 text-white border-red-500 font-bold",
+  "heat-mid": "bg-red-800 text-red-200 border-red-700",
+  "heat-light": "bg-red-950 text-red-400 border-red-900",
+  default: "bg-zinc-800 text-zinc-400 border-zinc-700",
+};
+
+// Authored in dark-mode terms only: the page-level invert filter derives the
+// Simple theme's light look from this, same as every other themed component.
+const SIMPLE_KEY_STYLES: Record<KeyVisualState, string> = {
+  active: "bg-zinc-500 text-black border-zinc-400 font-bold",
+  normal: "bg-zinc-700 text-zinc-300 border-zinc-600",
+  typed: "bg-transparent text-zinc-600 border-zinc-700",
+  "heat-severe": "bg-transparent text-red-400 border-red-500 font-bold",
+  "heat-mid": "bg-transparent text-red-400 border-red-600",
+  "heat-light": "bg-transparent text-red-500 border-red-800",
+  default: "bg-transparent text-zinc-600 border-zinc-700",
+};
+
 interface KeyboardDiagramProps {
   activeKeys: string[];
   typedKeys?: string[];
@@ -23,28 +48,13 @@ const JIS_ROWS: string[][] = [
 ];
 
 export default function KeyboardDiagram({ activeKeys, typedKeys = [], normalKeys = [], layout, showLegend = true, heatmap, compact = false }: KeyboardDiagramProps) {
+  const theme = useTheme();
+  const isSimple = isSimpleTheme(theme);
   const rows = layout === "JIS" ? JIS_ROWS : US_ROWS;
 
   const getKeyStyle = (key: string) => {
-    if (activeKeys.includes(key)) {
-      return "bg-yellow-400 text-black border-yellow-300 shadow-[0_3px_0_#ca8a04] font-bold scale-110";
-    }
-    if (normalKeys.includes(key)) {
-      return "bg-zinc-600 text-zinc-300 border-zinc-500 font-bold";
-    }
-    if (typedKeys.includes(key)) {
-      return "bg-zinc-700 text-zinc-500 border-zinc-600";
-    }
-    if (heatmap) {
-      const entry = heatmap[key];
-      if (entry && entry.attempt >= 3) {
-        const missRate = entry.miss / entry.attempt;
-        if (missRate >= 0.6) return "bg-red-600 text-white border-red-500 font-bold";
-        if (missRate >= 0.4) return "bg-red-800 text-red-200 border-red-700";
-        if (missRate >= 0.2) return "bg-red-950 text-red-400 border-red-900";
-      }
-    }
-    return "bg-zinc-800 text-zinc-400 border-zinc-700";
+    const state = classifyKeyState(key, { activeKeys, normalKeys, typedKeys, heatmap });
+    return (isSimple ? SIMPLE_KEY_STYLES : RETRO_KEY_STYLES)[state];
   };
 
   const hasHeatData = heatmap && Object.values(heatmap).some(e => e.attempt >= 3 && e.miss / e.attempt >= 0.2);
@@ -60,7 +70,7 @@ export default function KeyboardDiagram({ activeKeys, typedKeys = [], normalKeys
           {row.map((key) => (
             <div
               key={key}
-              className={`${keySize} flex items-center justify-center border rounded transition-all duration-100 font-pixel uppercase ${getKeyStyle(key)}`}
+              className={`${keySize} flex items-center justify-center border rounded transition-all duration-100 uppercase ${isSimple ? "font-mono" : "font-pixel"} ${getKeyStyle(key)}`}
             >
               {key}
             </div>
