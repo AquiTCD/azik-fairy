@@ -24,6 +24,8 @@ import { WEAKNESS_STAGE_ID, SETTINGS_STORAGE_KEY } from "@/constants/game";
 import { useProgressStorage } from "@/hooks/useProgressStorage";
 import { migrateSettings } from "@/utils/settingsMigration";
 import { useUserDictConfig } from "@/hooks/useUserDictConfig";
+import { applyThemeChange } from "@/utils/themeVolumeGroup";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -110,6 +112,14 @@ const DEFAULT_SETTINGS: GameSettings = {
   soundVolume: 0,
   wordsPerSession: 30,
   ghostRaceEnabled: true,
+  theme: "default",
+  officeSoundVolume: 0,
+};
+
+const THEME_MAIN_CLASSES: Record<GameSettings["theme"], string> = {
+  default: "bg-zinc-950 font-sans text-green-500",
+  "office-light": "bg-white text-black font-mono",
+  "office-dark": "bg-[#1e1e1e] text-[#d4d4d4] font-mono",
 };
 
 export default function Home() {
@@ -170,6 +180,12 @@ export default function Home() {
   const handleUpdateSettings = (newSettings: GameSettings) => {
     setSettings(newSettings);
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings));
+  };
+
+  // テーマ切り替え: default/officeグループを跨ぐ場合のみ音量をスワップする
+  const handleThemeChange = (newTheme: GameSettings["theme"]) => {
+    const { theme, soundVolume, officeSoundVolume } = applyThemeChange(settings, newTheme);
+    handleUpdateSettings({ ...settings, theme, soundVolume, officeSoundVolume });
   };
 
   const startStage = (stageId: string) => {
@@ -293,7 +309,8 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-8 bg-zinc-950 font-sans">
+    <ThemeProvider theme={settings.theme}>
+    <main className={`flex min-h-screen flex-col items-center justify-center p-4 md:p-8 ${THEME_MAIN_CLASSES[settings.theme]}`}>
 
       {/* タイトル画面 */}
       {gameState === "TITLE" && (
@@ -440,6 +457,7 @@ export default function Home() {
         <Settings
           settings={settings}
           onUpdateSettings={handleUpdateSettings}
+          onThemeChange={handleThemeChange}
           onBackToTitle={() => setGameState("TITLE")}
           onClearProgress={handleClearProgress}
           onResetStageIntros={handleResetStageIntros}
@@ -494,5 +512,6 @@ export default function Home() {
         );
       })()}
     </main>
+    </ThemeProvider>
   );
 }

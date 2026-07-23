@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { GameSettings } from "@/types/game";
+import { GameSettings, UiTheme } from "@/types/game";
 import { SoundThemeName, playPreview } from "@/hooks/useAzikSound";
 import { AZIK_DICTIONARY } from "@/data/azikRules";
 import { UserDictConfig } from "@/data/userDictConfig";
@@ -9,9 +9,16 @@ import GameButton from "@/components/GameButton";
 import FairyScreenLayout from "@/components/FairyScreenLayout";
 import AzikKeyConfigTable from "@/components/AzikKeyConfigTable";
 
+const THEME_OPTIONS: { value: UiTheme; label: string }[] = [
+  { value: "default", label: "Default (Retro Pop)" },
+  { value: "office-light", label: "Office (Light)" },
+  { value: "office-dark", label: "Office (Dark)" },
+];
+
 interface SettingsProps {
   settings: GameSettings;
   onUpdateSettings: (settings: GameSettings) => void;
+  onThemeChange: (theme: UiTheme) => void;
   onBackToTitle: () => void;
   onClearProgress: () => void;
   onResetStageIntros: () => void;
@@ -22,7 +29,7 @@ interface SettingsProps {
   userDictConfig?: UserDictConfig;
 }
 
-export default function Settings({ settings, onUpdateSettings, onBackToTitle, onClearProgress, onResetStageIntros, onImportTable, onSetKanaKeys, onResetUserDict, isCustomized, userDictConfig }: SettingsProps) {
+export default function Settings({ settings, onUpdateSettings, onThemeChange, onBackToTitle, onClearProgress, onResetStageIntros, onImportTable, onSetKanaKeys, onResetUserDict, isCustomized, userDictConfig }: SettingsProps) {
   const [introResetDone, setIntroResetDone] = useState(false);
   const [importInput, setImportInput] = useState("");
 
@@ -51,6 +58,28 @@ export default function Settings({ settings, onUpdateSettings, onBackToTitle, on
           {/* 基本設定セクション */}
           <div className="flex flex-col gap-4">
             <h3 className="text-sm font-bold font-pixel text-green-300 border-b border-green-950 pb-1">■ SYSTEM SETTINGS</h3>
+
+            {/* 画面テーマ */}
+            <div className="flex flex-col gap-2 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <span className="font-bold text-sm md:text-base tracking-wider">DISPLAY THEME:</span>
+              <div className="flex gap-2 flex-wrap">
+                {THEME_OPTIONS.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => onThemeChange(value)}
+                    className={`px-3 py-1.5 text-xs font-pixel font-bold border-2 transition-colors duration-150 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer ${settings.theme === value
+                      ? "bg-green-500 text-black border-green-500"
+                      : "bg-zinc-700 text-green-400 border-green-500 hover:bg-green-900"
+                      }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
+                Office テーマは装飾を抑えた地味な配色になります。切り替え時、効果音の音量は Default / Office それぞれで独立して記憶されます。
+              </p>
+            </div>
 
             {/* TRAINING MODE設定 */}
             <div className="flex flex-col gap-3 p-4 bg-zinc-800 border-2 border-green-500 rounded shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
