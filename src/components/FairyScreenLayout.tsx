@@ -2,7 +2,7 @@
 
 import React from "react";
 import FairyHelper, { FairyEmotion } from "./FairyHelper";
-import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 interface FairyScreenLayoutProps {
   fairy: { message: string; emotion: FairyEmotion };
@@ -32,16 +32,15 @@ export default function FairyScreenLayout({
   fairyColClassName = "",
 }: FairyScreenLayoutProps) {
   const theme = useTheme();
-  const office = isOfficeTheme(theme);
+  const isSimple = isSimpleTheme(theme);
   const borderColor = accent === "yellow" ? "border-yellow-400" : "border-green-500";
   const sizeClass   = wide
     ? "max-w-6xl p-4 lg:p-6"
     : "max-w-5xl p-6 md:p-8";
 
-  if (office) {
-    // Same border color for both office variants: THEME_FILTER (grayscale/invert
-    // on the page's <main>) is what derives light vs. dark, so a single
-    // dark-mode-oriented color here renders correctly in both.
+  if (isSimple) {
+    // Authored in dark-mode terms only: THEME_FILTER (grayscale/invert on the
+    // page's <main>) is what derives the Simple theme's light look from this.
     return (
       <div className={`flex flex-col gap-4 w-full ${sizeClass} border border-zinc-700 rounded ${className}`}>
         {children}

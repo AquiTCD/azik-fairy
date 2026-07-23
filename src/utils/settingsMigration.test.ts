@@ -13,7 +13,7 @@ const DEFAULTS: GameSettings = {
   wordsPerSession: 30,
   ghostRaceEnabled: true,
   theme: "default",
-  officeSoundVolume: 0,
+  simpleSoundVolume: 0,
 };
 
 describe("migrateSettings", () => {
@@ -122,7 +122,7 @@ describe("migrateSettings", () => {
     });
   });
 
-  describe("Office モードのマイグレーション", () => {
+  describe("Simple テーマのマイグレーション", () => {
     it("theme フィールドが欠落している場合は default にフォールバックする", () => {
       const raw = {};
       const result = migrateSettings(raw, DEFAULTS);
@@ -135,16 +135,16 @@ describe("migrateSettings", () => {
       expect(result.theme).toBe("simple");
     });
 
-    it("officeSoundVolume フィールドが欠落している場合は 0（ミュート）にフォールバックする", () => {
+    it("simpleSoundVolume フィールドが欠落している場合は 0（ミュート）にフォールバックする", () => {
       const raw = {};
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.officeSoundVolume).toBe(0);
+      expect(result.simpleSoundVolume).toBe(0);
     });
 
-    it("officeSoundVolume が既に設定されている場合はその値を維持する", () => {
-      const raw = { officeSoundVolume: 40 };
+    it("simpleSoundVolume が既に設定されている場合はその値を維持する", () => {
+      const raw = { simpleSoundVolume: 40 };
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.officeSoundVolume).toBe(40);
+      expect(result.simpleSoundVolume).toBe(40);
     });
   });
 });

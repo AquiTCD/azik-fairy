@@ -30,7 +30,7 @@ export interface GameSettings {
   ghostRaceEnabled: boolean;
   theme: UiTheme;
   /** "simple" テーマの音量バックアップ。soundVolume とのスワップは themeVolumeGroup.ts を参照。 */
-  officeSoundVolume: number;
+  simpleSoundVolume: number;
 }
 
 export interface StageProgress {

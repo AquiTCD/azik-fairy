@@ -11,34 +11,34 @@ describe("themeGroup", () => {
 });
 
 describe("applyThemeChange", () => {
-  it("default -> simple: soundVolume と officeSoundVolume がスワップされる", () => {
+  it("default -> simple: soundVolume と simpleSoundVolume がスワップされる", () => {
     const result = applyThemeChange(
-      { theme: "default", soundVolume: 70, officeSoundVolume: 0 },
+      { theme: "default", soundVolume: 70, simpleSoundVolume: 0 },
       "simple"
     );
-    expect(result).toEqual({ theme: "simple", soundVolume: 0, officeSoundVolume: 70 });
+    expect(result).toEqual({ theme: "simple", soundVolume: 0, simpleSoundVolume: 70 });
   });
 
-  it("simple -> default: soundVolume と officeSoundVolume がスワップされ、元の default 音量に復元される", () => {
+  it("simple -> default: soundVolume と simpleSoundVolume がスワップされ、元の default 音量に復元される", () => {
     const result = applyThemeChange(
-      { theme: "simple", soundVolume: 0, officeSoundVolume: 70 },
+      { theme: "simple", soundVolume: 0, simpleSoundVolume: 70 },
       "default"
     );
-    expect(result).toEqual({ theme: "default", soundVolume: 70, officeSoundVolume: 0 });
+    expect(result).toEqual({ theme: "default", soundVolume: 70, simpleSoundVolume: 0 });
   });
 
   it("default -> default: 何も変化しない", () => {
     const result = applyThemeChange(
-      { theme: "default", soundVolume: 70, officeSoundVolume: 0 },
+      { theme: "default", soundVolume: 70, simpleSoundVolume: 0 },
       "default"
     );
-    expect(result).toEqual({ theme: "default", soundVolume: 70, officeSoundVolume: 0 });
+    expect(result).toEqual({ theme: "default", soundVolume: 70, simpleSoundVolume: 0 });
   });
 
-  it("simple内で音量を変更した後にdefaultへ戻ると、変更後のsimple音量がofficeSoundVolumeに退避される", () => {
+  it("simple内で音量を変更した後にdefaultへ戻ると、変更後のsimple音量がsimpleSoundVolumeに退避される", () => {
     // ユーザーがsimpleモード中にミュート解除して50に変更した状態を模す
-    const afterVolumeChange = { theme: "simple" as const, soundVolume: 50, officeSoundVolume: 70 };
+    const afterVolumeChange = { theme: "simple" as const, soundVolume: 50, simpleSoundVolume: 70 };
     const result = applyThemeChange(afterVolumeChange, "default");
-    expect(result).toEqual({ theme: "default", soundVolume: 70, officeSoundVolume: 50 });
+    expect(result).toEqual({ theme: "default", soundVolume: 70, simpleSoundVolume: 50 });
   });
 });

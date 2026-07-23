@@ -17,7 +17,7 @@ import KanaSegmentDisplay from "./KanaSegmentDisplay";
 import KeyPatternButtons from "./KeyPatternButtons";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
-import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 import VolumeControl from "@/components/VolumeControl";
 import { resultComments, COMMENT_IDS_BY_RANK, CommentId } from "@/data/resultComments";
 import { WEAKNESS_STAGE_ID } from "@/constants/game";
@@ -141,7 +141,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundTheme, settings.soundVolume);
 
   const theme = useTheme();
-  const office = isOfficeTheme(theme);
+  const isSimple = isSimpleTheme(theme);
 
   const getAllowedPatterns = useCallback((currentSeg: AzikSegment): string[] => {
     return getPatterns(currentSeg, {
@@ -346,13 +346,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           <div className="font-pixel tracking-widest text-center leading-tight">
             <div
               className="text-5xl md:text-6xl font-extrabold"
-              style={office ? undefined : { animation: 'glow-yellow 1.6s ease-in-out infinite' }}
+              style={isSimple ? undefined : { animation: 'glow-yellow 1.6s ease-in-out infinite' }}
             >
               STAGE
             </div>
             <div
               className="text-5xl md:text-6xl font-extrabold mt-2"
-              style={office ? undefined : { animation: 'glow-yellow 1.6s ease-in-out infinite' }}
+              style={isSimple ? undefined : { animation: 'glow-yellow 1.6s ease-in-out infinite' }}
             >
               COMPLETE!
             </div>
@@ -366,7 +366,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
               pendingStats.rank === "B"       ? "border-cyan-400   text-cyan-300   bg-cyan-400/10"   :
                                                 "border-zinc-100   text-white      bg-zinc-800/50"
             }`}
-            style={pendingStats.rank === "PERFECT" && !office ? { animation: 'glow-yellow 1.6s ease-in-out infinite' } : undefined}
+            style={pendingStats.rank === "PERFECT" && !isSimple ? { animation: 'glow-yellow 1.6s ease-in-out infinite' } : undefined}
           >
             {pendingStats.rank === "PERFECT" ? "✦ PERFECT ✦" : `RANK  ${pendingStats.rank}`}
           </div>
@@ -467,7 +467,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       <div className={`flex-1 flex flex-col gap-3 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
 
         {/* 進捗ゲージ（単語ベース） */}
-        {office ? (
+        {isSimple ? (
           <div className="w-full text-center text-xs font-mono opacity-80">
             {wordIndex} / {words.length} WORDS
           </div>
@@ -485,7 +485,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
         {/* ゴーストレースバー */}
         {ghostBestWpm && settings.ghostRaceEnabled && (
-          office ? (
+          isSimple ? (
             <div className="w-full text-center text-[10px] font-mono opacity-70">
               ghost best: {ghostBestWpm}wpm
             </div>
@@ -511,13 +511,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         )}
 
         {/* タイピングボード */}
-        <div className={`w-full flex flex-col items-center p-4 lg:p-5 rounded-md min-h-[140px] justify-center relative ${office
+        <div className={`w-full flex flex-col items-center p-4 lg:p-5 rounded-md min-h-[140px] justify-center relative ${isSimple
           ? "border border-zinc-700 bg-zinc-900"
           : "bg-zinc-950 border-2 border-green-500 shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]"
           }`}>
           {/* 漢字（ルビ付き） */}
           <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[5rem] w-full text-center mb-1">
-            <div className={`text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest ${office ? "font-mono" : "text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"}`}>
+            <div className={`text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest ${isSimple ? "font-mono" : "text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"}`}>
               {currentWord ? (stage?.category === "Challenge" ? currentWord.kanji : <RubyText kanji={currentWord.kanji} kana={currentWord.kana} />) : ""}
             </div>
           </div>
@@ -538,7 +538,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
             <div className="mt-3 flex flex-col items-center text-sm opacity-80 w-full">
               <span className="text-green-300 font-bold text-xs font-pixel">NEXT KEY:</span>
               <KeyPatternButtons patterns={displayPatterns} inputBuffer={inputBuffer} />
-              {!office && (
+              {!isSimple && (
                 <KeyboardDiagram
                   activeKeys={azikNextKeys}
                   normalKeys={normalNextKeys}

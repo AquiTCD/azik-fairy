@@ -13,6 +13,6 @@ export function useTheme(): UiTheme {
   return useContext(ThemeContext);
 }
 
-export function isOfficeTheme(theme: UiTheme): boolean {
+export function isSimpleTheme(theme: UiTheme): boolean {
   return theme !== "default";
 }

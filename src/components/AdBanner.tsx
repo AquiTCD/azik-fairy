@@ -1,6 +1,6 @@
 import React from "react";
 import { Ad } from "@/data/adData";
-import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 interface AdBannerProps {
   ads: Ad[];
@@ -10,7 +10,7 @@ interface AdBannerProps {
 export default function AdBanner({ ads, layout = "horizontal" }: AdBannerProps) {
   const theme = useTheme();
 
-  if (isOfficeTheme(theme)) {
+  if (isSimpleTheme(theme)) {
     return (
       <div className="w-full text-left text-xs font-mono opacity-70">
         <span className="block mb-1">References:</span>

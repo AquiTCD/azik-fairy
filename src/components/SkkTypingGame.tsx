@@ -15,7 +15,7 @@ import VolumeControl from "@/components/VolumeControl";
 import KeyboardDiagram from "./KeyboardDiagram";
 import { getRank } from "@/utils/gameLogic";
 import { COMMENT_IDS_BY_RANK } from "@/data/resultComments";
-import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 interface SkkTypingGameProps {
   stageId: string;
@@ -135,7 +135,7 @@ export default function SkkTypingGame({
   );
 
   const theme = useTheme();
-  const office = isOfficeTheme(theme);
+  const isSimple = isSimpleTheme(theme);
 
   useEffect(() => {
     loadSkkStage(stageId).then(setStage);
@@ -295,7 +295,7 @@ export default function SkkTypingGame({
     >
       <div className="flex-1 flex flex-col gap-5 w-full">
         {/* 進捗バー（文単位） */}
-        {office ? (
+        {isSimple ? (
           <div className="w-full text-center text-xs font-mono opacity-80">
             {Math.min(currentSentenceIdx + 1, totalSentences)} / {totalSentences} SENTENCES
           </div>
@@ -337,7 +337,7 @@ export default function SkkTypingGame({
 
         {/* キーガイド / 未スタートガイド（キーボードを常にDOMに残してinvisibleで高さ確保）*/}
         <div className="relative flex flex-col items-center w-full">
-          {!office && (
+          {!isSimple && (
             <div className={!(started && settings.showGuide && currentWord) ? "invisible" : ""}>
               <KeyboardDiagram
                 activeKeys={

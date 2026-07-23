@@ -4,7 +4,7 @@ import { AzikMapping } from "@/data/azikRules";
 import { GameSettings, StageProgress } from "@/types/game";
 import KeyboardDiagram from "@/components/KeyboardDiagram";
 import { getIntroConfig } from "@/components/AzikKeyVisualizer";
-import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
+import { useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 interface StageCardProps {
   stage: StageMeta;
@@ -38,9 +38,9 @@ export default function StageCard({
   const intro = showIntroPreview ? getIntroConfig(stage.id, effectiveDict) : null;
   const frame = intro ? intro.frames[intro.frames.length - 1] : null;
   const theme = useTheme();
-  const office = isOfficeTheme(theme);
+  const isSimple = isSimpleTheme(theme);
 
-  const officeClasses = enabled
+  const simpleClasses = enabled
     ? "bg-transparent border-current hover:bg-zinc-700 hover:text-white focus:bg-zinc-700 focus:text-white group cursor-pointer focus:outline-none focus:ring-1 focus:ring-current"
     : "bg-transparent border-current opacity-40 cursor-not-allowed";
   const retroClasses = enabled
@@ -54,14 +54,14 @@ export default function StageCard({
       onClick={() => enabled && onClick()}
       onKeyDown={onKeyDown}
       disabled={!enabled}
-      className={`flex flex-col items-start p-5 border transition-all duration-150 text-left rounded w-full ${office ? "font-mono" : "border-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"} ${office ? officeClasses : retroClasses}`}
+      className={`flex flex-col items-start p-5 border transition-all duration-150 text-left rounded w-full ${isSimple ? "font-mono" : "border-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"} ${isSimple ? simpleClasses : retroClasses}`}
     >
       <div className="flex items-center justify-between w-full mb-1">
-        <span className={`text-xs px-2 py-0.5 font-bold font-sans ${office ? "border border-current bg-transparent" : "bg-green-500 text-black group-hover:bg-black group-hover:text-green-500 group-focus:bg-black group-focus:text-green-500"}`}>
+        <span className={`text-xs px-2 py-0.5 font-bold font-sans ${isSimple ? "border border-current bg-transparent" : "bg-green-500 text-black group-hover:bg-black group-hover:text-green-500 group-focus:bg-black group-focus:text-green-500"}`}>
           {badgeLabel}-{subIdx + 1}
         </span>
         {stageProg && (
-          <span className={`font-bold text-sm ${office ? "opacity-70 font-mono" : "text-yellow-400 font-pixel group-hover:text-yellow-900 group-focus:text-yellow-900"}`}>
+          <span className={`font-bold text-sm ${isSimple ? "opacity-70 font-mono" : "text-yellow-400 font-pixel group-hover:text-yellow-900 group-focus:text-yellow-900"}`}>
             {"★".repeat(stageProg.stars) + "☆".repeat(3 - stageProg.stars)}
           </span>
         )}
@@ -79,7 +79,7 @@ export default function StageCard({
           <span>TIME: <span className="font-bold">{stageProg.bestTime.toFixed(1)}s</span></span>
         </div>
       )}
-      {!office && intro && frame && (
+      {!isSimple && intro && frame && (
         <div className="hidden group-hover:flex group-focus:flex pointer-events-none flex-col gap-1.5 border-t border-black/20 pt-2 mt-1 w-full">
           <div className="text-[9px] font-pixel text-black/70 font-bold">{intro.title}</div>
           <div className="bg-zinc-900 rounded p-1.5 w-full overflow-hidden" style={{ height: "84px" }}>

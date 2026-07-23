@@ -5,7 +5,7 @@ export type ThemeGroup = "default" | "simple";
 export interface ThemeVolumeState {
   theme: UiTheme;
   soundVolume: number;
-  officeSoundVolume: number;
+  simpleSoundVolume: number;
 }
 
 export function themeGroup(theme: UiTheme): ThemeGroup {
@@ -13,7 +13,7 @@ export function themeGroup(theme: UiTheme): ThemeGroup {
 }
 
 /**
- * officeSoundVolume acts as a swap register for "the other group's volume".
+ * simpleSoundVolume acts as a swap register for "the other group's volume".
  * Crossing the default/simple boundary swaps it with the active soundVolume.
  */
 export function applyThemeChange(state: ThemeVolumeState, newTheme: UiTheme): ThemeVolumeState {
@@ -22,7 +22,7 @@ export function applyThemeChange(state: ThemeVolumeState, newTheme: UiTheme): Th
   }
   return {
     theme: newTheme,
-    soundVolume: state.officeSoundVolume,
-    officeSoundVolume: state.soundVolume,
+    soundVolume: state.simpleSoundVolume,
+    simpleSoundVolume: state.soundVolume,
   };
 }

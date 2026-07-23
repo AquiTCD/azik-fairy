@@ -25,7 +25,7 @@ import { useProgressStorage } from "@/hooks/useProgressStorage";
 import { migrateSettings } from "@/utils/settingsMigration";
 import { useUserDictConfig } from "@/hooks/useUserDictConfig";
 import { applyThemeChange } from "@/utils/themeVolumeGroup";
-import { ThemeProvider, useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
+import { ThemeProvider, useTheme, isSimpleTheme } from "@/contexts/ThemeContext";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -78,11 +78,11 @@ function TitleProgressBar({ stageProgress, totalKeysTyped, streak }: {
   streak: number;
 }) {
   const theme = useTheme();
-  const office = isOfficeTheme(theme);
+  const isSimple = isSimpleTheme(theme);
   const levCleared = LEV_STAGES.filter(s => (stageProgress[s.id]?.stars ?? 0) >= 2).length;
   const pct = Math.round((levCleared / LEV_TOTAL) * 100);
 
-  if (office) {
+  if (isSimple) {
     return (
       <div className="text-[10px] md:text-xs font-mono border border-current/30 px-4 py-2 rounded w-full flex justify-around opacity-80">
         {totalKeysTyped > 0 && (
@@ -130,10 +130,10 @@ const DEFAULT_SETTINGS: GameSettings = {
   wordsPerSession: 30,
   ghostRaceEnabled: true,
   theme: "default",
-  officeSoundVolume: 0,
+  simpleSoundVolume: 0,
 };
 
-const OFFICE_OVERRIDES =
+const SIMPLE_OVERRIDES =
   "[&_.font-pixel]:!font-mono [&_.font-sans]:!font-mono " +
   "[&_[class*='tracking-widest']]:!tracking-normal [&_[class*='tracking-wider']]:!tracking-normal " +
   "[&_[class*='shadow-']]:!shadow-none " +
@@ -147,7 +147,7 @@ const OFFICE_OVERRIDES =
 // element, silently canceling itself out.
 const THEME_MAIN_CLASSES: Record<GameSettings["theme"], string> = {
   default: "bg-zinc-950 font-sans text-green-500",
-  simple: `bg-zinc-950 font-sans text-green-500 ${OFFICE_OVERRIDES}`,
+  simple: `bg-zinc-950 font-sans text-green-500 ${SIMPLE_OVERRIDES}`,
 };
 
 const THEME_FILTER: Record<GameSettings["theme"], string | undefined> = {
@@ -215,10 +215,10 @@ export default function Home() {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(newSettings));
   };
 
-  // テーマ切り替え: default/officeグループを跨ぐ場合のみ音量をスワップする
+  // テーマ切り替え: default/simpleグループを跨ぐ場合のみ音量をスワップする
   const handleThemeChange = (newTheme: GameSettings["theme"]) => {
-    const { theme, soundVolume, officeSoundVolume } = applyThemeChange(settings, newTheme);
-    handleUpdateSettings({ ...settings, theme, soundVolume, officeSoundVolume });
+    const { theme, soundVolume, simpleSoundVolume } = applyThemeChange(settings, newTheme);
+    handleUpdateSettings({ ...settings, theme, soundVolume, simpleSoundVolume });
   };
 
   const startStage = (stageId: string) => {
@@ -354,7 +354,7 @@ export default function Home() {
           <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
             <h1
               className="text-4xl md:text-5xl font-extrabold tracking-widest font-pixel"
-              style={isOfficeTheme(settings.theme) ? undefined : { animation: 'glow-yellow 2.4s ease-in-out infinite' }}
+              style={isSimpleTheme(settings.theme) ? undefined : { animation: 'glow-yellow 2.4s ease-in-out infinite' }}
             >
               AZIK-FAIRY
             </h1>
