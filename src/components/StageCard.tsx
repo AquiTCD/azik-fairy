@@ -79,7 +79,7 @@ export default function StageCard({
           <span>TIME: <span className="font-bold">{stageProg.bestTime.toFixed(1)}s</span></span>
         </div>
       )}
-      {intro && frame && (
+      {!office && intro && frame && (
         <div className="hidden group-hover:flex group-focus:flex pointer-events-none flex-col gap-1.5 border-t border-black/20 pt-2 mt-1 w-full">
           <div className="text-[9px] font-pixel text-black/70 font-bold">{intro.title}</div>
           <div className="bg-zinc-900 rounded p-1.5 w-full overflow-hidden" style={{ height: "84px" }}>

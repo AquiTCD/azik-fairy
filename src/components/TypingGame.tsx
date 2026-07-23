@@ -467,18 +467,29 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
       <div className={`flex-1 flex flex-col gap-3 ${isWiggling ? "animate-[wiggle_0.08s_ease-in-out_infinite]" : ""}`}>
 
         {/* 進捗ゲージ（単語ベース） */}
-        <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-          <div
-            className="bg-green-500 h-full transition-all duration-300"
-            style={{ width: `${(wordIndex / words.length) * 100}%` }}
-          />
-          <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference font-pixel">
+        {office ? (
+          <div className="w-full text-center text-xs font-mono opacity-80">
             {wordIndex} / {words.length} WORDS
-          </span>
-        </div>
+          </div>
+        ) : (
+          <div className="bg-zinc-800 border-2 border-green-500 h-7 flex items-center relative rounded overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+            <div
+              className="bg-green-500 h-full transition-all duration-300"
+              style={{ width: `${(wordIndex / words.length) * 100}%` }}
+            />
+            <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference font-pixel">
+              {wordIndex} / {words.length} WORDS
+            </span>
+          </div>
+        )}
 
         {/* ゴーストレースバー */}
         {ghostBestWpm && settings.ghostRaceEnabled && (
+          office ? (
+            <div className="w-full text-center text-[10px] font-mono opacity-70">
+              ghost best: {ghostBestWpm}wpm
+            </div>
+          ) : (
           <div className="flex items-center gap-2 w-full">
             <div className="relative flex-1 h-2 bg-zinc-800 rounded overflow-hidden border border-zinc-700">
               {/* 自分の進捗（キーベース） */}
@@ -496,6 +507,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
             </div>
             <span className="text-[8px] text-yellow-400 font-pixel opacity-70 shrink-0">👻{ghostBestWpm}wpm</span>
           </div>
+          )
         )}
 
         {/* タイピングボード */}
@@ -526,12 +538,14 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
             <div className="mt-3 flex flex-col items-center text-sm opacity-80 w-full">
               <span className="text-green-300 font-bold text-xs font-pixel">NEXT KEY:</span>
               <KeyPatternButtons patterns={displayPatterns} inputBuffer={inputBuffer} />
-              <KeyboardDiagram
-                activeKeys={azikNextKeys}
-                normalKeys={normalNextKeys}
-                typedKeys={inputBuffer.split("").filter(Boolean)}
-                layout={settings.keyboardLayout}
-              />
+              {!office && (
+                <KeyboardDiagram
+                  activeKeys={azikNextKeys}
+                  normalKeys={normalNextKeys}
+                  typedKeys={inputBuffer.split("").filter(Boolean)}
+                  layout={settings.keyboardLayout}
+                />
+              )}
             </div>
           )}
         </div>

@@ -25,7 +25,7 @@ import { useProgressStorage } from "@/hooks/useProgressStorage";
 import { migrateSettings } from "@/utils/settingsMigration";
 import { useUserDictConfig } from "@/hooks/useUserDictConfig";
 import { applyThemeChange } from "@/utils/themeVolumeGroup";
-import { ThemeProvider, isOfficeTheme } from "@/contexts/ThemeContext";
+import { ThemeProvider, useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
 
 function getTitleFairyMessage(totalKeysTyped: number, streak: number): string {
   if (totalKeysTyped === 0) {
@@ -77,8 +77,25 @@ function TitleProgressBar({ stageProgress, totalKeysTyped, streak }: {
   totalKeysTyped: number;
   streak: number;
 }) {
+  const theme = useTheme();
+  const office = isOfficeTheme(theme);
   const levCleared = LEV_STAGES.filter(s => (stageProgress[s.id]?.stars ?? 0) >= 2).length;
   const pct = Math.round((levCleared / LEV_TOTAL) * 100);
+
+  if (office) {
+    return (
+      <div className="text-[10px] md:text-xs font-mono border border-current/30 px-4 py-2 rounded w-full flex justify-around opacity-80">
+        {totalKeysTyped > 0 && (
+          <>
+            <div>TOTAL KEYS: <span className="font-bold">{totalKeysTyped.toLocaleString()}</span></div>
+            <div>STREAK: <span className="font-bold">{streak} DAYS</span></div>
+          </>
+        )}
+        <div>STAGES: <span className="font-bold">{levCleared}</span> / {LEV_TOTAL}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="text-[10px] md:text-xs font-pixel text-green-300 border border-green-800 bg-zinc-950/80 px-4 py-2 rounded w-full flex flex-col gap-2 shadow-[inset_1px_1px_3px_rgba(0,0,0,0.8)]">
       {totalKeysTyped > 0 && (
