@@ -346,13 +346,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
           <div className="font-pixel tracking-widest text-center leading-tight">
             <div
               className="text-5xl md:text-6xl font-extrabold"
-              style={{ animation: 'glow-yellow 1.6s ease-in-out infinite' }}
+              style={office ? undefined : { animation: 'glow-yellow 1.6s ease-in-out infinite' }}
             >
               STAGE
             </div>
             <div
               className="text-5xl md:text-6xl font-extrabold mt-2"
-              style={{ animation: 'glow-yellow 1.6s ease-in-out infinite' }}
+              style={office ? undefined : { animation: 'glow-yellow 1.6s ease-in-out infinite' }}
             >
               COMPLETE!
             </div>
@@ -366,7 +366,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
               pendingStats.rank === "B"       ? "border-cyan-400   text-cyan-300   bg-cyan-400/10"   :
                                                 "border-zinc-100   text-white      bg-zinc-800/50"
             }`}
-            style={pendingStats.rank === "PERFECT" ? { animation: 'glow-yellow 1.6s ease-in-out infinite' } : undefined}
+            style={pendingStats.rank === "PERFECT" && !office ? { animation: 'glow-yellow 1.6s ease-in-out infinite' } : undefined}
           >
             {pendingStats.rank === "PERFECT" ? "✦ PERFECT ✦" : `RANK  ${pendingStats.rank}`}
           </div>
