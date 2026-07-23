@@ -17,6 +17,7 @@ import KanaSegmentDisplay from "./KanaSegmentDisplay";
 import KeyPatternButtons from "./KeyPatternButtons";
 import GameButton from "./GameButton";
 import { useAzikSound } from "@/hooks/useAzikSound";
+import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
 import VolumeControl from "@/components/VolumeControl";
 import { resultComments, COMMENT_IDS_BY_RANK, CommentId } from "@/data/resultComments";
 import { WEAKNESS_STAGE_ID } from "@/constants/game";
@@ -138,6 +139,9 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
   const optimalKeysRef = useRef({ totalNormal: 0, totalAzik: 0 });
 
   const { playCorrect, playMiss, playWordComplete, playStageClear } = useAzikSound(settings.soundTheme, settings.soundVolume);
+
+  const theme = useTheme();
+  const office = isOfficeTheme(theme);
 
   const getAllowedPatterns = useCallback((currentSeg: AzikSegment): string[] => {
     return getPatterns(currentSeg, {
@@ -495,10 +499,13 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
         )}
 
         {/* タイピングボード */}
-        <div className="w-full flex flex-col items-center p-4 lg:p-5 bg-zinc-950 border-2 border-green-500 rounded-md min-h-[140px] justify-center relative shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]">
+        <div className={`w-full flex flex-col items-center p-4 lg:p-5 rounded-md min-h-[140px] justify-center relative ${office
+          ? `border ${theme === "office-dark" ? "border-zinc-700 bg-[#252526]" : "border-gray-300 bg-gray-50"}`
+          : "bg-zinc-950 border-2 border-green-500 shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]"
+          }`}>
           {/* 漢字（ルビ付き） */}
           <div className="flex items-center justify-center min-h-[3.5rem] md:min-h-[4rem] lg:min-h-[5rem] w-full text-center mb-1">
-            <div className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            <div className={`text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-widest ${office ? "font-mono" : "text-zinc-100 font-sans drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"}`}>
               {currentWord ? (stage?.category === "Challenge" ? currentWord.kanji : <RubyText kanji={currentWord.kanji} kana={currentWord.kana} />) : ""}
             </div>
           </div>

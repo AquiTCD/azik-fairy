@@ -1,5 +1,7 @@
 "use client";
 
+import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
+
 interface KeyboardDiagramProps {
   activeKeys: string[];
   typedKeys?: string[];
@@ -23,9 +25,29 @@ const JIS_ROWS: string[][] = [
 ];
 
 export default function KeyboardDiagram({ activeKeys, typedKeys = [], normalKeys = [], layout, showLegend = true, heatmap, compact = false }: KeyboardDiagramProps) {
+  const theme = useTheme();
+  const office = isOfficeTheme(theme);
   const rows = layout === "JIS" ? JIS_ROWS : US_ROWS;
 
   const getKeyStyle = (key: string) => {
+    if (office) {
+      if (activeKeys.includes(key)) {
+        return "bg-zinc-400 text-black border-zinc-500 font-bold dark:bg-zinc-300";
+      }
+      if (normalKeys.includes(key)) {
+        return "bg-zinc-200 text-zinc-600 border-zinc-400 dark:bg-zinc-700 dark:text-zinc-300 dark:border-zinc-600";
+      }
+      if (typedKeys.includes(key)) {
+        return "bg-transparent text-zinc-400 border-zinc-300 dark:border-zinc-700";
+      }
+      if (heatmap) {
+        const entry = heatmap[key];
+        if (entry && entry.attempt >= 3 && entry.miss / entry.attempt >= 0.2) {
+          return "bg-transparent text-red-600 border-red-500 font-bold dark:text-red-400";
+        }
+      }
+      return "bg-transparent text-zinc-400 border-zinc-300 dark:border-zinc-700";
+    }
     if (activeKeys.includes(key)) {
       return "bg-yellow-400 text-black border-yellow-300 shadow-[0_3px_0_#ca8a04] font-bold scale-110";
     }
@@ -60,7 +82,7 @@ export default function KeyboardDiagram({ activeKeys, typedKeys = [], normalKeys
           {row.map((key) => (
             <div
               key={key}
-              className={`${keySize} flex items-center justify-center border rounded transition-all duration-100 font-pixel uppercase ${getKeyStyle(key)}`}
+              className={`${keySize} flex items-center justify-center border rounded transition-all duration-100 uppercase ${office ? "font-mono" : "font-pixel"} ${getKeyStyle(key)}`}
             >
               {key}
             </div>

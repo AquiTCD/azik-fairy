@@ -2,6 +2,7 @@
 
 import React from "react";
 import FairyHelper, { FairyEmotion } from "./FairyHelper";
+import { useTheme, isOfficeTheme } from "@/contexts/ThemeContext";
 
 interface FairyScreenLayoutProps {
   fairy: { message: string; emotion: FairyEmotion };
@@ -30,10 +31,21 @@ export default function FairyScreenLayout({
   className = "",
   fairyColClassName = "",
 }: FairyScreenLayoutProps) {
+  const theme = useTheme();
+  const office = isOfficeTheme(theme);
   const borderColor = accent === "yellow" ? "border-yellow-400" : "border-green-500";
   const sizeClass   = wide
     ? "max-w-6xl p-4 lg:p-6"
     : "max-w-5xl p-6 md:p-8";
+
+  if (office) {
+    const officeBorder = theme === "office-dark" ? "border-zinc-700" : "border-gray-300";
+    return (
+      <div className={`flex flex-col gap-4 w-full ${sizeClass} border ${officeBorder} rounded ${className}`}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col lg:flex-row-reverse gap-4 lg:gap-6 w-full ${sizeClass} bg-zinc-900 border-4 border-double ${borderColor} rounded-lg shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-green-400 ${className}`}>
