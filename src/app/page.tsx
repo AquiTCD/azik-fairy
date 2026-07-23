@@ -141,16 +141,20 @@ const OFFICE_OVERRIDES =
   "[&_[class*='rounded-lg']]:!rounded [&_[class*='rounded-md']]:!rounded " +
   "[&_[class*='animate-pulse']]:!animate-none [&_[class*='scale-110']]:!scale-100";
 
+// Office themes reuse the exact same base bg/text classes as default and rely
+// entirely on THEME_FILTER to derive light/dark from it. Setting an explicit
+// bg-white/bg-black here would get re-inverted by the filter on this same
+// element, silently canceling itself out.
 const THEME_MAIN_CLASSES: Record<GameSettings["theme"], string> = {
   default: "bg-zinc-950 font-sans text-green-500",
-  "office-light": `bg-white text-black font-mono ${OFFICE_OVERRIDES}`,
-  "office-dark": `bg-[#1e1e1e] text-[#d4d4d4] font-mono ${OFFICE_OVERRIDES}`,
+  "office-light": `bg-zinc-950 font-sans text-green-500 ${OFFICE_OVERRIDES}`,
+  "office-dark": `bg-zinc-950 font-sans text-green-500 ${OFFICE_OVERRIDES}`,
 };
 
 const THEME_FILTER: Record<GameSettings["theme"], string | undefined> = {
   default: undefined,
-  "office-dark": "grayscale(1) contrast(1.05)",
-  "office-light": "grayscale(1) invert(1) hue-rotate(180deg)",
+  "office-dark": "grayscale(1) contrast(1.2)",
+  "office-light": "grayscale(1) invert(1) hue-rotate(180deg) contrast(1.2)",
 };
 
 export default function Home() {

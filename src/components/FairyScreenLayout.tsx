@@ -39,9 +39,11 @@ export default function FairyScreenLayout({
     : "max-w-5xl p-6 md:p-8";
 
   if (office) {
-    const officeBorder = theme === "office-dark" ? "border-zinc-700" : "border-gray-300";
+    // Same border color for both office variants: THEME_FILTER (grayscale/invert
+    // on the page's <main>) is what derives light vs. dark, so a single
+    // dark-mode-oriented color here renders correctly in both.
     return (
-      <div className={`flex flex-col gap-4 w-full ${sizeClass} border ${officeBorder} rounded ${className}`}>
+      <div className={`flex flex-col gap-4 w-full ${sizeClass} border border-zinc-700 rounded ${className}`}>
         {children}
       </div>
     );

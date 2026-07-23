@@ -512,7 +512,7 @@ export default function TypingGame({ stageId, settings, onFinish, onBackToStageS
 
         {/* タイピングボード */}
         <div className={`w-full flex flex-col items-center p-4 lg:p-5 rounded-md min-h-[140px] justify-center relative ${office
-          ? `border ${theme === "office-dark" ? "border-zinc-700 bg-[#252526]" : "border-gray-300 bg-gray-50"}`
+          ? "border border-zinc-700 bg-zinc-900"
           : "bg-zinc-950 border-2 border-green-500 shadow-[inset_4px_4px_10px_rgba(0,0,0,0.8)]"
           }`}>
           {/* 漢字（ルビ付き） */}
