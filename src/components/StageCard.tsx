@@ -41,7 +41,7 @@ export default function StageCard({
   const office = isOfficeTheme(theme);
 
   const officeClasses = enabled
-    ? "bg-transparent border-current hover:bg-black/5 dark:hover:bg-white/10 group cursor-pointer focus:outline-none focus:ring-1 focus:ring-current"
+    ? "bg-transparent border-current hover:bg-zinc-700 hover:text-white focus:bg-zinc-700 focus:text-white group cursor-pointer focus:outline-none focus:ring-1 focus:ring-current"
     : "bg-transparent border-current opacity-40 cursor-not-allowed";
   const retroClasses = enabled
     ? "bg-zinc-800 border-green-500 hover:bg-green-500 hover:text-black focus:bg-green-500 focus:text-black group cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1 focus:ring-offset-zinc-900"

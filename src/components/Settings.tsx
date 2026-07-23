@@ -11,8 +11,7 @@ import AzikKeyConfigTable from "@/components/AzikKeyConfigTable";
 
 const THEME_OPTIONS: { value: UiTheme; label: string }[] = [
   { value: "default", label: "Default (Retro Pop)" },
-  { value: "office-light", label: "Office (Light)" },
-  { value: "office-dark", label: "Office (Dark)" },
+  { value: "simple", label: "Simple" },
 ];
 
 interface SettingsProps {
@@ -77,7 +76,7 @@ export default function Settings({ settings, onUpdateSettings, onThemeChange, on
                 ))}
               </div>
               <p className="text-[10px] md:text-xs opacity-75 font-sans leading-relaxed">
-                Office テーマは装飾を抑えた地味な配色になります。切り替え時、効果音の音量は Default / Office それぞれで独立して記憶されます。
+                Simple テーマは装飾を抑えた地味な配色になります。切り替え時、効果音の音量は Default / Simple それぞれで独立して記憶されます。
               </p>
             </div>
 

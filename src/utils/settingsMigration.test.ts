@@ -130,9 +130,9 @@ describe("migrateSettings", () => {
     });
 
     it("theme が既に設定されている場合はその値を維持する", () => {
-      const raw = { theme: "office-dark" };
+      const raw = { theme: "simple" };
       const result = migrateSettings(raw, DEFAULTS);
-      expect(result.theme).toBe("office-dark");
+      expect(result.theme).toBe("simple");
     });
 
     it("officeSoundVolume フィールドが欠落している場合は 0（ミュート）にフォールバックする", () => {

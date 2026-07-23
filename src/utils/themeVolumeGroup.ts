@@ -1,6 +1,6 @@
 import { UiTheme } from "@/types/game";
 
-export type ThemeGroup = "default" | "office";
+export type ThemeGroup = "default" | "simple";
 
 export interface ThemeVolumeState {
   theme: UiTheme;
@@ -9,13 +9,12 @@ export interface ThemeVolumeState {
 }
 
 export function themeGroup(theme: UiTheme): ThemeGroup {
-  return theme === "default" ? "default" : "office";
+  return theme === "default" ? "default" : "simple";
 }
 
 /**
  * officeSoundVolume acts as a swap register for "the other group's volume".
- * Crossing a group boundary swaps it with the active soundVolume; switching
- * within the same group (office-light <-> office-dark) leaves volume untouched.
+ * Crossing the default/simple boundary swaps it with the active soundVolume.
  */
 export function applyThemeChange(state: ThemeVolumeState, newTheme: UiTheme): ThemeVolumeState {
   if (themeGroup(state.theme) === themeGroup(newTheme)) {

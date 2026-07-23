@@ -19,10 +19,10 @@ const VARIANT: Record<ButtonVariant, string> = {
 };
 
 const OFFICE_VARIANT: Record<ButtonVariant, string> = {
-  primary:   "bg-transparent border border-current hover:bg-black/5 dark:hover:bg-white/10 focus:ring-current",
-  secondary: "bg-transparent border border-current hover:bg-black/5 dark:hover:bg-white/10 focus:ring-current",
-  danger:    "bg-transparent text-red-600 border border-red-600 hover:bg-red-600/10 focus:ring-red-500",
-  ghost:     "bg-transparent border border-current opacity-80 hover:opacity-100 focus:ring-current",
+  primary:   "bg-transparent border border-current hover:bg-zinc-700 hover:text-white focus:ring-current",
+  secondary: "bg-transparent border border-current hover:bg-zinc-700 hover:text-white focus:ring-current",
+  danger:    "bg-transparent text-red-600 border border-red-600 hover:bg-red-700 hover:text-white focus:ring-red-500",
+  ghost:     "bg-transparent border border-current opacity-80 hover:opacity-100 hover:bg-zinc-700 hover:text-white focus:ring-current",
 };
 
 const SIZE: Record<ButtonSize, string> = {

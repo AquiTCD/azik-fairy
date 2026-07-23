@@ -16,7 +16,7 @@ export interface GameStats {
   keyHeatmap: Record<string, { miss: number; attempt: number }>;
 }
 
-export type UiTheme = "default" | "office-light" | "office-dark";
+export type UiTheme = "default" | "simple";
 
 export interface GameSettings {
   isTraining: boolean;
@@ -29,7 +29,7 @@ export interface GameSettings {
   wordsPerSession: number;
   ghostRaceEnabled: boolean;
   theme: UiTheme;
-  /** "office" グループ（office-light/office-dark共通）の音量バックアップ。soundVolume とのスワップは themeVolumeGroup.ts を参照。 */
+  /** "simple" テーマの音量バックアップ。soundVolume とのスワップは themeVolumeGroup.ts を参照。 */
   officeSoundVolume: number;
 }
 
