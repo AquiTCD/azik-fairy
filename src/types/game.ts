@@ -16,6 +16,8 @@ export interface GameStats {
   keyHeatmap: Record<string, { miss: number; attempt: number }>;
 }
 
+export type UiTheme = "default" | "office-light" | "office-dark";
+
 export interface GameSettings {
   isTraining: boolean;
   isFullTraining: boolean;
@@ -26,6 +28,9 @@ export interface GameSettings {
   soundVolume: number;
   wordsPerSession: number;
   ghostRaceEnabled: boolean;
+  theme: UiTheme;
+  /** "office" グループ（office-light/office-dark共通）の音量バックアップ。soundVolume とのスワップは themeVolumeGroup.ts を参照。 */
+  officeSoundVolume: number;
 }
 
 export interface StageProgress {
