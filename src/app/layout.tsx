@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
 import { Noto_Sans_JP, Press_Start_2P } from "next/font/google";
 import "./globals.css";
+
+export { metadata } from "@/data/siteMetadata";
 
 const notoSansJP = Noto_Sans_JP({
   weight: ["400", "700"],
@@ -13,46 +14,6 @@ const pressStart = Press_Start_2P({
   subsets: ["latin"],
   variable: "--font-press-start",
 });
-
-export const metadata: Metadata = {
-  metadataBase: new URL("https://azik-fairy.solunita.net"),
-  title: "AZIK-Fairy | AZIKタイピング養成妖精",
-  description: "AZIK入力をゲーム感覚で楽しく、強制モードでスパルタに養成してくれるタイピングゲーム",
-  openGraph: {
-    title: "AZIK-Fairy | AZIKタイピング養成妖精",
-    description: "AZIK入力をゲーム感覚で楽しく、強制モードでスパルタに養成してくれるタイピングゲーム",
-    url: "https://azik-fairy.solunita.net/",
-    siteName: "AZIK-Fairy",
-    locale: "ja_JP",
-    type: "website",
-    images: [
-      {
-        url: "/images/og_image.png",
-        width: 1200,
-        height: 630,
-        alt: "AZIK-Fairy",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AZIK-Fairy | AZIKタイピング養成妖精",
-    description: "AZIK入力をゲーム感覚で楽しく、強制モードでスパルタに養成してくれるタイピングゲーム",
-    images: ["/images/og_image.png"],
-  },
-  alternates: {
-    canonical: "https://azik-fairy.solunita.net/",
-  },
-  icons: {
-    icon: [
-      { url: "/images/favicon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/images/favicon-32.png", sizes: "32x32", type: "image/png" },
-    ],
-    shortcut: "/images/favicon.ico",
-    apple: { url: "/images/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-  },
-  manifest: "/manifest.json",
-};
 
 export default function RootLayout({
   children,
