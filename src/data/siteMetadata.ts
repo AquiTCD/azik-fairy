@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 const SITE_TITLE = "AZIK-Fairy｜AZIK入力養成妖精（タイピング練習）";
 const SITE_DESCRIPTION =
-  "日本語拡張入力AZIK習得のためのタイピング練習ゲーム。自由に打てるTRAININGモードから、本番仕様のCHALLENGEモードまで、タイピングゲームのように楽しみながら妖精がサポートします。";
+  "日本語拡張入力AZIK習得のためのタイピング練習ゲーム。自由に打てるトレーニングモードから、本番仕様のチャレンジモードまで、タイピングゲームのように楽しみながら妖精がサポートします。";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://azik-fairy.solunita.net"),
