@@ -6,7 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
       url: "https://azik-fairy.solunita.net/",
-      lastModified: new Date("2026-06-21"),
+      lastModified: new Date("2026-10-15"),
       changeFrequency: "monthly",
       priority: 1,
     },
