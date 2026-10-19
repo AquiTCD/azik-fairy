@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-const SITE_TITLE = "AZIK-Fairy｜AZIK入力養成妖精（タイピング練習）";
-const SITE_DESCRIPTION =
+export const SITE_TITLE = "AZIK-Fairy｜AZIK入力養成妖精（タイピング練習）";
+export const SITE_DESCRIPTION =
   "日本語拡張入力AZIK習得のためのタイピング練習ゲーム。自由に打てるトレーニングモードから、本番仕様のチャレンジモードまで、タイピングゲームのように楽しみながら妖精がサポートします。";
 
 export const metadata: Metadata = {
