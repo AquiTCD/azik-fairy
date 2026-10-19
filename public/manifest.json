@@ -1,7 +1,7 @@
 {
   "name": "AZIK-Fairy",
   "short_name": "AZIK-Fairy",
-  "description": "AZIK入力をゲーム感覚で楽しく養成してくれるタイピングゲーム",
+  "description": "日本語拡張入力AZIK習得のためのタイピング練習ゲーム。自由に打てるトレーニングモードから、本番仕様のチャレンジモードまで、タイピングゲームのように楽しみながら妖精がサポートします。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#09090b",
